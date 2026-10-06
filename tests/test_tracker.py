@@ -3,7 +3,8 @@ import json
 import os
 import unittest
 
-from tracker import bonfire, california, chicago, federalregister, grantsgov, mwrd, nyc, pool, profile, samgov, text
+from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts, michigan,
+                     mwrd, nyc, pool, prizes, profile, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -131,6 +132,80 @@ class FederalRegisterTest(unittest.TestCase):
         self.assertEqual(rows[0]["funder"], "National Oceanic and Atmospheric Administration")
         self.assertEqual(rows[0]["summary"], "NOAA invites applications for sensor pilots.")
         self.assertEqual(rows[0]["eligibility"], "Others (see listing)")
+
+
+
+class IllinoisTest(unittest.TestCase):
+    def setUp(self):
+        self.rows = {r["source_id"]: r for r in illinois.collect(TODAY, page=_read("sample_illinois.html"))}
+
+    def test_keeps_open_and_no_end_date(self):
+        self.assertEqual(set(self.rows), {"0f9fad21-8730", "4339"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["0f9fad21-8730"]
+        self.assertEqual(row["title"], "Lake Michigan Monitoring")
+        self.assertEqual(row["funder"], "Illinois Department of Natural Resources")
+        self.assertEqual((row["award_floor"], row["award_ceiling"]), ("15000", "75000"))
+        self.assertEqual(row["close_date"], "")
+        self.assertEqual(row["link"], "https://il.amplifund.com/Public/Opportunities/Details/0f9fad21-8730")
+        nofo = self.rows["4339"]
+        self.assertEqual((nofo["post_date"], nofo["close_date"]), ("2026-08-31", "2026-10-19"))
+        self.assertTrue(nofo["link"].endswith("nofo=4339"))
+
+
+class MichiganTest(unittest.TestCase):
+    def test_skips_closed_programs_and_reads_tags(self):
+        rows = michigan.collect(TODAY, data=json.loads(_read("sample_michigan.json")))
+        self.assertEqual([r["source_id"] for r in rows], ["a1"])
+        row = rows[0]
+        self.assertEqual(row["status"], "posted")
+        self.assertEqual(row["listing_type"], "Grant program")
+        self.assertEqual(row["eligibility"], "Local governments; Others (see listing)")
+        self.assertEqual(row["topics"], "Drinking water")
+        self.assertEqual(row["link"], "https://www.michigan.gov/egle/about/swp")
+
+
+class MassachusettsTest(unittest.TestCase):
+    def test_pages_are_combined_deduped_and_filtered(self):
+        pages = [_read("sample_commbuys_p1.html"), _read("sample_commbuys_p2.xml")]
+        rows = {r["source_id"]: r for r in massachusetts.collect(TODAY, pages=pages)}
+        self.assertEqual(set(rows), {"BD-1", "BD-2"})
+        self.assertEqual(rows["BD-1"]["listing_type"], "Grant")
+        self.assertEqual(rows["BD-1"]["close_date"], "2026-11-06")
+        self.assertEqual(rows["BD-2"]["funder"], "City of Fitchburg")
+        self.assertIn("docId=BD-2", rows["BD-2"]["link"])
+
+
+class VirginiaTest(unittest.TestCase):
+    def test_keeps_open_future_and_normalizes(self):
+        rows = virginia.collect(TODAY, data=json.loads(_read("sample_virginia.json")))
+        self.assertEqual([r["source_id"] for r in rows], ["VBO:IFB:A123:1"])
+        row = rows[0]
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-09-01", "2026-11-01"))
+        self.assertEqual(row["summary"], "Furnish sensors .")
+        self.assertEqual(row["topics"], "Water Testing Equipment")
+        self.assertEqual(row["location"], "Virginia Beach, VA")
+        self.assertIn("VBODetails.jsp", row["link"])
+        self.assertIn("BID_INTRNL_NO=1", row["link"])
+
+
+class PrizesTest(unittest.TestCase):
+    def test_reads_open_xtech_cards_and_skips_empty_usbr_page(self):
+        rows = prizes.collect(TODAY, xtech_page=_read("sample_xtech.html"), usbr_page=_read("sample_usbr_none.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["xtechsearch10"])
+        row = rows[0]
+        self.assertEqual(row["title"], "xTech|Search 10")
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-09-10", "2026-10-19"))
+        self.assertIn("unmanned vessel", row["summary"])
+
+    def test_usbr_page_with_a_competition_is_listed(self):
+        page = _read("sample_usbr_none.html").replace(
+            "There are currently no prize competitions accepting submissions.", "Halt the Hitchhiker Phase 2 is open.")
+        rows = prizes.parse_usbr(page, TODAY)
+        self.assertEqual(len(rows), 1)
+        self.assertIn("Halt the Hitchhiker", rows[0]["summary"])
+        self.assertEqual(rows[0]["source_id"], prizes.parse_usbr(page, TODAY)[0]["source_id"])
 
 
 class PoolTest(unittest.TestCase):
