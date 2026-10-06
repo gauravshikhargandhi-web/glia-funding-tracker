@@ -3,7 +3,7 @@ import json
 import os
 import unittest
 
-from tracker import california, grantsgov, nyc, pool, profile, samgov, text
+from tracker import bonfire, california, chicago, federalregister, grantsgov, mwrd, nyc, pool, profile, samgov, text
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -68,6 +68,69 @@ class NycTest(unittest.TestCase):
         self.assertEqual(row["listing_type"], "Contract (Request for Proposals)")
         self.assertEqual(row["summary"], "Sensors for sewer overflow monitoring.")
         self.assertEqual(row["link"], "https://a856-cityrecord.nyc.gov/RequestDetail/20260903027")
+
+
+
+def _read(name, encoding="utf-8"):
+    with open(os.path.join(HERE, name), encoding=encoding) as f:
+        return f.read()
+
+
+class MwrdTest(unittest.TestCase):
+    def setUp(self):
+        self.rows = {r["source_id"]: r for r in mwrd.collect(
+            TODAY, page=_read("sample_mwrd.html"), details={"2904": _read("sample_mwrd_detail.html")})}
+
+    def test_keeps_bids_not_yet_opened(self):
+        self.assertEqual(set(self.rows), {"23-890-1S", "25-RFP-20"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["23-890-1S"]
+        self.assertEqual(row["title"], "Rehabilitation Of Local Sewers")
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-09-16", "2026-10-27"))
+        self.assertEqual(row["award_ceiling"], "2706674")
+        self.assertIn("LABOR AGREEMENT", row["summary"])
+        self.assertTrue(row["link"].endswith("contractID=2904"))
+        self.assertEqual(self.rows["25-RFP-20"]["listing_type"], "Contract (RFP)")
+
+
+class ChicagoTest(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(HERE, "sample_chicago.html"), "rb") as f:
+            page = chicago.decode(f.read())
+        self.rows = {r["source_id"]: r for r in chicago.collect(TODAY, page=page)}
+
+    def test_keeps_open_only(self):
+        self.assertEqual(set(self.rows), {"70287", "72293"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["70287"]
+        self.assertEqual(row["funder"], "Chicago Department Of Water Management")
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-09-14", "2026-10-14"))
+        self.assertEqual(row["eligibility"], "Any vendor")
+        self.assertEqual(self.rows["72293"]["funder"], "Chicago Department Of Aviation")
+        self.assertEqual(self.rows["72293"]["title"], "AED\u2019s and Support Materials")
+
+    def test_flags_target_market_set_aside(self):
+        self.assertIn("Target Market", self.rows["72293"]["eligibility"])
+
+
+class BonfireTest(unittest.TestCase):
+    def test_keeps_open_and_normalizes(self):
+        rows = bonfire.collect(TODAY, payloads={"glwater": json.loads(_read("sample_bonfire.json"))})
+        self.assertEqual([r["source_id"] for r in rows], ["glwater-252183"])
+        self.assertEqual(rows[0]["close_date"], "2026-10-16")
+        self.assertEqual(rows[0]["funder"], "Great Lakes Water Authority")
+        self.assertEqual(rows[0]["link"], "https://glwater.bonfirehub.com/opportunities/252183")
+
+
+class FederalRegisterTest(unittest.TestCase):
+    def test_drops_paperwork_notices_and_normalizes(self):
+        rows = federalregister.collect(TODAY, data=json.loads(_read("sample_federalregister.json")))
+        self.assertEqual([r["source_id"] for r in rows], ["2026-20001"])
+        self.assertEqual(rows[0]["funder"], "National Oceanic and Atmospheric Administration")
+        self.assertEqual(rows[0]["summary"], "NOAA invites applications for sensor pilots.")
+        self.assertEqual(rows[0]["eligibility"], "Others (see listing)")
 
 
 class PoolTest(unittest.TestCase):

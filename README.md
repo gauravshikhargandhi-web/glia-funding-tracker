@@ -22,8 +22,11 @@ Each row has the same columns whatever the source: title, funder, listing type, 
 | [California Grants Portal](https://data.ca.gov/dataset/california-grants-portal) (all California state grants and loans) | Live | No |
 | [NYC City Record Online](https://a856-cityrecord.nyc.gov/) solicitations | Live | No |
 | [SAM.gov](https://sam.gov) contract opportunities (public daily file of every federal contract notice) | Live | No |
-| Federal Register notices | Planned | No |
-| Chicago and Detroit bid pages | Planned | No |
+| [Federal Register](https://www.federalregister.gov) funding, prize and proposal notices (last 30 days) | Live | No |
+| [MWRD](https://apps.mwrd.org/ContractAnnouncements/) (Chicago water reclamation district) contract announcements | Live | No |
+| [City of Chicago eProcurement](https://eprocurement.cityofchicago.org/OA_HTML/OA.jsp?OAFunc=PON_ABSTRACT_PAGE) solicitations | Live | No |
+| [Great Lakes Water Authority](https://glwater.bonfirehub.com/portal/?tab=openOpportunities) (Detroit area) open bids on Bonfire | Live | No |
+| Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
 | Other state grant portals (IL, MA, MI, NY, VA) | Planned | No |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.

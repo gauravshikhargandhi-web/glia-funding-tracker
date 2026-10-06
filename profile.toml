@@ -18,11 +18,15 @@ keywords = [
   "culvert", "lead service line", "lead pipe", "shellfish", "oyster", "salmon", "coral",
   "kelp", "seaweed", "blue carbon", "vessel", "boat", "underwater", "subsea", "bathymetr",
   "sonar", "buoy", "algae", "nutrient pollution",
+  # Added 2026-10-06 after reading the first MWRD, Chicago and Great Lakes Water Authority bids.
+  "clarifier", "biosolid", "sludge", "water reclamation", "treatment plant", "pump station",
+  "pumping station", "lift station", "hydrant",
 ]
 
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
-exclude_keywords = ["Watervliet", "Marine Corps", "Marine Forces"]
+# "Bottled drinking water" and "water cooler" are office supply orders.
+exclude_keywords = ["Watervliet", "Marine Corps", "Marine Forces", "bottled drinking water", "water cooler"]
 
 # Keep only listings open to at least one of these applicant types.
 # "Others (see listing)" catches listings that describe eligibility in text;
