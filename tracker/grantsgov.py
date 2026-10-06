@@ -6,11 +6,10 @@ the ones still open (or forecast) and reshape them into the common format.
 
 import datetime
 import io
-import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 
-from tracker.text import clean
+from tracker.text import clean, fetch
 
 # Grants.gov publishes the daily extract to this public bucket.
 EXTRACT_URL = "https://prod-grants-gov-chatbot.s3.amazonaws.com/extracts/GrantsDBExtract{day}v2.zip"
@@ -79,8 +78,7 @@ def download_extract(today, days_back=3):
         day = (today - datetime.timedelta(days=offset)).strftime("%Y%m%d")
         url = EXTRACT_URL.format(day=day)
         try:
-            with urllib.request.urlopen(url, timeout=300) as resp:
-                data = resp.read()
+            data = fetch(url)
         except Exception as exc:  # missing file or network hiccup: try the day before
             print(f"grants.gov: no extract at {url} ({exc})")
             continue

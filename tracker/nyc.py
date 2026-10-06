@@ -6,9 +6,8 @@ solicitations whose due date has not passed.
 
 import json
 import urllib.parse
-import urllib.request
 
-from tracker.text import clean, dollars
+from tracker.text import clean, dollars, fetch
 
 API_URL = "https://data.cityofnewyork.us/resource/dg92-zbpx.json"
 NOTICE_URL = "https://a856-cityrecord.nyc.gov/RequestDetail/{id}"
@@ -21,8 +20,7 @@ def download(today):
         "$limit": "5000",
     }
     url = API_URL + "?" + urllib.parse.urlencode(query)
-    with urllib.request.urlopen(url, timeout=120) as resp:
-        return json.load(resp)
+    return json.loads(fetch(url, timeout=120))
 
 
 def normalize(row):

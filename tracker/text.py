@@ -1,6 +1,17 @@
-"""Small text helpers shared by the collectors."""
+"""Small helpers shared by the collectors."""
 
 import re
+import urllib.request
+
+# Some portals (data.ca.gov among them) refuse Python's default user agent.
+USER_AGENT = "Mozilla/5.0 (compatible; glia-funding-tracker; +https://github.com/gauravshikhargandhi-web/glia-funding-tracker)"
+
+
+def fetch(url, timeout=300):
+    """Download a URL and return its bytes."""
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=timeout) as resp:
+        return resp.read()
 
 
 def clean(text):
