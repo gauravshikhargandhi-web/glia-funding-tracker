@@ -44,6 +44,7 @@ def apply(profile, rows, dropped=None):
     set_asides = [a.lower() for a in rules.get("exclude_set_asides", [])]
     contractor_words = _pattern(rules.get("contractor_only_title_words", []))
     contractor_topics = rules.get("contractor_only_topics", [])
+    tech_words = _pattern(rules.get("not_construction_words", []))
     not_eligible = _regex(rules.get("not_eligible_patterns", []))
 
     matches = []
@@ -54,7 +55,7 @@ def apply(profile, rows, dropped=None):
             continue
         if exclude and exclude.search(text):
             continue
-        reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, not_eligible)
+        reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible)
         if reason:
             if dropped is not None:
                 dropped.append((row, reason))
@@ -72,13 +73,14 @@ def apply(profile, rows, dropped=None):
     return matches
 
 
-def _who_can_bid(row, set_asides, contractor_words, contractor_topics, not_eligible):
+def _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible):
     """Why a startup could not bid on this listing, or "" if nothing says so."""
     eligibility = row["eligibility"].lower()
     for name in set_asides:
         if name in eligibility:
             return f"set-aside: {name}"
-    if row["listing_type"].startswith("Contract"):
+    looks_technical = tech_words and tech_words.search(row["title"])
+    if row["listing_type"].startswith("Contract") and not looks_technical:
         found = contractor_words.search(row["title"]) if contractor_words else None
         if found:
             return f"construction bid: {found.group(0).lower()}"

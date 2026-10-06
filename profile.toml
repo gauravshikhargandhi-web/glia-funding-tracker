@@ -74,10 +74,18 @@ contractor_only_title_words = [
   "water line extension", "waterline extension", "pump station replacement",
   "pump station improvements", "bridge replacement", "bridge preservation",
   "bridge superstructure", "culvert replacement", "tank replacement", "recoating",
-  "pipe lining", "sewer rehab",
+  "pipe lining", "sewer rehab", "rehabilitation of water mains", "rehabilitation of local sewers",
+  "culvert rehabilitation", "dam replacement", "expansion joint", "exterior building", "roof rep",
 ]
 # Contract categories that mean construction (Virginia eVA labels every bid).
 contractor_only_topics = ["Category: Construction"]
+# A bid whose title has any of these is kept even when it looks like
+# construction, because a technology or services company could win it.
+not_construction_words = [
+  "monitoring", "instrumentation", "sensor", "SCADA", "inspection", "assessment",
+  "study", "testing", "locating", "optimization", "data", "water quality",
+  "mitigation credit", "mitigation cred",
+]
 
 # Grant text that rules businesses out. Checked in the eligibility notes and
 # summary. Grants that just say "see listing" are kept.

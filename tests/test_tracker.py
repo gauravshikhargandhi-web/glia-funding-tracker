@@ -229,8 +229,11 @@ class ProfileTest(unittest.TestCase):
     def test_default_profile_keeps_every_water_agency_bid(self):
         rows = mwrd.collect(TODAY, page=_read("sample_mwrd.html"), details={})
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
-        ids = {r["source_id"] for r in profile.apply(prof, rows)}
-        self.assertEqual(ids, {"23-890-1S", "25-RFP-20"})  # the CMMS software RFP has no water words
+        dropped = []
+        ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(ids, {"25-RFP-20"})  # the CMMS software RFP has no water words
+        # The sewer rehabilitation bid matches as a water-agency bid but is construction.
+        self.assertEqual([row["source_id"] for row, _ in dropped], ["23-890-1S"])
 
     def test_default_profile_keeps_only_allowed_contract_codes(self):
         with open(os.path.join(HERE, "sample_samgov.csv"), encoding="cp1252") as f:
@@ -251,7 +254,9 @@ class ProfileTest(unittest.TestCase):
             dict(base, source_id="build", title="Water Main Replacement Phase 2"),
             dict(base, source_id="grant", title="Water Main Replacement Planning Grant",
                  listing_type="Grant", eligibility="Others (see listing)"),
-            dict(base, source_id="category", topics="Category: Construction"),
+            dict(base, source_id="category", title="Stormwater pond retrofit", topics="Category: Construction"),
+            dict(base, source_id="locating", title="Locating Underground Water & Sanitary Sewer",
+                 topics="Category: Construction"),
             dict(base, source_id="noprofit", listing_type="Grant", eligibility="Others (see listing)",
                  eligibility_notes="For-profit organizations are not eligible to apply."),
             dict(base, source_id="seelisting", listing_type="Grant", eligibility="Others (see listing)",
@@ -260,11 +265,12 @@ class ProfileTest(unittest.TestCase):
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
         dropped = []
         ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
-        self.assertEqual(ids, {"keep", "grant", "seelisting"})
+        self.assertEqual(ids, {"keep", "grant", "seelisting", "locating"})
         reasons = {row["source_id"]: reason for row, reason in dropped}
         self.assertEqual(reasons["setaside"], "set-aside: 8(a)")
         self.assertEqual(reasons["build"], "construction bid: water main replacement")
         self.assertEqual(reasons["category"], "construction bid: Category: Construction")
+        self.assertNotIn("locating", reasons)
         self.assertTrue(reasons["noprofit"].startswith("not open to businesses"))
 
 
