@@ -31,9 +31,9 @@ class _RedirectHandler(urllib.request.HTTPRedirectHandler):
 _opener = urllib.request.build_opener(_RedirectHandler, urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
 
-def fetch(url, timeout=300):
-    """Download a URL and return its bytes."""
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+def fetch(url, timeout=300, data=None, headers=None):
+    """Download a URL and return its bytes. Pass data (bytes) to POST."""
+    request = urllib.request.Request(url, data=data, headers={"User-Agent": USER_AGENT, **(headers or {})})
     with _opener.open(request, timeout=timeout) as resp:
         return resp.read()
 

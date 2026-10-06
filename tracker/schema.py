@@ -14,6 +14,7 @@ FIELDS = [
     "award_ceiling",
     "total_funding",
     "eligibility",     # source's applicant types, "; " separated
+    "eligibility_notes",  # source's own words on who may apply, when it gives them
     "topics",          # source's categories, "; " separated
     "location",        # where the applicant or work must be; "National" for federal
     "link",            # the original listing page

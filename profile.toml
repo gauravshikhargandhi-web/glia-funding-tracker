@@ -34,8 +34,12 @@ water_agencies = [
 
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
-# "Bottled drinking water" and "water cooler" are office supply orders.
-exclude_keywords = ["Watervliet", "Marine Corps", "Marine Forces", "bottled drinking water", "water cooler"]
+# "Bottled drinking water" and "water cooler" are office supply orders; the rest are
+# building plumbing and pool services that mention water (seen in Massachusetts bids).
+exclude_keywords = [
+  "Watervliet", "Marine Corps", "Marine Forces", "bottled drinking water", "water cooler",
+  "water damage", "water heater", "chilled water", "condensing water", "lifeguard", "swim lesson",
+]
 
 # Keep only listings open to at least one of these applicant types.
 # "Others (see listing)" catches listings that describe eligibility in text;
@@ -47,6 +51,50 @@ eligibility_any = [
   "Others (see listing)",
   "Business",        # California's term for companies
   "Any vendor",      # city solicitations open to any registered vendor
+]
+
+# --- Who can bid -------------------------------------------------------------
+# These rules drop listings a startup could not bid on. Everything they drop is
+# written to data/filtered_out.csv with the reason, so you can check nothing
+# useful was cut. Delete a line (or empty a list) to turn a rule off.
+
+# Set-asides that need a certification most startups don't hold. Matched
+# against the eligibility column. "Small business" set-asides are kept.
+exclude_set_asides = [
+  "8(a)", "HUBZone", "Service-Disabled Veteran", "SDVOSB", "Veteran-Owned",
+  "Women-Owned", "WOSB", "Buy Indian", "Indian Economic", "Target Market",
+]
+
+# Construction and public-works bids go to licensed, bonded contractors.
+# These words are checked in the titles of contracts only, never grants.
+contractor_only_title_words = [
+  "construction", "reconstruction", "paving", "repaving", "sidewalk", "roofing",
+  "roof replacement", "HVAC", "demolition", "general bids", "force main",
+  "water line replacement", "waterline replacement", "water main replacement",
+  "water line extension", "waterline extension", "pump station replacement",
+  "pump station improvements", "bridge replacement", "bridge preservation",
+  "bridge superstructure", "culvert replacement", "tank replacement", "recoating",
+  "pipe lining", "sewer rehab", "rehabilitation of water mains", "rehabilitation of local sewers",
+  "culvert rehabilitation", "dam replacement", "expansion joint", "exterior building", "roof rep",
+]
+# Contract categories that mean construction (Virginia eVA labels every bid).
+contractor_only_topics = ["Category: Construction"]
+# A bid whose title has any of these is kept even when it looks like
+# construction, because a technology or services company could win it.
+not_construction_words = [
+  "monitoring", "instrumentation", "sensor", "SCADA", "inspection", "assessment",
+  "study", "testing", "locating", "optimization", "data", "water quality",
+  "mitigation credit", "mitigation cred",
+]
+
+# Grant text that rules businesses out. Checked in the eligibility notes and
+# summary. Grants that just say "see listing" are kept.
+not_eligible_patterns = [
+  'for[- ]profit (organizations|entities|businesses|companies|applicants)?[^.]{0,40}(are|is) not eligible',
+  'not eligible[^.]{0,40}for[- ]profit',
+  'not open to for[- ]profit',
+  'eligib\w* (applicants|entities) (are|is) limited to (states?|state agencies|local|units of local government|tribes|tribal|federally[- ]recognized|non-?profit|public|institutions of higher education|universities)',
+  'only (states|state agencies|tribes|federally[- ]recognized tribes|units of local government|local governments|non-?profit organizations|public agencies|institutions of higher education) (are eligible|may apply|can apply)',
 ]
 
 # Skip funders whose code starts with any of these (HHS is mostly health research).

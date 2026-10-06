@@ -150,6 +150,7 @@ def normalize(record):
         "award_ceiling": _money(record.get("AwardCeiling")),
         "total_funding": _money(record.get("EstimatedTotalProgramFunding")),
         "eligibility": "; ".join(APPLICANT_TYPES.get(c, c) for c in record.get("EligibleApplicants", [])),
+        "eligibility_notes": clean(record.get("AdditionalInformationOnEligibility"))[:600],
         "topics": "; ".join(CATEGORIES.get(c, c) for c in record.get("CategoryOfFundingActivity", [])),
         "location": "National",
         "link": LISTING_URL.format(id=record.get("OpportunityID", "")),

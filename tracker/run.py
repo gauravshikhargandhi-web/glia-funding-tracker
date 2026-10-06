@@ -7,10 +7,12 @@
 import argparse
 import datetime
 
-from tracker import bonfire, california, chicago, federalregister, grantsgov, mwrd, nyc, pool, profile, samgov
+from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
+                     mwrd, nyc, pool, prizes, profile, samgov, virginia)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
+FILTERED_PATH = "data/filtered_out.csv"
 
 
 def main():
@@ -32,6 +34,10 @@ def main():
         ("mwrd", lambda: mwrd.collect(today)),
         ("chicago-eprocurement", lambda: chicago.collect(today)),
         ("bonfire", lambda: bonfire.collect(today)),
+        ("illinois-gata", lambda: illinois.collect(today)),
+        ("commbuys", lambda: massachusetts.collect(today)),
+        ("eva-virginia", lambda: virginia.collect(today)),
+        ("prizes", lambda: prizes.collect(today)),
     ]
     failed = []
     for name, collect in sources:
@@ -46,9 +52,13 @@ def main():
         print(f"{name}: {len(fresh)} open listings")
 
     pool.save(POOL_PATH, rows)
-    matches = profile.apply(profile.load(args.profile), rows)
+    dropped = []
+    matches = profile.apply(profile.load(args.profile), rows, dropped)
     pool.save(MATCHES_PATH, matches)
-    print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}")
+    pool.save(FILTERED_PATH, [dict(row, filtered_reason=reason) for row, reason in dropped],
+              extra=["filtered_reason"])
+    print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}, "
+          f"{len(dropped)} more set aside as not biddable (see {FILTERED_PATH})")
     if failed:
         raise SystemExit(f"sources failed: {', '.join(failed)}")
 

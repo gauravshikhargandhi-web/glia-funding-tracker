@@ -3,7 +3,8 @@ import json
 import os
 import unittest
 
-from tracker import bonfire, california, chicago, federalregister, grantsgov, mwrd, nyc, pool, profile, samgov, text
+from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
+                     mwrd, nyc, pool, prizes, profile, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -133,6 +134,68 @@ class FederalRegisterTest(unittest.TestCase):
         self.assertEqual(rows[0]["eligibility"], "Others (see listing)")
 
 
+
+class IllinoisTest(unittest.TestCase):
+    def setUp(self):
+        self.rows = {r["source_id"]: r for r in illinois.collect(TODAY, page=_read("sample_illinois.html"))}
+
+    def test_keeps_open_and_no_end_date(self):
+        self.assertEqual(set(self.rows), {"0f9fad21-8730", "4339"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["0f9fad21-8730"]
+        self.assertEqual(row["title"], "Lake Michigan Monitoring")
+        self.assertEqual(row["funder"], "Illinois Department of Natural Resources")
+        self.assertEqual((row["award_floor"], row["award_ceiling"]), ("15000", "75000"))
+        self.assertEqual(row["close_date"], "")
+        self.assertEqual(row["link"], "https://il.amplifund.com/Public/Opportunities/Details/0f9fad21-8730")
+        nofo = self.rows["4339"]
+        self.assertEqual((nofo["post_date"], nofo["close_date"]), ("2026-08-31", "2026-10-19"))
+        self.assertTrue(nofo["link"].endswith("nofo=4339"))
+
+
+class MassachusettsTest(unittest.TestCase):
+    def test_pages_are_combined_deduped_and_filtered(self):
+        pages = [_read("sample_commbuys_p1.html"), _read("sample_commbuys_p2.xml")]
+        rows = {r["source_id"]: r for r in massachusetts.collect(TODAY, pages=pages)}
+        self.assertEqual(set(rows), {"BD-1", "BD-2"})
+        self.assertEqual(rows["BD-1"]["listing_type"], "Grant")
+        self.assertEqual(rows["BD-1"]["close_date"], "2026-11-06")
+        self.assertEqual(rows["BD-2"]["funder"], "City of Fitchburg")
+        self.assertIn("docId=BD-2", rows["BD-2"]["link"])
+
+
+class VirginiaTest(unittest.TestCase):
+    def test_keeps_open_future_and_normalizes(self):
+        rows = virginia.collect(TODAY, data=json.loads(_read("sample_virginia.json")))
+        self.assertEqual([r["source_id"] for r in rows], ["VBO:IFB:A123:1"])
+        row = rows[0]
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-09-01", "2026-11-01"))
+        self.assertEqual(row["summary"], "Furnish sensors .")
+        self.assertEqual(row["topics"], "Water Testing Equipment")
+        self.assertEqual(row["location"], "Virginia Beach, VA")
+        self.assertIn("VBODetails.jsp", row["link"])
+        self.assertIn("BID_INTRNL_NO=1", row["link"])
+
+
+class PrizesTest(unittest.TestCase):
+    def test_reads_open_xtech_cards_and_skips_empty_usbr_page(self):
+        rows = prizes.collect(TODAY, xtech_page=_read("sample_xtech.html"), usbr_page=_read("sample_usbr_none.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["xtechsearch10"])
+        row = rows[0]
+        self.assertEqual(row["title"], "xTech|Search 10")
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-09-10", "2026-10-19"))
+        self.assertIn("unmanned vessel", row["summary"])
+
+    def test_usbr_page_with_a_competition_is_listed(self):
+        page = _read("sample_usbr_none.html").replace(
+            "There are currently no prize competitions accepting submissions.", "Halt the Hitchhiker Phase 2 is open.")
+        rows = prizes.parse_usbr(page, TODAY)
+        self.assertEqual(len(rows), 1)
+        self.assertIn("Halt the Hitchhiker", rows[0]["summary"])
+        self.assertEqual(rows[0]["source_id"], prizes.parse_usbr(page, TODAY)[0]["source_id"])
+
+
 class PoolTest(unittest.TestCase):
     def test_merge_keeps_first_seen_and_other_sources(self):
         previous = [
@@ -166,8 +229,11 @@ class ProfileTest(unittest.TestCase):
     def test_default_profile_keeps_every_water_agency_bid(self):
         rows = mwrd.collect(TODAY, page=_read("sample_mwrd.html"), details={})
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
-        ids = {r["source_id"] for r in profile.apply(prof, rows)}
-        self.assertEqual(ids, {"23-890-1S", "25-RFP-20"})  # the CMMS software RFP has no water words
+        dropped = []
+        ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(ids, {"25-RFP-20"})  # the CMMS software RFP has no water words
+        # The sewer rehabilitation bid matches as a water-agency bid but is construction.
+        self.assertEqual([row["source_id"] for row, _ in dropped], ["23-890-1S"])
 
     def test_default_profile_keeps_only_allowed_contract_codes(self):
         with open(os.path.join(HERE, "sample_samgov.csv"), encoding="cp1252") as f:
@@ -177,6 +243,35 @@ class ProfileTest(unittest.TestCase):
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
         ids = {r["source_id"] for r in profile.apply(prof, rows + [construction, boat_part])}
         self.assertEqual(ids, {"s6", "s2"})
+
+    def test_who_can_bid_rules_drop_and_record_reasons(self):
+        base = {k: "" for k in pool.FIELDS}
+        base.update(title="Stormwater monitoring", summary="water quality", eligibility="Any vendor",
+                    funder="City", listing_type="Contract (bid)")
+        rows = [
+            dict(base, source_id="keep"),
+            dict(base, source_id="setaside", eligibility="Total Small Business; 8(a) Set-Aside"),
+            dict(base, source_id="build", title="Water Main Replacement Phase 2"),
+            dict(base, source_id="grant", title="Water Main Replacement Planning Grant",
+                 listing_type="Grant", eligibility="Others (see listing)"),
+            dict(base, source_id="category", title="Stormwater pond retrofit", topics="Category: Construction"),
+            dict(base, source_id="locating", title="Locating Underground Water & Sanitary Sewer",
+                 topics="Category: Construction"),
+            dict(base, source_id="noprofit", listing_type="Grant", eligibility="Others (see listing)",
+                 eligibility_notes="For-profit organizations are not eligible to apply."),
+            dict(base, source_id="seelisting", listing_type="Grant", eligibility="Others (see listing)",
+                 eligibility_notes="See the full announcement for details."),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        dropped = []
+        ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(ids, {"keep", "grant", "seelisting", "locating"})
+        reasons = {row["source_id"]: reason for row, reason in dropped}
+        self.assertEqual(reasons["setaside"], "set-aside: 8(a)")
+        self.assertEqual(reasons["build"], "construction bid: water main replacement")
+        self.assertEqual(reasons["category"], "construction bid: Category: Construction")
+        self.assertNotIn("locating", reasons)
+        self.assertTrue(reasons["noprofit"].startswith("not open to businesses"))
 
 
 
