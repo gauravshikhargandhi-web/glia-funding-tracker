@@ -1,5 +1,6 @@
 """Small helpers shared by the collectors."""
 
+import http.cookiejar
 import re
 import urllib.parse
 import urllib.request
@@ -26,7 +27,8 @@ class _RedirectHandler(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, drop_default_port(newurl))
 
 
-_opener = urllib.request.build_opener(_RedirectHandler)
+# The cookie jar lets sites that test for cookies with a redirect (MWRD) load.
+_opener = urllib.request.build_opener(_RedirectHandler, urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
 
 def fetch(url, timeout=300):

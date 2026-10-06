@@ -7,7 +7,7 @@
 import argparse
 import datetime
 
-from tracker import california, grantsgov, nyc, pool, profile, samgov
+from tracker import bonfire, california, chicago, federalregister, grantsgov, mwrd, nyc, pool, profile, samgov
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -28,6 +28,10 @@ def main():
         ("grants.ca.gov", lambda: california.collect(today)),
         ("nyc-city-record", lambda: nyc.collect(today)),
         ("sam.gov", lambda: samgov.collect(today)),
+        ("federalregister", lambda: federalregister.collect(today)),
+        ("mwrd", lambda: mwrd.collect(today)),
+        ("chicago-eprocurement", lambda: chicago.collect(today)),
+        ("bonfire", lambda: bonfire.collect(today)),
     ]
     failed = []
     for name, collect in sources:
