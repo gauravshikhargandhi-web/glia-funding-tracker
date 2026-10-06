@@ -7,9 +7,8 @@ We keep active and forecasted listings.
 import csv
 import io
 import re
-import urllib.request
 
-from tracker.text import clean, dollars
+from tracker.text import clean, dollars, fetch
 
 CSV_URL = (
     "https://data.ca.gov/dataset/e1b1c799-cdd4-4219-af6d-93b79747fffb/resource/"
@@ -18,8 +17,7 @@ CSV_URL = (
 
 
 def download():
-    with urllib.request.urlopen(CSV_URL, timeout=300) as resp:
-        return resp.read().decode("utf-8-sig")
+    return fetch(CSV_URL).decode("utf-8-sig")
 
 
 def _amount_range(text):
