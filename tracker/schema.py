@@ -6,6 +6,14 @@ FIELDS = [
     "title",
     "funder",          # agency, state department or city
     "funder_code",
+    # Plain-language columns, the same for every source (see tracker/plain.py)
+    "kind",            # Grant, Contract, Prize, Loan, Funding notice
+    "stage",           # Open, Coming soon, Info request
+    "deadline",        # close date, or "Not set"
+    "amount",          # e.g. "Up to $500K"
+    "who_can_apply",   # Any company, Companies eligible, Small businesses only, Check listing, Not companies
+    "short_summary",   # first sentences of the summary
+    # The source's own fields
     "listing_type",    # grant, cooperative agreement, contract, prize, ...
     "status",          # posted or forecast
     "post_date",       # YYYY-MM-DD

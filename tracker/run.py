@@ -7,12 +7,32 @@
 import argparse
 import datetime
 
+import collections
+import csv
+
 from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mwrd, nyc, pool, prizes, profile, samgov, virginia)
+                     mwrd, nyc, plain, pool, prizes, profile, samgov, virginia)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
 FILTERED_PATH = "data/filtered_out.csv"
+SUMMARY_PATH = "data/summary.csv"
+
+# How each source is described in data/summary.csv (and the sheet's About tab).
+ABOUT = {
+    "grants.gov": ("Grants.gov", "Federal", "All federal grants and cooperative agreements, including forecasts"),
+    "sam.gov": ("SAM.gov", "Federal", "Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"),
+    "federalregister": ("Federal Register", "Federal", "Funding and prize notices published by agencies"),
+    "grants.ca.gov": ("California Grants Portal", "State (CA)", "California state grants and loans"),
+    "illinois-gata": ("Illinois GATA", "State (IL)", "Illinois state funding opportunities"),
+    "commbuys": ("Massachusetts COMMBUYS", "State (MA)", "Massachusetts state and local bids, plus some grants"),
+    "eva-virginia": ("Virginia eVA", "State (VA)", "Virginia state and local solicitations"),
+    "nyc-city-record": ("NYC City Record", "City (New York)", "New York City solicitations"),
+    "chicago-eprocurement": ("Chicago eProcurement", "City (Chicago)", "City of Chicago bids"),
+    "mwrd": ("MWRD (Chicago)", "Water agency", "Metropolitan Water Reclamation District bids"),
+    "bonfire": ("Great Lakes Water Authority", "Water agency", "Detroit-area regional water authority bids"),
+    "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
+}
 
 
 def main():
@@ -51,16 +71,46 @@ def main():
         rows = pool.merge(rows, name, fresh, today)
         print(f"{name}: {len(fresh)} open listings")
 
+    plain.add(rows)
     pool.save(POOL_PATH, rows)
     dropped = []
     matches = profile.apply(profile.load(args.profile), rows, dropped)
     pool.save(MATCHES_PATH, matches)
     pool.save(FILTERED_PATH, [dict(row, filtered_reason=reason) for row, reason in dropped],
               extra=["filtered_reason"])
+    save_summary(SUMMARY_PATH, today, rows, matches, dropped, failed)
     print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}, "
           f"{len(dropped)} more set aside as not biddable (see {FILTERED_PATH})")
     if failed:
         raise SystemExit(f"sources failed: {', '.join(failed)}")
+
+
+def save_summary(path, today, rows, matches, dropped, failed):
+    """A small table of today's counts, for the sheet's About tab."""
+    pool_by = collections.Counter(r["source"] for r in rows)
+    match_by = collections.Counter(r["source"] for r in matches)
+    drop_by = collections.Counter(r["source"] for r, _ in dropped)
+    out = [["section", "name", "level", "open", "matches", "set_aside", "detail"],
+           ["run", "Last refresh", "", "", "", "", today.isoformat()],
+           ["total", "All sources", "", len(rows), len(matches), len(dropped), f"{len(ABOUT)} sources"]]
+    for source, (label, level, covers) in ABOUT.items():
+        note = "Failed today; showing yesterday's listings. " if source in failed else ""
+        out.append(["source", label, level, pool_by[source], match_by[source], drop_by[source], note + covers])
+    for name, n in collections.Counter(r["kind"] for r in matches).most_common():
+        out.append(["kind", name, "", "", n, "", ""])
+    for name, n in collections.Counter(r["stage"] for r in matches).most_common():
+        out.append(["stage", name, "", "", n, "", ""])
+    for name, n in collections.Counter(r["who_can_apply"] for r in matches).most_common():
+        out.append(["who", name, "", "", n, "", ""])
+    labels = {"construction bid": "Construction bids", "set-aside": "Certification-only set-asides",
+              "not open to businesses": "Grants closed to companies"}
+    reasons = collections.Counter(labels.get(reason.split(":")[0], reason) for _, reason in dropped)
+    for name, n in reasons.most_common():
+        out.append(["set_aside", name, "", "", "", n, ""])
+    new_today = sum(1 for r in matches if r["first_seen"] == today.isoformat())
+    out.append(["new", "New matches today", "", "", new_today, "", ""])
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerows(out)
 
 
 if __name__ == "__main__":

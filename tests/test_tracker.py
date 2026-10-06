@@ -4,7 +4,7 @@ import os
 import unittest
 
 from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mwrd, nyc, pool, prizes, profile, samgov, text, virginia)
+                     mwrd, nyc, plain, pool, prizes, profile, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -177,6 +177,11 @@ class VirginiaTest(unittest.TestCase):
         self.assertIn("VBODetails.jsp", row["link"])
         self.assertIn("BID_INTRNL_NO=1", row["link"])
 
+    def test_local_government_bids_link_to_their_own_page(self):
+        link = virginia._link({"app": "IV", "internalid": "128282", "version": "1"})
+        self.assertEqual(link, "https://mvendor.cgieva.com/Vendor/public/IVDetails.jsp?"
+                               "PageTitle=SO+Details&rfp_id_lot=128282&rfp_id_round=1")
+
 
 class PrizesTest(unittest.TestCase):
     def test_reads_open_xtech_cards_and_skips_empty_usbr_page(self):
@@ -273,6 +278,40 @@ class ProfileTest(unittest.TestCase):
         self.assertNotIn("locating", reasons)
         self.assertTrue(reasons["noprofit"].startswith("not open to businesses"))
 
+
+
+class PlainTest(unittest.TestCase):
+    def row(self, **fields):
+        base = {k: "" for k in pool.FIELDS}
+        base.update(fields)
+        return plain.describe(base)
+
+    def test_grant_with_ceiling_and_see_listing(self):
+        got = self.row(listing_type="Cooperative agreement; Grant", status="posted", close_date="2026-11-01",
+                       award_ceiling="1657690", eligibility="Others (see listing)",
+                       summary="Study salinity &amp;amp; flow. More detail follows.")
+        self.assertEqual(got["kind"], "Grant")
+        self.assertEqual(got["stage"], "Open")
+        self.assertEqual(got["deadline"], "2026-11-01")
+        self.assertEqual(got["amount"], "Up to $1.7M")
+        self.assertEqual(got["who_can_apply"], "Check listing")
+        self.assertEqual(got["short_summary"], "Study salinity & flow. More detail follows.")
+
+    def test_contract_stages_and_set_asides(self):
+        sought = self.row(listing_type="Contract (Sources Sought)", status="forecast",
+                          eligibility="Small Business Set Aside - Total")
+        self.assertEqual((sought["kind"], sought["stage"], sought["who_can_apply"]),
+                         ("Contract", "Info request", "Small businesses only"))
+        presol = self.row(listing_type="Contract (Presolicitation)", status="forecast", eligibility="Any vendor")
+        self.assertEqual((presol["stage"], presol["deadline"], presol["who_can_apply"]),
+                         ("Coming soon", "Not set", "Any company"))
+
+    def test_total_funding_and_long_summary(self):
+        got = self.row(listing_type="Grant", total_funding="3500000", eligibility="Business; Nonprofit",
+                       summary="word " * 100)
+        self.assertEqual(got["amount"], "$3.5M total")
+        self.assertEqual(got["who_can_apply"], "Companies eligible")
+        self.assertTrue(got["short_summary"].endswith(" ...") and len(got["short_summary"]) <= 284)
 
 
 class TextTest(unittest.TestCase):
