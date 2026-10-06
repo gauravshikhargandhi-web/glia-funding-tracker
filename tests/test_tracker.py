@@ -100,13 +100,14 @@ class ProfileTest(unittest.TestCase):
         ids = {r["source_id"] for r in profile.apply(prof, rows)}
         self.assertEqual(ids, {"20260903027"})  # the locks bid has no water keywords
 
-    def test_default_profile_skips_construction_contracts(self):
+    def test_default_profile_keeps_only_allowed_contract_codes(self):
         with open(os.path.join(HERE, "sample_samgov.csv"), encoding="cp1252") as f:
             rows = samgov.collect(TODAY, csv_text=f.read())
         construction = dict(rows[0], source_id="c1", topics="NAICS 237110; PSC Y1ND")
+        boat_part = dict(rows[0], source_id="c2", topics="NAICS 336612; PSC 2040")
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
-        ids = {r["source_id"] for r in profile.apply(prof, rows + [construction])}
-        self.assertEqual(ids, {"s1", "s2"})
+        ids = {r["source_id"] for r in profile.apply(prof, rows + [construction, boat_part])}
+        self.assertEqual(ids, {"s6", "s2"})
 
 
 
@@ -124,12 +125,13 @@ class SamGovTest(unittest.TestCase):
             self.rows = {r["source_id"]: r for r in samgov.collect(TODAY, csv_text=f.read())}
 
     def test_keeps_open_solicitations_and_early_notices(self):
-        # s3 is an award, s4 is past its deadline, s5 has no deadline and is not an early notice.
-        self.assertEqual(set(self.rows), {"s1", "s2"})
+        # s3 is an award, s4 is past its deadline, s5 has no deadline and is not an early notice,
+        # and s6 is a later amendment of s1, so it replaces s1.
+        self.assertEqual(set(self.rows), {"s6", "s2"})
 
     def test_normalizes_fields(self):
-        row = self.rows["s1"]
-        self.assertEqual(row["title"], "Stormwater sensor network pilot")
+        row = self.rows["s6"]
+        self.assertEqual(row["title"], "Stormwater sensor network pilot - Amendment 1")
         self.assertEqual(row["funder"], "National Oceanic And Atmospheric Administration")
         self.assertEqual(row["listing_type"], "Contract (Solicitation)")
         self.assertEqual(row["close_date"], "2026-11-05")

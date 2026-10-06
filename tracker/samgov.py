@@ -70,7 +70,7 @@ def collect(today, csv_text=None):
     if csv_text is None:
         csv_text = download()
     today = today.isoformat()
-    listings = []
+    latest = {}
     for row in csv.DictReader(io.StringIO(csv_text)):
         if row.get("Active") != "Yes" or row.get("Type") in SKIP_TYPES:
             continue
@@ -80,5 +80,9 @@ def collect(today, csv_text=None):
                 continue
         elif row.get("BaseType") not in EARLY_TYPES or (row.get("ArchiveDate") or "") < today:
             continue
-        listings.append(normalize(row))
-    return listings
+        # Each amendment or follow-up notice is its own row; keep the newest one
+        # per solicitation number (or per title and agency when there is none).
+        key = row.get("Sol#", "").strip().lower() or (row.get("Title", "").strip().lower(), row.get("Sub-Tier", ""))
+        if key not in latest or row.get("PostedDate", "") > latest[key].get("PostedDate", ""):
+            latest[key] = row
+    return [normalize(row) for row in latest.values()]
