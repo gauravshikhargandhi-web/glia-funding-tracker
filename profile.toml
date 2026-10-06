@@ -11,7 +11,7 @@ keywords = [
   "coastal", "great lakes", "ocean", "marine", "aquacultur", "fisheries", "seafood",
   "harbor", "port infrastructure", "seawall", "shoreline", "flood", "pfas", "wetland",
   "estuar", "drought", "irrigation", "harmful algal", "invasive species", "bycatch",
-  "unmanned", "drone", "digital twin", "resilien",
+  "unmanned", "drone", "digital twin", "climate resilien", "coast resilien",
   # Added 2026-10-06 after reading the first California and NYC pulls.
   "sea level", "storm surge", "tidal", "groundwater", "aquifer", "aquatic", "hydrolog",
   "hydrosphere", "desalinat", "river", "lake", "riparian", "erosion", "dredg", "levee",
@@ -21,7 +21,8 @@ keywords = [
 ]
 
 # Drop listings that mention any of these.
-exclude_keywords = []
+# "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
+exclude_keywords = ["Watervliet", "Marine Corps", "Marine Forces"]
 
 # Keep only listings open to at least one of these applicant types.
 # "Others (see listing)" catches listings that describe eligibility in text;
@@ -37,3 +38,11 @@ eligibility_any = [
 
 # Skip funders whose code starts with any of these (HHS is mostly health research).
 exclude_funder_codes = ["HHS"]
+
+# Skip listings whose topics contain any of these. SAM.gov topics carry the
+# federal product/service code (PSC) and industry code (NAICS). These cut
+# construction, building repair and facility operations contracts:
+# PSC Y/Z = construction and repair of buildings and sites, J = equipment repair,
+# M = operating facilities, S = utilities and housekeeping, X = leases,
+# NAICS 23 = construction.
+exclude_topics = ["PSC Y", "PSC Z", "PSC J", "PSC M", "PSC S", "PSC X", "NAICS 23"]

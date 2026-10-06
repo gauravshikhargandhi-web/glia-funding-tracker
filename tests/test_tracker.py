@@ -3,7 +3,7 @@ import json
 import os
 import unittest
 
-from tracker import california, grantsgov, nyc, pool, profile, text
+from tracker import california, grantsgov, nyc, pool, profile, samgov, text
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -100,9 +100,14 @@ class ProfileTest(unittest.TestCase):
         ids = {r["source_id"] for r in profile.apply(prof, rows)}
         self.assertEqual(ids, {"20260903027"})  # the locks bid has no water keywords
 
+    def test_default_profile_skips_construction_contracts(self):
+        with open(os.path.join(HERE, "sample_samgov.csv"), encoding="cp1252") as f:
+            rows = samgov.collect(TODAY, csv_text=f.read())
+        construction = dict(rows[0], source_id="c1", topics="NAICS 237110; PSC Y1ND")
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        ids = {r["source_id"] for r in profile.apply(prof, rows + [construction])}
+        self.assertEqual(ids, {"s1", "s2"})
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TextTest(unittest.TestCase):
@@ -111,3 +116,35 @@ class TextTest(unittest.TestCase):
                          "https://s3.amazonaws.com/b/f.csv?X-Amz-Signature=abc")
         self.assertEqual(text.drop_default_port("https://example.com:8443/x"), "https://example.com:8443/x")
         self.assertEqual(text.drop_default_port("https://example.com/x"), "https://example.com/x")
+
+
+class SamGovTest(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(HERE, "sample_samgov.csv"), encoding="cp1252") as f:
+            self.rows = {r["source_id"]: r for r in samgov.collect(TODAY, csv_text=f.read())}
+
+    def test_keeps_open_solicitations_and_early_notices(self):
+        # s3 is an award, s4 is past its deadline, s5 has no deadline and is not an early notice.
+        self.assertEqual(set(self.rows), {"s1", "s2"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["s1"]
+        self.assertEqual(row["title"], "Stormwater sensor network pilot")
+        self.assertEqual(row["funder"], "National Oceanic And Atmospheric Administration")
+        self.assertEqual(row["listing_type"], "Contract (Solicitation)")
+        self.assertEqual(row["close_date"], "2026-11-05")
+        self.assertEqual(row["eligibility"], "Small Business Set Aside - Total")
+        self.assertEqual(row["topics"], "NAICS 334519; PSC 6665")
+        self.assertEqual(row["location"], "Ann Arbor, MI")
+        self.assertEqual(row["summary"], "Deploy sensors & telemetry.")
+
+    def test_early_notice_without_deadline(self):
+        row = self.rows["s2"]
+        self.assertEqual(row["status"], "forecast")
+        self.assertEqual(row["close_date"], "")
+        self.assertEqual(row["eligibility"], "Any vendor")
+        self.assertEqual(row["location"], "National")
+
+
+if __name__ == "__main__":
+    unittest.main()
