@@ -13,11 +13,11 @@ def load(path):
         return list(csv.DictReader(f))
 
 
-def save(path, rows):
+def save(path, rows, extra=()):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     rows = sorted(rows, key=lambda r: (r["close_date"] or "9999-99-99", r["source"], r["source_id"]))
     with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
+        writer = csv.DictWriter(f, fieldnames=FIELDS + list(extra), extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
 

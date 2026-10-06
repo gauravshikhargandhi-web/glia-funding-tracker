@@ -241,6 +241,32 @@ class ProfileTest(unittest.TestCase):
         ids = {r["source_id"] for r in profile.apply(prof, rows + [construction, boat_part])}
         self.assertEqual(ids, {"s6", "s2"})
 
+    def test_who_can_bid_rules_drop_and_record_reasons(self):
+        base = {k: "" for k in pool.FIELDS}
+        base.update(title="Stormwater monitoring", summary="water quality", eligibility="Any vendor",
+                    funder="City", listing_type="Contract (bid)")
+        rows = [
+            dict(base, source_id="keep"),
+            dict(base, source_id="setaside", eligibility="Total Small Business; 8(a) Set-Aside"),
+            dict(base, source_id="build", title="Water Main Replacement Phase 2"),
+            dict(base, source_id="grant", title="Water Main Replacement Planning Grant",
+                 listing_type="Grant", eligibility="Others (see listing)"),
+            dict(base, source_id="category", topics="Category: Construction"),
+            dict(base, source_id="noprofit", listing_type="Grant", eligibility="Others (see listing)",
+                 eligibility_notes="For-profit organizations are not eligible to apply."),
+            dict(base, source_id="seelisting", listing_type="Grant", eligibility="Others (see listing)",
+                 eligibility_notes="See the full announcement for details."),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        dropped = []
+        ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(ids, {"keep", "grant", "seelisting"})
+        reasons = {row["source_id"]: reason for row, reason in dropped}
+        self.assertEqual(reasons["setaside"], "set-aside: 8(a)")
+        self.assertEqual(reasons["build"], "construction bid: water main replacement")
+        self.assertEqual(reasons["category"], "construction bid: Category: Construction")
+        self.assertTrue(reasons["noprofit"].startswith("not open to businesses"))
+
 
 
 class TextTest(unittest.TestCase):

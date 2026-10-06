@@ -46,7 +46,8 @@ def normalize(doc):
         "award_ceiling": "",
         "total_funding": "",
         "eligibility": "Any vendor",
-        "topics": "; ".join(doc.get("commdesc") or []),
+        # eVA's own category (Construction, Goods, Professional Services, ...) comes first.
+        "topics": "; ".join(([f"Category: {doc['category']}"] if doc.get("category") else []) + (doc.get("commdesc") or [])),
         "location": f"{doc['workloc']}, VA" if doc.get("workloc") else "Virginia",
         "link": _link(doc),
         "summary": clean(doc.get("longdesc"))[:600],
