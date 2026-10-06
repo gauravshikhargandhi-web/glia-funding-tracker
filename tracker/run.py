@@ -7,7 +7,7 @@
 import argparse
 import datetime
 
-from tracker import grantsgov, pool, profile
+from tracker import california, grantsgov, nyc, pool, profile
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -23,14 +23,29 @@ def main():
     today = datetime.date.fromisoformat(args.today) if args.today else datetime.date.today()
     rows = pool.load(POOL_PATH)
 
-    fresh = grantsgov.collect(today, xml_source=args.xml)
-    rows = pool.merge(rows, "grants.gov", fresh, today)
-    print(f"grants.gov: {len(fresh)} open listings")
+    sources = [
+        ("grants.gov", lambda: grantsgov.collect(today, xml_source=args.xml)),
+        ("grants.ca.gov", lambda: california.collect(today)),
+        ("nyc-city-record", lambda: nyc.collect(today)),
+    ]
+    failed = []
+    for name, collect in sources:
+        try:
+            fresh = collect()
+        except Exception as exc:
+            # Keep yesterday's rows for this source and carry on with the rest.
+            print(f"{name}: FAILED ({exc}); keeping previous listings")
+            failed.append(name)
+            continue
+        rows = pool.merge(rows, name, fresh, today)
+        print(f"{name}: {len(fresh)} open listings")
 
     pool.save(POOL_PATH, rows)
     matches = profile.apply(profile.load(args.profile), rows)
     pool.save(MATCHES_PATH, matches)
     print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}")
+    if failed:
+        raise SystemExit(f"sources failed: {', '.join(failed)}")
 
 
 if __name__ == "__main__":

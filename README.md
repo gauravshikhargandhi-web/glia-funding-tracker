@@ -19,10 +19,14 @@ Each row has the same columns whatever the source: title, funder, listing type, 
 | Source | Status | Key needed |
 | --- | --- | --- |
 | [Grants.gov](https://www.grants.gov) daily extract (all federal grants and forecasts) | Live | No |
+| [California Grants Portal](https://data.ca.gov/dataset/california-grants-portal) (all California state grants and loans) | Live | No |
+| [NYC City Record Online](https://a856-cityrecord.nyc.gov/) solicitations | Live | No |
 | SAM.gov contract opportunities | Planned | Free personal key |
 | Federal Register notices | Planned | No |
-| NYC City Record Online, Chicago and Detroit bid pages | Planned | No |
-| State grant portals (CA, IL, MA, MI, NY, VA) | Planned | No |
+| Chicago and Detroit bid pages | Planned | No |
+| Other state grant portals (IL, MA, MI, NY, VA) | Planned | No |
+
+If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.
 
 Only free, public sources are used. Sites that need a login are left out.
 

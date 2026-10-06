@@ -25,6 +25,8 @@ eligibility_any = [
   "For-profit organizations",
   "Unrestricted",
   "Others (see listing)",
+  "Business",        # California's term for companies
+  "Any vendor",      # city solicitations open to any registered vendor
 ]
 
 # Skip funders whose code starts with any of these (HHS is mostly health research).

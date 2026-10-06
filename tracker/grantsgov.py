@@ -6,10 +6,11 @@ the ones still open (or forecast) and reshape them into the common format.
 
 import datetime
 import io
-import re
 import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
+
+from tracker.text import clean
 
 # Grants.gov publishes the daily extract to this public bucket.
 EXTRACT_URL = "https://prod-grants-gov-chatbot.s3.amazonaws.com/extracts/GrantsDBExtract{day}v2.zip"
@@ -102,12 +103,6 @@ def _money(value):
     return value if value.isdigit() and value != "0" else ""
 
 
-def _clean(text):
-    text = re.sub(r"<[^>]+>", " ", text or "")
-    text = text.replace("&nbsp;", " ").replace("&amp;", "&")
-    return re.sub(r"\s+", " ", text).strip()
-
-
 def parse_records(xml_source):
     """Yield one dict per opportunity in the extract (file path or file object)."""
     for _, el in ET.iterparse(xml_source):
@@ -146,7 +141,7 @@ def normalize(record):
     return {
         "source": "grants.gov",
         "source_id": record.get("OpportunityID", ""),
-        "title": _clean(record.get("OpportunityTitle")),
+        "title": clean(record.get("OpportunityTitle")),
         "funder": record.get("AgencyName", ""),
         "funder_code": record.get("AgencyCode", ""),
         "listing_type": "; ".join(instruments) or "Grant",
@@ -160,7 +155,7 @@ def normalize(record):
         "topics": "; ".join(CATEGORIES.get(c, c) for c in record.get("CategoryOfFundingActivity", [])),
         "location": "National",
         "link": LISTING_URL.format(id=record.get("OpportunityID", "")),
-        "summary": _clean(record.get("Description"))[:600],
+        "summary": clean(record.get("Description"))[:600],
     }
 
 
