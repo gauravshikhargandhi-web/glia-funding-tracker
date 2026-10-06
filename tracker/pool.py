@@ -22,6 +22,21 @@ def save(path, rows, extra=()):
         writer.writerows(rows)
 
 
+def closed(previous, source, fresh):
+    """Rows of this source that were open before but are missing from the fresh pull."""
+    still_open = {r["source_id"] for r in fresh}
+    return [r for r in previous if r["source"] == source and r["source_id"] not in still_open]
+
+
+def archive(path, rows):
+    """Add closed listings to the archive, keeping one row per listing."""
+    kept = {(r["source"], r["source_id"]): r for r in load(path)}
+    for row in rows:
+        kept[(row["source"], row["source_id"])] = row
+    save(path, kept.values())
+    return len(kept)
+
+
 def merge(previous, source, fresh, today):
     """Replace one source's rows with a fresh pull, keeping first_seen dates.
 

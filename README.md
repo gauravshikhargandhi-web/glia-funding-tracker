@@ -11,6 +11,7 @@ Every day a GitHub job pulls public funding sources, keeps the listings that are
 | [`data/listings.csv`](data/listings.csv) | Every open listing from every source |
 | [`data/matches.csv`](data/matches.csv) | The listings that fit [`profile.toml`](profile.toml) |
 | [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, or a grant that rules out businesses), with the reason in the last column |
+| [`data/archive/`](data/archive) | Water listings that have closed, one file per year (starting 2026), kept for looking back at what funders offer and when |
 | [`data/summary.csv`](data/summary.csv) | Today's counts per source and per kind, stage and who can apply (feeds the sheet's About tab) |
 | [`profile.toml`](profile.toml) | Keywords and eligibility rules that decide what counts as a match |
 

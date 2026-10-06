@@ -17,6 +17,8 @@ POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
 FILTERED_PATH = "data/filtered_out.csv"
 SUMMARY_PATH = "data/summary.csv"
+# Closed water listings, one file per year so each stays well under GitHub's file limit.
+ARCHIVE_PATH = "data/archive/{year}.csv"
 
 # How each source is described in data/summary.csv (and the sheet's About tab).
 ABOUT = {
@@ -60,6 +62,7 @@ def main():
         ("prizes", lambda: prizes.collect(today)),
     ]
     failed = []
+    closed = []
     for name, collect in sources:
         try:
             fresh = collect()
@@ -68,13 +71,25 @@ def main():
             print(f"{name}: FAILED ({exc}); keeping previous listings")
             failed.append(name)
             continue
+        gone = pool.closed(rows, name, fresh)
+        if not fresh and len(gone) >= 10:
+            # A big source that suddenly returns nothing has more likely broken than closed everything.
+            print(f"{name}: FAILED (no listings returned); keeping previous listings")
+            failed.append(name)
+            continue
+        closed += gone
         rows = pool.merge(rows, name, fresh, today)
         print(f"{name}: {len(fresh)} open listings")
 
     plain.add(rows)
     pool.save(POOL_PATH, rows)
+    prof = profile.load(args.profile)
     dropped = []
-    matches = profile.apply(profile.load(args.profile), rows, dropped)
+    matches = profile.apply(prof, rows, dropped)
+    to_archive = profile.on_topic(prof, closed)
+    archive_path = ARCHIVE_PATH.format(year=today.year)
+    archived = pool.archive(archive_path, to_archive)
+    print(f"archive: {len(to_archive)} water listings closed today, {archived} in {archive_path}")
     pool.save(MATCHES_PATH, matches)
     pool.save(FILTERED_PATH, [dict(row, filtered_reason=reason) for row, reason in dropped],
               extra=["filtered_reason"])

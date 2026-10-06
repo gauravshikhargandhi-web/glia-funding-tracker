@@ -314,6 +314,26 @@ class PlainTest(unittest.TestCase):
         self.assertTrue(got["short_summary"].endswith(" ...") and len(got["short_summary"]) <= 284)
 
 
+class ArchiveTest(unittest.TestCase):
+    def test_closed_water_listings_are_archived_once(self):
+        import tempfile
+        base = {k: "" for k in pool.FIELDS}
+        previous = [dict(base, source="mwrd", source_id="1", title="Sewer flow monitoring", funder="City"),
+                    dict(base, source="mwrd", source_id="2", title="Office chairs", funder="City"),
+                    dict(base, source="mwrd", source_id="3", title="Stormwater study", funder="City"),
+                    dict(base, source="nyc", source_id="1", title="Wastewater sensors", funder="City")]
+        fresh = [dict(base, source="mwrd", source_id="3", title="Stormwater study", funder="City")]
+        gone = pool.closed(previous, "mwrd", fresh)
+        self.assertEqual([r["source_id"] for r in gone], ["1", "2"])
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        water = profile.on_topic(prof, gone)
+        self.assertEqual([r["title"] for r in water], ["Sewer flow monitoring"])
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "archive", "2026.csv")
+            self.assertEqual(pool.archive(path, water), 1)
+            self.assertEqual(pool.archive(path, water), 1)  # the same listing is not added twice
+
+
 class TextTest(unittest.TestCase):
     def test_drop_default_port(self):
         self.assertEqual(text.drop_default_port("https://s3.amazonaws.com:443/b/f.csv?X-Amz-Signature=abc"),
