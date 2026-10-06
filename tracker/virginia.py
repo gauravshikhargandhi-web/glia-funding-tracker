@@ -13,8 +13,8 @@ LIST_URL = "https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp"
 
 
 def download():
-    query = [("q", "*:*"), ("fq", "status:Open"), ("fq", "closedate:[NOW TO *]"),
-             ("rows", "5000"), ("wt", "json")]
+    # The site's search proxy rejects date-range filters, so past deadlines are dropped in collect().
+    query = [("q", "*:*"), ("fq", "status:Open"), ("rows", "5000"), ("wt", "json")]
     return json.loads(fetch(SEARCH_URL + "?" + urllib.parse.urlencode(query), timeout=180))
 
 

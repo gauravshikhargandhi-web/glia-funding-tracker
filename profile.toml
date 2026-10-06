@@ -34,8 +34,12 @@ water_agencies = [
 
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
-# "Bottled drinking water" and "water cooler" are office supply orders.
-exclude_keywords = ["Watervliet", "Marine Corps", "Marine Forces", "bottled drinking water", "water cooler"]
+# "Bottled drinking water" and "water cooler" are office supply orders; the rest are
+# building plumbing and pool services that mention water (seen in Massachusetts bids).
+exclude_keywords = [
+  "Watervliet", "Marine Corps", "Marine Forces", "bottled drinking water", "water cooler",
+  "water damage", "water heater", "chilled water", "condensing water", "lifeguard", "swim lesson",
+]
 
 # Keep only listings open to at least one of these applicant types.
 # "Others (see listing)" catches listings that describe eligibility in text;

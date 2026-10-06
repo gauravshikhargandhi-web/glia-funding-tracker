@@ -3,7 +3,7 @@ import json
 import os
 import unittest
 
-from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts, michigan,
+from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
                      mwrd, nyc, pool, prizes, profile, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
@@ -152,18 +152,6 @@ class IllinoisTest(unittest.TestCase):
         nofo = self.rows["4339"]
         self.assertEqual((nofo["post_date"], nofo["close_date"]), ("2026-08-31", "2026-10-19"))
         self.assertTrue(nofo["link"].endswith("nofo=4339"))
-
-
-class MichiganTest(unittest.TestCase):
-    def test_skips_closed_programs_and_reads_tags(self):
-        rows = michigan.collect(TODAY, data=json.loads(_read("sample_michigan.json")))
-        self.assertEqual([r["source_id"] for r in rows], ["a1"])
-        row = rows[0]
-        self.assertEqual(row["status"], "posted")
-        self.assertEqual(row["listing_type"], "Grant program")
-        self.assertEqual(row["eligibility"], "Local governments; Others (see listing)")
-        self.assertEqual(row["topics"], "Drinking water")
-        self.assertEqual(row["link"], "https://www.michigan.gov/egle/about/swp")
 
 
 class MassachusettsTest(unittest.TestCase):
