@@ -18,11 +18,13 @@ keywords = [
 exclude_keywords = []
 
 # Keep only listings open to at least one of these applicant types.
-# Add "Others (see listing)" to also catch listings that describe eligibility in text.
+# "Others (see listing)" catches listings that describe eligibility in text;
+# some of those won't allow startups, so check the eligibility column.
 eligibility_any = [
   "Small businesses",
   "For-profit organizations",
   "Unrestricted",
+  "Others (see listing)",
 ]
 
 # Skip funders whose code starts with any of these (HHS is mostly health research).
