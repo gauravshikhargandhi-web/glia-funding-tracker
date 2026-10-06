@@ -46,3 +46,21 @@ exclude_funder_codes = ["HHS"]
 # M = operating facilities, S = utilities and housekeeping, X = leases,
 # NAICS 23 = construction.
 exclude_topics = ["PSC Y", "PSC Z", "PSC J", "PSC M", "PSC S", "PSC X", "NAICS 23"]
+
+# Federal contracts (SAM.gov) carry a product/service code (PSC) saying what is
+# being bought. Keep only those whose code starts with one of these; listings
+# without a code are not affected. Look codes up at https://www.acquisition.gov/psc-manual
+allowed_codes = [
+  "PSC A",     # research and development
+  "PSC B",     # special studies and analysis (environmental studies, water testing)
+  "PSC C2",    # architect and engineering services
+  "PSC D",     # IT and data services
+  "PSC F",     # natural resources and environmental services
+  "PSC H",     # inspection, testing and quality control
+  "PSC R4",    # professional and engineering services
+  "PSC 1550",  # unmanned aircraft
+  "PSC 46",    # water purification and sewage treatment equipment
+  "PSC 5845",  # underwater sound equipment
+  "PSC 66",    # instruments and laboratory equipment
+  "PSC 7",     # IT equipment and software
+]

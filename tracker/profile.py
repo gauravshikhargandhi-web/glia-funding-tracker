@@ -12,6 +12,9 @@ def load(path):
         return tomllib.load(f)
 
 
+_CODE = re.compile(r"PSC \w")
+
+
 def _pattern(words):
     if not words:
         return None
@@ -25,6 +28,7 @@ def apply(profile, rows):
     eligible = [e.lower() for e in rules.get("eligibility_any", [])]
     skip_funders = tuple(rules.get("exclude_funder_codes", []))
     skip_topics = rules.get("exclude_topics", [])
+    allowed_codes = rules.get("allowed_codes", [])
 
     matches = []
     for row in rows:
@@ -38,6 +42,9 @@ def apply(profile, rows):
         if skip_funders and row["funder_code"].startswith(skip_funders):
             continue
         if any(t in row["topics"] for t in skip_topics):
+            continue
+        # Listings that carry a product/service code (SAM.gov) must use an allowed one.
+        if allowed_codes and _CODE.search(row["topics"]) and not any(c in row["topics"] for c in allowed_codes):
             continue
         matches.append(row)
     return matches
