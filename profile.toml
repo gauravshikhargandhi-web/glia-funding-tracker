@@ -12,6 +12,12 @@ keywords = [
   "harbor", "port infrastructure", "seawall", "shoreline", "flood", "pfas", "wetland",
   "estuar", "drought", "irrigation", "harmful algal", "invasive species", "bycatch",
   "unmanned", "drone", "digital twin", "resilien",
+  # Added 2026-10-06 after reading the first California and NYC pulls.
+  "sea level", "storm surge", "tidal", "groundwater", "aquifer", "aquatic", "hydrolog",
+  "hydrosphere", "desalinat", "river", "lake", "riparian", "erosion", "dredg", "levee",
+  "culvert", "lead service line", "lead pipe", "shellfish", "oyster", "salmon", "coral",
+  "kelp", "seaweed", "blue carbon", "vessel", "boat", "underwater", "subsea", "bathymetr",
+  "sonar", "buoy", "algae", "nutrient pollution",
 ]
 
 # Drop listings that mention any of these.
