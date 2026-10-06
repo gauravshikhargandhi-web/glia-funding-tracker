@@ -16,9 +16,8 @@ jobs:
           import json, re, urllib.parse
           from tracker import virginia, text
           ids = ["IV128282", "IV127561", "IV129310", "IV129311", "IV129323"]
-          q = [("q", "id:(" + " OR ".join(ids) + ")"), ("rows", "10"), ("wt", "json")]
-          d = json.loads(text.fetch(virginia.SEARCH_URL + "?" + urllib.parse.urlencode(q)))
-          for doc in d["response"]["docs"]:
+          d = virginia.download()
+          for doc in [x for x in d["response"]["docs"] if x["id"] in ids]:
               link = virginia._link(doc)
               page = text.fetch(link)
               s = page.decode("utf-8", "replace") if isinstance(page, bytes) else page
