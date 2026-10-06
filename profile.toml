@@ -1,0 +1,29 @@
+# Your funding profile. Edit this file to change what lands in data/matches.csv.
+# The full pool of open listings is always in data/listings.csv.
+
+name = "GLIA water and water-adjacent cohort"
+
+[filter]
+# A listing matches if its title or summary contains any of these (case-insensitive,
+# matched at the start of a word, so "aquacultur" catches aquaculture and aquacultural).
+keywords = [
+  "water", "wastewater", "stormwater", "storm water", "sewer", "watershed",
+  "coastal", "great lakes", "ocean", "marine", "aquacultur", "fisheries", "seafood",
+  "harbor", "port infrastructure", "seawall", "shoreline", "flood", "pfas", "wetland",
+  "estuar", "drought", "irrigation", "harmful algal", "invasive species", "bycatch",
+  "unmanned", "drone", "digital twin", "resilien",
+]
+
+# Drop listings that mention any of these.
+exclude_keywords = []
+
+# Keep only listings open to at least one of these applicant types.
+# Add "Others (see listing)" to also catch listings that describe eligibility in text.
+eligibility_any = [
+  "Small businesses",
+  "For-profit organizations",
+  "Unrestricted",
+]
+
+# Skip funders whose code starts with any of these (HHS is mostly health research).
+exclude_funder_codes = ["HHS"]
