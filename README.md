@@ -11,9 +11,21 @@ Every day a GitHub job pulls public funding sources, keeps the listings that are
 | [`data/listings.csv`](data/listings.csv) | Every open listing from every source |
 | [`data/matches.csv`](data/matches.csv) | The listings that fit [`profile.toml`](profile.toml) |
 | [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, or a grant that rules out businesses), with the reason in the last column |
+| [`data/summary.csv`](data/summary.csv) | Today's counts per source and per kind, stage and who can apply (feeds the sheet's About tab) |
 | [`profile.toml`](profile.toml) | Keywords and eligibility rules that decide what counts as a match |
 
-Each row has the same columns whatever the source: title, funder, listing type, status, post and close dates, award floor and ceiling, total funding, eligibility, topics, location, link, a short summary, and the dates the tracker first and last saw it.
+Each row has the same columns whatever the source. Six plain columns come right after the title and funder, so every listing reads the same way:
+
+| Column | Values |
+| --- | --- |
+| kind | Grant, Contract, Prize, Loan, Funding notice |
+| stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
+| deadline | Closing date, or "Not set" for rolling and forecast listings |
+| amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
+| who_can_apply | Any company, Companies eligible, Small businesses only, Check listing, Not companies |
+| short_summary | The first sentences of the summary |
+
+The source's own wording follows: listing type, status, post and close dates, award floor and ceiling, total funding, eligibility, eligibility notes, topics, location, link, the full summary, and the dates the tracker first and last saw the listing.
 
 ## Sources
 
@@ -40,7 +52,9 @@ Only free, public sources are used. Sites that need a login are left out.
 
 ## View it in Google Sheets
 
-Make a new Google Sheet and put this in cell A1. It refreshes on its own about once an hour.
+The script in [`sheet/refresh.gs`](sheet/refresh.gs) fills a **Matches** tab and an **About** tab (sources, today's counts, how matching works) and refreshes both every day. Setup steps are at the top of the file.
+
+For a quick read-only view instead, make a new Google Sheet and put this in cell A1. It refreshes on its own about once an hour.
 
 ```
 =IMPORTDATA("https://raw.githubusercontent.com/gauravshikhargandhi-web/glia-funding-tracker/main/data/matches.csv")
