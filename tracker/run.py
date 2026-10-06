@@ -7,7 +7,7 @@
 import argparse
 import datetime
 
-from tracker import california, grantsgov, nyc, pool, profile
+from tracker import california, grantsgov, nyc, pool, profile, samgov
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -27,6 +27,7 @@ def main():
         ("grants.gov", lambda: grantsgov.collect(today, xml_source=args.xml)),
         ("grants.ca.gov", lambda: california.collect(today)),
         ("nyc-city-record", lambda: nyc.collect(today)),
+        ("sam.gov", lambda: samgov.collect(today)),
     ]
     failed = []
     for name, collect in sources:

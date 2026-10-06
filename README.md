@@ -21,7 +21,7 @@ Each row has the same columns whatever the source: title, funder, listing type, 
 | [Grants.gov](https://www.grants.gov) daily extract (all federal grants and forecasts) | Live | No |
 | [California Grants Portal](https://data.ca.gov/dataset/california-grants-portal) (all California state grants and loans) | Live | No |
 | [NYC City Record Online](https://a856-cityrecord.nyc.gov/) solicitations | Live | No |
-| SAM.gov contract opportunities | Planned | Free personal key |
+| [SAM.gov](https://sam.gov) contract opportunities (public daily file of every federal contract notice) | Live | No |
 | Federal Register notices | Planned | No |
 | Chicago and Detroit bid pages | Planned | No |
 | Other state grant portals (IL, MA, MI, NY, VA) | Planned | No |

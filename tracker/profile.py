@@ -24,6 +24,7 @@ def apply(profile, rows):
     exclude = _pattern(rules.get("exclude_keywords", []))
     eligible = [e.lower() for e in rules.get("eligibility_any", [])]
     skip_funders = tuple(rules.get("exclude_funder_codes", []))
+    skip_topics = rules.get("exclude_topics", [])
 
     matches = []
     for row in rows:
@@ -35,6 +36,8 @@ def apply(profile, rows):
         if eligible and not any(e in row["eligibility"].lower() for e in eligible):
             continue
         if skip_funders and row["funder_code"].startswith(skip_funders):
+            continue
+        if any(t in row["topics"] for t in skip_topics):
             continue
         matches.append(row)
     return matches
