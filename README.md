@@ -10,6 +10,7 @@ Every day a GitHub job pulls public funding sources, keeps the listings that are
 | --- | --- |
 | [`data/listings.csv`](data/listings.csv) | Every open listing from every source |
 | [`data/matches.csv`](data/matches.csv) | The listings that fit [`profile.toml`](profile.toml) |
+| [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, or a grant that rules out businesses), with the reason in the last column |
 | [`profile.toml`](profile.toml) | Keywords and eligibility rules that decide what counts as a match |
 
 Each row has the same columns whatever the source: title, funder, listing type, status, post and close dates, award floor and ceiling, total funding, eligibility, topics, location, link, a short summary, and the dates the tracker first and last saw it.
