@@ -1,8 +1,9 @@
 import datetime
+import json
 import os
 import unittest
 
-from tracker import grantsgov, pool, profile
+from tracker import california, grantsgov, nyc, pool, profile
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -31,6 +32,44 @@ class GrantsGovTest(unittest.TestCase):
         self.assertEqual(self.rows["103"]["close_date"], "")
 
 
+class CaliforniaTest(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(HERE, "sample_california.csv"), encoding="utf-8") as f:
+            self.rows = {r["source_id"]: r for r in california.collect(TODAY, csv_text=f.read())}
+
+    def test_keeps_active_only(self):
+        self.assertEqual(set(self.rows), {"192465", "190509"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["192465"]
+        self.assertEqual(row["close_date"], "2026-11-25")
+        self.assertEqual((row["award_floor"], row["award_ceiling"]), ("1", "750000"))
+        self.assertEqual(row["total_funding"], "15000000")
+        self.assertEqual(row["eligibility"], "Business")
+        self.assertEqual(row["location"], "California")
+        self.assertTrue(row["link"].startswith("http"))
+
+    def test_ongoing_deadline_is_blank(self):
+        self.assertEqual(self.rows["190509"]["close_date"], "")
+
+
+class NycTest(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(HERE, "sample_nyc.json"), encoding="utf-8") as f:
+            self.rows = nyc.collect(TODAY, rows=json.load(f))
+
+    def test_keeps_future_due_dates_only(self):
+        self.assertEqual([r["source_id"] for r in self.rows], ["20260903027"])
+
+    def test_normalizes_fields(self):
+        row = self.rows[0]
+        self.assertEqual(row["close_date"], "2026-10-08")
+        self.assertEqual(row["funder"], "NYC Environmental Protection")
+        self.assertEqual(row["listing_type"], "Contract (Request for Proposals)")
+        self.assertEqual(row["summary"], "Sensors for sewer overflow monitoring.")
+        self.assertEqual(row["link"], "https://a856-cityrecord.nyc.gov/RequestDetail/20260903027")
+
+
 class PoolTest(unittest.TestCase):
     def test_merge_keeps_first_seen_and_other_sources(self):
         previous = [
@@ -53,6 +92,13 @@ class ProfileTest(unittest.TestCase):
         ids = {r["source_id"] for r in profile.apply(prof, rows)}
         # 102 is water-related but open to universities only.
         self.assertEqual(ids, {"100", "103"})
+
+    def test_default_profile_keeps_matching_city_solicitations(self):
+        with open(os.path.join(HERE, "sample_nyc.json"), encoding="utf-8") as f:
+            rows = nyc.collect(datetime.date(2026, 7, 1), rows=json.load(f))
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        ids = {r["source_id"] for r in profile.apply(prof, rows)}
+        self.assertEqual(ids, {"20260903027"})  # the locks bid has no water keywords
 
 
 if __name__ == "__main__":
