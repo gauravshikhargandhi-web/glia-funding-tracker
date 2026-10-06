@@ -27,7 +27,11 @@ Each row has the same columns whatever the source: title, funder, listing type, 
 | [City of Chicago eProcurement](https://eprocurement.cityofchicago.org/OA_HTML/OA.jsp?OAFunc=PON_ABSTRACT_PAGE) solicitations | Live | No |
 | [Great Lakes Water Authority](https://glwater.bonfirehub.com/portal/?tab=openOpportunities) (Detroit area) open bids on Bonfire | Live | No |
 | Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
-| Other state grant portals (IL, MA, MI, NY, VA) | Planned | No |
+| [Illinois GATA](https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx) state funding opportunities | Live | No |
+| [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |
+| [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
+| Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
+| Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.
 
