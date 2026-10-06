@@ -1,0 +1,28 @@
+name: Diagnose California
+on:
+  push:
+    branches: [diag-california]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check links
+        run: |
+          python3 - <<'PY'
+          import json, re, urllib.parse
+          from tracker import virginia, text
+          ids = ["IV128282", "IV127561", "IV129310", "IV129311", "IV129323"]
+          q = [("q", "id:(" + " OR ".join(ids) + ")"), ("rows", "10"), ("wt", "json")]
+          d = json.loads(text.fetch(virginia.SEARCH_URL + "?" + urllib.parse.urlencode(q)))
+          for doc in d["response"]["docs"]:
+              link = virginia._link(doc)
+              page = text.fetch(link)
+              s = page.decode("utf-8", "replace") if isinstance(page, bytes) else page
+              t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s))
+              print("LINK", doc["id"], len(s), doc["shortdesc"][:50] in t, link)
+              print("   ", t[t.find(doc["shortdesc"][:20]) - 100: t.find(doc["shortdesc"][:20]) + 200] if doc["shortdesc"][:20] in t else t[:300])
+          PY

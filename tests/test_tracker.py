@@ -177,6 +177,11 @@ class VirginiaTest(unittest.TestCase):
         self.assertIn("VBODetails.jsp", row["link"])
         self.assertIn("BID_INTRNL_NO=1", row["link"])
 
+    def test_local_government_bids_link_to_their_own_page(self):
+        link = virginia._link({"app": "IV", "internalid": "128282", "version": "1"})
+        self.assertEqual(link, "https://mvendor.cgieva.com/Vendor/public/IVDetails.jsp?"
+                               "PageTitle=SO+Details&rfp_id_lot=128282&rfp_id_round=1")
+
 
 class PrizesTest(unittest.TestCase):
     def test_reads_open_xtech_cards_and_skips_empty_usbr_page(self):

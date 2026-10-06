@@ -19,6 +19,15 @@ def download():
 
 
 def _link(doc):
+    # Built the same way as the eVA site's own "View" links.
+    if doc.get("app") == "IV":
+        return DETAIL_URL.format(page="IVDetails.jsp") + urllib.parse.urlencode({
+            "PageTitle": "SO Details", "rfp_id_lot": doc.get("internalid", ""), "rfp_id_round": doc.get("version", ""),
+        })
+    if doc.get("app") == "QQ":
+        return DETAIL_URL.format(page="QQDetails.jsp") + urllib.parse.urlencode({
+            "PageTitle": "QQ Details", "REQUEST_ID": doc.get("internalid", ""),
+        })
     pages = {"VBO": ("VBODetails.jsp", "VBOSODetails.jsp"), "ADV": ("ADVSODetails.jsp", "ADVSODetails.jsp")}
     if doc.get("app") not in pages:
         return LIST_URL
