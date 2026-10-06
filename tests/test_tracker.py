@@ -3,7 +3,7 @@ import json
 import os
 import unittest
 
-from tracker import california, grantsgov, nyc, pool, profile
+from tracker import california, grantsgov, nyc, pool, profile, text
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -103,3 +103,11 @@ class ProfileTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TextTest(unittest.TestCase):
+    def test_drop_default_port(self):
+        self.assertEqual(text.drop_default_port("https://s3.amazonaws.com:443/b/f.csv?X-Amz-Signature=abc"),
+                         "https://s3.amazonaws.com/b/f.csv?X-Amz-Signature=abc")
+        self.assertEqual(text.drop_default_port("https://example.com:8443/x"), "https://example.com:8443/x")
+        self.assertEqual(text.drop_default_port("https://example.com/x"), "https://example.com/x")
