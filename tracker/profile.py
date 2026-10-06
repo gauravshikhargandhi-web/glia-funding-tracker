@@ -29,11 +29,13 @@ def apply(profile, rows):
     skip_funders = tuple(rules.get("exclude_funder_codes", []))
     skip_topics = rules.get("exclude_topics", [])
     allowed_codes = rules.get("allowed_codes", [])
+    water_agencies = [a.lower() for a in rules.get("water_agencies", [])]
 
     matches = []
     for row in rows:
         text = f"{row['title']} {row['summary']}"
-        if include and not include.search(text):
+        from_water_agency = any(a in row["funder"].lower() for a in water_agencies)
+        if include and not from_water_agency and not include.search(text):
             continue
         if exclude and exclude.search(text):
             continue

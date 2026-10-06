@@ -23,6 +23,15 @@ keywords = [
   "pumping station", "lift station", "hydrant",
 ]
 
+# Every listing from these funders counts as a keyword match, even when its title
+# has no water words (e.g. a water utility buying maintenance software). The other
+# filters below still apply. Matched against the funder column, ignoring case.
+water_agencies = [
+  "Metropolitan Water Reclamation District",  # MWRD, Chicago area
+  "Great Lakes Water Authority",              # GLWA, Detroit area
+  "Department Of Water Management",           # City of Chicago
+]
+
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
 # "Bottled drinking water" and "water cooler" are office supply orders.

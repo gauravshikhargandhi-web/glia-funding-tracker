@@ -163,6 +163,12 @@ class ProfileTest(unittest.TestCase):
         ids = {r["source_id"] for r in profile.apply(prof, rows)}
         self.assertEqual(ids, {"20260903027"})  # the locks bid has no water keywords
 
+    def test_default_profile_keeps_every_water_agency_bid(self):
+        rows = mwrd.collect(TODAY, page=_read("sample_mwrd.html"), details={})
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        ids = {r["source_id"] for r in profile.apply(prof, rows)}
+        self.assertEqual(ids, {"23-890-1S", "25-RFP-20"})  # the CMMS software RFP has no water words
+
     def test_default_profile_keeps_only_allowed_contract_codes(self):
         with open(os.path.join(HERE, "sample_samgov.csv"), encoding="cp1252") as f:
             rows = samgov.collect(TODAY, csv_text=f.read())
