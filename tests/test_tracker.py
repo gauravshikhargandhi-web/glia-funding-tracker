@@ -3,8 +3,8 @@ import json
 import os
 import unittest
 
-from tracker import (bonfire, buffalo, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
+from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, massachusetts,
+                     metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -189,6 +189,68 @@ class BuffaloTest(unittest.TestCase):
     def test_odd_date_formats(self):
         self.assertEqual(buffalo.due_date("on Monday April, 27, 2026, for the"), "2026-04-27")
         self.assertEqual(buffalo.due_date("at 10:00 A.M. local time on DECEMBER 17, 2025"), "2025-12-17")
+
+
+class ClevelandTest(unittest.TestCase):
+    def setUp(self):
+        pages = {"invitations-bid": _read("sample_cleveland_itb.html"),
+                 "request-qualificationsproposal": _read("sample_cleveland_rfq.html")}
+        self.rows = {r["source_id"]: r for r in cleveland.collect(datetime.date(2026, 10, 8), pages=pages)}
+
+    def test_keeps_open_dated_listings(self):
+        # 98-26 closed; the CDBG RFP gives no year, so it is left out.
+        self.assertEqual(set(self.rows), {"109-26", "112-26", "510", "collapse_301"})
+
+    def test_large_bid(self):
+        row = self.rows["109-26"]
+        self.assertEqual(row["title"], "Pipe Repair Clamps and Couplings")
+        self.assertEqual(row["funder"], "City of Cleveland Division of Water")
+        self.assertEqual(row["close_date"], "2026-10-22")
+        self.assertEqual(row["link"], cleveland.BASE + "invitations-bid#collapse_101")
+        self.assertEqual(self.rows["112-26"]["funder"], "City of Cleveland Department of Public Works")
+
+    def test_drops_city_hall_address(self):
+        # "Lakeside Avenue" would otherwise match the keyword "lake" on every listing.
+        self.assertNotIn("Lakeside", self.rows["112-26"]["summary"])
+        self.assertIn("Cleveland City Hall", self.rows["112-26"]["summary"])
+
+    def test_small_bid_closing_date(self):
+        self.assertEqual(self.rows["510"]["close_date"], "2026-10-14")
+        self.assertEqual(self.rows["510"]["title"], "MANHOLE RISERS & LIDS")
+
+    def test_rfp_uses_closing_date_and_keeps_dashed_title(self):
+        row = self.rows["collapse_301"]
+        self.assertEqual(row["title"], "Central Recreation Center - Expansion")
+        self.assertEqual(row["close_date"], "2026-11-29")
+        self.assertEqual(row["listing_type"], "Contract (RFP)")
+        self.assertIn("Division of Architecture", row["funder"])
+
+
+class MetCouncilTest(unittest.TestCase):
+    def setUp(self):
+        self.rows = {r["source_id"]: r for r in metcouncil.collect(datetime.date(2026, 10, 8),
+                                                                    page=_read("sample_metcouncil.html"))}
+
+    def test_keeps_open_rows(self):
+        self.assertEqual(set(self.rows), {"26P276"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["26P276"]
+        self.assertEqual(row["title"], "Interceptor 1-MS-100 Condition Assessment")
+        self.assertEqual(row["funder"], "Metropolitan Council Environmental Services")
+        self.assertEqual(row["listing_type"], "Contract (request for information)")
+        self.assertEqual(row["post_date"], "2026-10-01")
+        self.assertEqual(row["close_date"], "2026-10-30")
+        self.assertEqual(row["link"], "https://metrocouncil.org/getdoc/abc/26P276.aspx")
+
+
+class NsfTest(unittest.TestCase):
+    def test_keeps_only_small_business_programs(self):
+        rows = nsf.collect(datetime.date(2026, 10, 8), feed=_read("sample_nsf.xml"))
+        self.assertEqual([r["source_id"] for r in rows], ["NSF 26-511"])
+        self.assertEqual(rows[0]["close_date"], "2026-11-04")
+        self.assertEqual(rows[0]["eligibility"], "Small businesses")
+        self.assertNotIn("Upcoming Due Dates item", rows[0]["summary"])
 
 
 class FederalRegisterTest(unittest.TestCase):
