@@ -3,8 +3,8 @@ import json
 import os
 import unittest
 
-from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mwrd, nyc, plain, pool, prizes, profile, samgov, text, virginia)
+from tracker import (bonfire, buffalo, california, chicago, federalregister, grantsgov, illinois, massachusetts,
+                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -123,6 +123,72 @@ class BonfireTest(unittest.TestCase):
         self.assertEqual(rows[0]["close_date"], "2026-10-16")
         self.assertEqual(rows[0]["funder"], "Great Lakes Water Authority")
         self.assertEqual(rows[0]["link"], "https://glwater.bonfirehub.com/opportunities/252183")
+
+
+class OpenGovTest(unittest.TestCase):
+    def setUp(self):
+        payload = json.loads(_read("sample_opengov.json"))
+        self.rows = {r["source_id"]: r for r in opengov.collect(TODAY, payloads={"neorsd": [payload]})}
+
+    def test_keeps_open_and_coming_soon(self):
+        self.assertEqual(set(self.rows), {"neorsd-307121", "neorsd-279486", "neorsd-300761", "neorsd-2"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["neorsd-279486"]
+        self.assertEqual(row["title"], "Rubbish Removal and Recycling Services")
+        self.assertEqual(row["funder"], "Northeast Ohio Regional Sewer District")
+        self.assertEqual(row["close_date"], "2026-11-02")
+        self.assertEqual(row["post_date"], "2026-10-06")
+        self.assertEqual(row["topics"], "Technical Services Group; Standard Bid")
+        self.assertEqual(row["link"], "https://procurement.opengov.com/portal/neorsd/projects/279486")
+        self.assertIn("requirement contract awarded", row["summary"])  # split spans rejoined
+
+    def test_coming_soon_request_for_information(self):
+        row = dict(self.rows["neorsd-2"])
+        self.assertEqual((row["status"], row["close_date"]), ("forecast", ""))
+        self.assertEqual(plain.stage(row), "Info request")
+
+
+class MmsdTest(unittest.TestCase):
+    def setUp(self):
+        page = _read("sample_mmsd.html", encoding="cp1252")
+        self.rows = {r["source_id"]: r for r in mmsd.collect(TODAY, page=page)}
+
+    def test_keeps_open_listings_only(self):
+        self.assertEqual(set(self.rows), {"J06106C10", "J06105D01", "P-3388"})
+
+    def test_normalizes_fields(self):
+        row = self.rows["J06105D01"]
+        self.assertEqual(row["title"], "Engineering Services \u2013 Electrical Distribution System Equipment "
+                                       "Replacements at Jones Island Water Reclamation Facility")
+        self.assertEqual(row["close_date"], "2026-10-22")
+        self.assertEqual(row["funder"], "Milwaukee Metropolitan Sewerage District")
+        self.assertTrue(row["link"].endswith("PID=B9BC41590DD445AB7D4E91B8423EFA255C6EC00A76B4B31B"))
+        self.assertEqual(self.rows["P-3388"]["listing_type"], "Contract (request for information)")
+
+
+class BuffaloTest(unittest.TestCase):
+    def setUp(self):
+        self.feed = _read("sample_buffalo.xml").encode()
+
+    def test_reads_deadline_from_notice_text(self):
+        rows = {r["source_id"]: r for r in buffalo.collect(datetime.date(2026, 6, 10), feed=self.feed)}
+        # The meeting recording is skipped; the dateless RFP is kept as recent.
+        self.assertEqual(set(rows), {"10332", "9668"})
+        row = rows["9668"]
+        self.assertEqual(row["title"], "Colorado Avenue \u2013 CSO053 SPP 337 Modifications")
+        self.assertEqual(row["close_date"], "2026-07-09")
+        self.assertEqual(row["post_date"], "2026-06-04")
+        self.assertEqual(row["listing_type"], "Contract (bid)")
+        self.assertEqual(rows["10332"]["listing_type"], "Contract (RFP)")
+        self.assertEqual(rows["10332"]["close_date"], "")
+
+    def test_old_posts_drop_out(self):
+        self.assertEqual(buffalo.collect(TODAY, feed=self.feed), [])
+
+    def test_odd_date_formats(self):
+        self.assertEqual(buffalo.due_date("on Monday April, 27, 2026, for the"), "2026-04-27")
+        self.assertEqual(buffalo.due_date("at 10:00 A.M. local time on DECEMBER 17, 2025"), "2025-12-17")
 
 
 class FederalRegisterTest(unittest.TestCase):
