@@ -128,6 +128,7 @@ def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()
     for name, n in collections.Counter(r["who_can_apply"] for r in matches).most_common():
         out.append(["who", name, "", "", n, "", ""])
     labels = {"construction bid": "Construction bids", "set-aside": "Certification-only set-asides",
+              "off-topic bid": "Off-topic bids (supplies, grounds, building services)",
               "not open to businesses": "Grants closed to companies"}
     reasons = collections.Counter(labels.get(reason.split(":")[0], reason) for _, reason in dropped)
     for name, n in reasons.most_common():

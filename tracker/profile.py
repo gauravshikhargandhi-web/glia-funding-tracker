@@ -45,6 +45,7 @@ def apply(profile, rows, dropped=None):
     set_asides = [a.lower() for a in rules.get("exclude_set_asides", [])]
     contractor_words = _pattern(rules.get("contractor_only_title_words", []))
     contractor_topics = rules.get("contractor_only_topics", [])
+    off_topic_words = _pattern(rules.get("off_topic_title_words", []))
     tech_words = _pattern(rules.get("not_construction_words", []))
     not_eligible = _regex(rules.get("not_eligible_patterns", []))
 
@@ -52,7 +53,8 @@ def apply(profile, rows, dropped=None):
     for row in rows:
         if not _on_topic(row, include, exclude, water_agencies, picked):
             continue
-        reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible)
+        reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible,
+                              off_topic_words)
         if reason:
             if dropped is not None:
                 dropped.append((row, reason))
@@ -91,7 +93,8 @@ def _on_topic(row, include, exclude, water_agencies, picked=()):
     return not (exclude and exclude.search(text))
 
 
-def _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible):
+def _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible,
+                 off_topic_words=None):
     """Why a startup could not bid on this listing, or "" if nothing says so."""
     eligibility = row["eligibility"].lower()
     for name in set_asides:
@@ -105,6 +108,9 @@ def _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_word
         for topic in contractor_topics:
             if topic in row["topics"]:
                 return f"construction bid: {topic}"
+        found = off_topic_words.search(row["title"]) if off_topic_words else None
+        if found:
+            return f"off-topic bid: {found.group(0).lower()}"
     if not_eligible:
         found = not_eligible.search(f"{row.get('eligibility_notes', '')} {row['summary']}")
         if found:

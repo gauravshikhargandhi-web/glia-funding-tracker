@@ -393,6 +393,24 @@ class ProfileTest(unittest.TestCase):
         self.assertNotIn("locating", reasons)
         self.assertTrue(reasons["noprofit"].startswith("not open to businesses"))
 
+    def test_off_topic_utility_bids_are_set_aside(self):
+        base = {k: "" for k in pool.FIELDS}
+        base.update(eligibility="Any vendor", funder="Northeast Ohio Regional Sewer District",
+                    listing_type="Contract (bid)")
+        rows = [
+            dict(base, source_id="rubbish", title="Rubbish Removal and Recycling Services"),
+            dict(base, source_id="chlorine", title="Sodium Hypochlorite Solution at all Wastewater Treatment Plants"),
+            dict(base, source_id="itsm", title="Request for Information: IT Service Management Platform"),
+            dict(base, source_id="tech", title="Landscape drainage monitoring"),  # technical words win
+            dict(base, source_id="grant", title="Landscape restoration grant", listing_type="Grant"),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        dropped = []
+        ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(ids, {"itsm", "tech", "grant"})
+        reasons = {row["source_id"]: reason for row, reason in dropped}
+        self.assertEqual(reasons, {"rubbish": "off-topic bid: rubbish", "chlorine": "off-topic bid: hypochlorite"})
+
 
 
 class PlainTest(unittest.TestCase):

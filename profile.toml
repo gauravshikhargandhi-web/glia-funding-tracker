@@ -85,6 +85,17 @@ contractor_only_title_words = [
   "pipe lining", "sewer rehab", "rehabilitation of water mains", "rehabilitation of local sewers",
   "culvert rehabilitation", "dam replacement", "expansion joint", "exterior building", "roof rep",
 ]
+# Bids for things a technology startup doesn't sell: supplies, chemicals, grounds,
+# building services and property deals. Many come from water agencies, whose bids
+# all count as matches. Checked in the titles of contracts only, never grants;
+# the technical words below still keep a bid.
+off_topic_title_words = [
+  "rubbish", "refuse collection", "trash collection", "trash removal", "recycling services", "janitorial", "custodial",
+  "elevator", "landscap", "turf", "mowing", "snow removal", "pest control", "flagger",
+  "hypochlorite", "activated carbon", "chemical supply", "uniform", "furniture",
+  "snack bar", "statue", "basketball", "morgue", "doors and frames", "real estate",
+  "emergency sewer work", "emergency water main", "water main break",
+]
 # Contract categories that mean construction (Virginia eVA labels every bid).
 contractor_only_topics = ["Category: Construction"]
 # A bid whose title has any of these is kept even when it looks like
