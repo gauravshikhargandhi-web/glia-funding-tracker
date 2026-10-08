@@ -35,6 +35,10 @@ water_agencies = [
   "Buffalo Sewer Authority",                   # Buffalo, NY
 ]
 
+# Sources a person picked by hand count as matches without water words
+# ("calendar" is the Calendar tab of the Google Sheet).
+hand_picked_sources = ["calendar"]
+
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
 # "Bottled drinking water" and "water cooler" are office supply orders; the rest are
@@ -54,6 +58,7 @@ eligibility_any = [
   "Others (see listing)",
   "Business",        # California's term for companies
   "Any vendor",      # city solicitations open to any registered vendor
+  "Any company",     # calendar programs open to any startup
 ]
 
 # --- Who can bid -------------------------------------------------------------
@@ -128,3 +133,8 @@ allowed_codes = [
   "PSC 66",    # instruments and laboratory equipment
   "PSC 7",     # IT equipment and software
 ]
+
+[calendar]
+# The Calendar tab of the Google Sheet, read as CSV each run. The sheet must be
+# shared as "anyone with the link can view". Leave blank to use data/calendar.csv only.
+sheet_csv = "https://docs.google.com/spreadsheets/d/1Hdk8iebShtatUGKV1sUEGooQkF8m5A1FL6WhUsMt3ig/gviz/tq?tqx=out:csv&headers=1&sheet=Calendar"

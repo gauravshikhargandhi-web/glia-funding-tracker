@@ -4,7 +4,7 @@ import os
 import unittest
 
 from tracker import (bonfire, buffalo, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, samgov, text, virginia)
+                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -265,6 +265,55 @@ class PrizesTest(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertIn("Halt the Hitchhiker", rows[0]["summary"])
         self.assertEqual(rows[0]["source_id"], prizes.parse_usbr(page, TODAY)[0]["source_id"])
+
+
+class CalendarTest(unittest.TestCase):
+    SHEET = (
+        "Program,Run by,Kind,Opens,Closes,Rolling,Amount,Who can apply,Location,Usual window,Link,About,Last checked,Notes\n"
+        "Imagine H2O,Imagine H2O,Accelerator,2026-10-12,2026-11-20,,,Any company,Global,Oct to Nov,https://x,Water accelerator.,2026-10-01,\n"
+        "BREW 2.0,The Water Council,Accelerator,,11/13/2026,,,Any company,,,https://y,,2026-06-01,\n"
+        "Great Lakes Protection Fund,GLPF,Grant,,,yes,,Any company,,Rolling,https://z,,2026-10-01,\n"
+        "Cleantech Open,Cleantech Open,Accelerator,,,,,Any company,,Feb to Apr,https://w,,2026-10-01,\n"
+        "Tech Challenge,The Water Council,Prize,,2026-10-02,,Up to $10K,Any company,,,https://v,,2026-10-01,\n"
+        ",,,,,,,,,,,,,\n")
+
+    def setUp(self):
+        self.rows = programs.parse(self.SHEET)
+        self.listed = {r["title"]: r for r in programs.collect(TODAY, rows=self.rows)}
+
+    def test_lists_open_upcoming_and_rolling_rounds(self):
+        self.assertEqual(set(self.listed), {"Imagine H2O", "BREW 2.0", "Great Lakes Protection Fund"})
+        row = self.listed["Imagine H2O"]
+        self.assertEqual((row["status"], row["post_date"], row["close_date"]), ("forecast", "2026-10-12", "2026-11-20"))
+        self.assertEqual(row["source_id"], "imagine-h2o-2026")
+        self.assertEqual(self.listed["BREW 2.0"]["close_date"], "2026-11-13")  # US-style date accepted
+        self.assertEqual(self.listed["Great Lakes Protection Fund"]["source_id"], "great-lakes-protection-fund-rolling")
+
+    def test_plain_columns_and_profile_keep_every_program(self):
+        rows = plain.add(list(self.listed.values()))
+        by = {r["title"]: r for r in rows}
+        self.assertEqual(by["Imagine H2O"]["kind"], "Accelerator")
+        self.assertEqual(by["Imagine H2O"]["stage"], "Coming soon")
+        self.assertEqual(by["Imagine H2O"]["who_can_apply"], "Any company")
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual(len(profile.apply(prof, rows)), 3)  # no water words needed
+
+    def test_checks_flag_rows_needing_dates(self):
+        found = dict(programs.checks(TODAY, self.rows))
+        self.assertEqual(found, {
+            "BREW 2.0": "Not checked in 90 days; confirm the dates",
+            "Cleantech Open": "Add this round's dates",
+            "Tech Challenge": "Round closed; add next round's dates",
+        })
+
+    def test_missing_tab_falls_back_to_mirror(self):
+        self.assertFalse(programs._valid("title,funder\nSomething else,x\n"))
+        self.assertTrue(programs._valid(self.SHEET))
+
+    def test_repo_calendar_file_parses(self):
+        rows = programs.read_mirror(os.path.join(HERE, "..", "data", "calendar.csv"))
+        self.assertGreaterEqual(len(rows), 10)
+        self.assertTrue(all(r["program"] and r["link"].startswith("https://") for r in rows))
 
 
 class PoolTest(unittest.TestCase):

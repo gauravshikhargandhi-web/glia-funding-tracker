@@ -11,7 +11,7 @@ import collections
 import csv
 
 from tracker import (bonfire, buffalo, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, samgov, virginia)
+                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, programs, samgov, virginia)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -37,6 +37,7 @@ ABOUT = {
     "mmsd": ("MMSD (Milwaukee)", "Water agency", "Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"),
     "buffalo-sewer": ("Buffalo Sewer Authority", "Water agency", "Buffalo Sewer Authority bids and RFPs"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
+    "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
 }
 
 
@@ -49,6 +50,8 @@ def main():
 
     today = datetime.date.fromisoformat(args.today) if args.today else datetime.date.today()
     rows = pool.load(POOL_PATH)
+    prof = profile.load(args.profile)
+    calendar_url = prof.get("calendar", {}).get("sheet_csv", "")
 
     sources = [
         ("grants.gov", lambda: grantsgov.collect(today, xml_source=args.xml)),
@@ -66,6 +69,7 @@ def main():
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
+        ("calendar", lambda: programs.collect(today, url=calendar_url)),
     ]
     failed = []
     closed = []
@@ -89,7 +93,6 @@ def main():
 
     plain.add(rows)
     pool.save(POOL_PATH, rows)
-    prof = profile.load(args.profile)
     dropped = []
     matches = profile.apply(prof, rows, dropped)
     to_archive = profile.on_topic(prof, closed)
@@ -99,14 +102,15 @@ def main():
     pool.save(MATCHES_PATH, matches)
     pool.save(FILTERED_PATH, [dict(row, filtered_reason=reason) for row, reason in dropped],
               extra=["filtered_reason"])
-    save_summary(SUMMARY_PATH, today, rows, matches, dropped, failed)
+    save_summary(SUMMARY_PATH, today, rows, matches, dropped, failed,
+                 programs.checks(today, programs.read_mirror()))
     print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}, "
           f"{len(dropped)} more set aside as not biddable (see {FILTERED_PATH})")
     if failed:
         raise SystemExit(f"sources failed: {', '.join(failed)}")
 
 
-def save_summary(path, today, rows, matches, dropped, failed):
+def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()):
     """A small table of today's counts, for the sheet's About tab."""
     pool_by = collections.Counter(r["source"] for r in rows)
     match_by = collections.Counter(r["source"] for r in matches)
@@ -130,6 +134,9 @@ def save_summary(path, today, rows, matches, dropped, failed):
         out.append(["set_aside", name, "", "", "", n, ""])
     new_today = sum(1 for r in matches if r["first_seen"] == today.isoformat())
     out.append(["new", "New matches today", "", "", new_today, "", ""])
+    # Calendar rows a person should update (shown on the About tab).
+    for program, todo in calendar_checks:
+        out.append(["calendar_check", program, "", "", "", "", todo])
     with open(path, "w", newline="", encoding="utf-8") as f:
         csv.writer(f).writerows(out)
 
