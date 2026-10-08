@@ -12,33 +12,11 @@ jobs:
           import urllib.request, urllib.robotparser
           UA = "glia-funding-tracker"
           urls = [
-            "https://apps.mwrd.org/ContractAnnouncements/",
-            "https://data.ca.gov/dataset/e1b1c799-cdd4-4219-af6d-93b79747fffb/resource/x",
-            "https://data.cityofnewyork.us/resource/dg92-zbpx.json",
-            "https://a856-cityrecord.nyc.gov/RequestDetail/1",
             "https://eprocurement.cityofchicago.org/OA_HTML/OA.jsp?OAFunc=PON_ABSTRACT_PAGE",
-            "https://mvendor.cgieva.com/Vendor/public/solrconnect.jsp",
-            "https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx",
-            "https://sam.gov/api/prod/fileextractservices/v1/api/download/x",
-            "https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml",
-            "https://www.federalregister.gov/api/v1/documents.json",
-            "https://www.usbr.gov/research/challenges/accepting.html",
-            "https://xtech.army.mil/competitions/",
-            "https://glwater.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData",
-            "https://thewatercouncil.com/feed/",
-            "https://buffalosewer.org/category/vendor-opportunities/feed/",
-            "https://www.nsf.gov/rss/rss_www_funding_upcoming.xml",
-            "https://currentwater.org/feed/",
-            "https://www.clevelandohio.gov/city-hall/departments/finance/invitations-bid",
-            "https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx",
-            "https://api.usaspending.gov/api/v2/search/spending_by_award/",
-            "https://data.www.sbir.gov/awarddatapublic/award_data.csv",
-            "https://bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml",
-            "https://www.waterrf.org/rss.xml",
-            "https://swefcsrfswitchboard.unm.edu/srf/",
-            "https://dnr.wisconsin.gov/sites/default/files/topic/Aid/loans/priorityList/x.xlsx",
-            "https://efc.ny.gov/x",
-            "https://projects.propublica.org/nonprofits/api/v2/search.json",
+            "https://www.chicago.gov/content/dam/city/depts/dps/WeeklyBidOpportunities/2026WeeklyBidOpportunities/100526.pdf",
+            "https://www.chicago.gov/city/en/depts/dps/provdrs/contract/svcs/weekly-bid-opportunities.html",
+            "https://data.cityofchicago.org/resource/rsxa-ify5.json",
+            "https://detroitmi.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData",
           ]
           from urllib.parse import urlsplit
           for u in urls:
@@ -57,4 +35,5 @@ jobs:
                   rp = urllib.robotparser.RobotFileParser(); rp.parse(body.splitlines())
                   verdict = "ALLOWED" if rp.can_fetch(UA, u) else "DISALLOWED"
               print(f"{verdict:24} {status!s:12} {u}")
+              if "chicago" in u: print(body[:1500])
           PY
