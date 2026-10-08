@@ -52,6 +52,7 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | [Met Council](https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx) (Minneapolis-St. Paul) bids, RFPs and RFIs, including regional wastewater | Live | No |
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
+| Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Imagine H2O, Current, LACI, JumpStart, fundsforcompanies); see below | Live | No |
 | Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.
@@ -74,9 +75,15 @@ Some of the best programs for water startups (Imagine H2O, BREW, Techstars Water
 
 Each morning the job reads the tab (the sheet must be shared as "anyone with the link can view"; the address is in `profile.toml` under `[calendar]`) and keeps a copy in `data/calendar.csv`. Rounds that are open, rolling, or announced but not yet open go into the pool and always count as matches; closed rounds move to the archive, which builds a record of when each program runs. The About tab lists rows that need an update: a round that closed with no next round, a program with no dates, or a row not checked in 90 days. Updating the calendar once a quarter keeps it current.
 
+## Leads from incubators and water clusters
+
+Awards like the Nicor Gas Illinois Innovator Award are posted on incubator and water-cluster websites, not on government portals. Each morning the job reads the news feeds listed in `profile.toml` under `[leads]` and keeps the posts that look like a call for startups: words like "apply", "applications open" or "call for" anywhere in the post, or "prize", "challenge", "award" or "deadline" in the title. Feeds that cover every industry must also mention water near the top. News about past winners and programs outside the US are skipped.
+
+The results go to `data/leads.csv` and the sheet's **Leads** tab, newest first, with any deadline found in the post. Nothing needs approving. Leads stay for a year. Some will be news rather than open calls, so open the link before acting on one. To add a feed, copy one of the `[[leads.feeds]]` blocks in `profile.toml`. A feed that is down only means no new leads from it that day; it doesn't fail the run.
+
 ## View it in Google Sheets
 
-The script in [`sheet/refresh.gs`](sheet/refresh.gs) fills a **Matches** tab and an **About** tab (sources, today's counts, how matching works) and refreshes both every day. Setup steps are at the top of the file.
+The script in [`sheet/refresh.gs`](sheet/refresh.gs) fills a **Matches** tab, a **Leads** tab and an **About** tab (sources, today's counts, how matching works) and refreshes both every day. Setup steps are at the top of the file.
 
 For a quick read-only view instead, make a new Google Sheet and put this in cell A1. It refreshes on its own about once an hour.
 

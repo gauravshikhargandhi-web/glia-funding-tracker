@@ -9,7 +9,11 @@
  *
  * After that the sheet refreshes itself every day shortly after the GitHub job,
  * and you can click Funding tracker > Refresh now any time. Each refresh rewrites
- * the "Matches" tab and the "About" tab, so don't type into those two tabs.
+ * the "Matches", "Leads" and "About" tabs, so don't type into those three tabs.
+ *
+ * "Leads" lists calls for startups (awards, prizes, open applications) found on
+ * incubator and water-cluster news feeds, newest first. It fills itself; nobody
+ * has to approve anything.
  *
  * The "Calendar" tab is the opposite: people type into it and the script never
  * overwrites it. The first refresh creates it from the repo's data/calendar.csv;
@@ -23,6 +27,7 @@ const DATA_URL = 'https://raw.githubusercontent.com/' + REPO + '/main/data/';
 const MATCHES_TAB = 'Matches';
 const ABOUT_TAB = 'About';
 const CALENDAR_TAB = 'Calendar';
+const LEADS_TAB = 'Leads';
 
 function refreshNow() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -31,6 +36,7 @@ function refreshNow() {
   sheet.clearContents();
   sheet.getRange(1, 1, matches.length, matches[0].length).setValues(matches);
   sheet.setFrozenRows(1);
+  writeLeads(ss, fetchCsv('leads.csv'));
   writeAbout(ss, fetchCsv('summary.csv'));
   ensureCalendar(ss);
   ss.toast((matches.length - 1) + ' listings loaded', 'Funding tracker', 5);
@@ -44,6 +50,17 @@ function fetchCsv(name) {
     throw new Error('Could not download ' + url + ' (HTTP ' + response.getResponseCode() + ')');
   }
   return Utilities.parseCsv(response.getContentText());
+}
+
+function writeLeads(ss, rows) {
+  // leads.csv columns: first_seen, posted, deadline, source, title, link, why, summary
+  const sheet = ss.getSheetByName(LEADS_TAB) || ss.insertSheet(LEADS_TAB);
+  sheet.clearContents();
+  sheet.getRange(1, 1, rows.length, rows[0].length).setNumberFormat('@').setValues(rows);
+  sheet.getRange(1, 1, 1, rows[0].length).setFontWeight('bold');
+  sheet.setFrozenRows(1);
+  sheet.setColumnWidth(5, 380);
+  sheet.setColumnWidth(8, 420);
 }
 
 function ensureCalendar(ss) {
@@ -85,6 +102,7 @@ function writeAbout(ss, summary) {
   add('Open listings in the pool', num(total[3]));
   add('Matches (Matches tab)', num(total[4]), breakdown('kind'));
   add('New matches since yesterday', num(one('new')[4]));
+  add('New leads today (Leads tab)', num(one('leads')[4]), one('leads')[6] || '');
   add('Stage of the matches', '', breakdown('stage'));
   add('Who can apply to the matches', '', breakdown('who'));
   add('Set aside as not biddable', num(total[5]), breakdown('set_aside') + ' (kept in data/filtered_out.csv, not deleted)');
@@ -96,6 +114,11 @@ function writeAbout(ss, summary) {
   add('Source', 'Level', 'Open today', 'Matches', 'Set aside', 'What it covers');
   rowsIn('source').forEach(r => add(r[1], r[2], num(r[3]), num(r[4]), num(r[5]), r[6]));
   add('');
+  const leadsFailed = rowsIn('leads_failed');
+  if (leadsFailed.length) {
+    add('Leads feeds that could not be read today: ' + leadsFailed.map(r => r[1]).join(', '));
+    add('');
+  }
   const checks = rowsIn('calendar_check');
   if (checks.length) {
     heading('CALENDAR: NEEDS AN UPDATE');
@@ -110,6 +133,12 @@ function writeAbout(ss, summary) {
   add('4. Who can win', 'Drops construction bids (contracts only, never grants) and set-asides that need a certification (veteran-owned, 8(a), HUBZone, women-owned). Technical bids (monitoring, testing, sensors, SCADA, data) are always kept.');
   add('5. Noise', 'Drops off-topic uses of "water" (water heaters, water damage, bottled water, lifeguards) federal building repair and facility jobs, and bids for supplies, chemicals, grounds and building services (rubbish, elevators, landscaping).');
   add('6. Calendar', 'Programs in the Calendar tab always count. Open rounds and rolling programs show in Matches; rounds that have not opened yet show as Coming soon.');
+  add('');
+  heading('READING THE LEADS TAB');
+  add('What it is', 'Posts from incubator, water-cluster and funder news feeds that look like a call: apply, award, prize, challenge, deadline. Some are news, not calls; open the link to check.');
+  add('deadline', 'A deadline date found in the post, when there is one');
+  add('why', 'The words that made the post count as a lead');
+  add('Adding a feed', 'Add a block under [leads] in profile.toml on GitHub');
   add('');
   heading('READING THE MATCHES TAB');
   add('kind', 'Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan or Funding notice');

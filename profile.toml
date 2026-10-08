@@ -21,6 +21,8 @@ keywords = [
   # Added 2026-10-06 after reading the first MWRD, Chicago and Great Lakes Water Authority bids.
   "clarifier", "biosolid", "sludge", "water reclamation", "treatment plant", "pump station",
   "pumping station", "lift station", "hydrant",
+  # Added 2026-10-08 from the incubator feeds (Leads tab).
+  "blue economy",
 ]
 
 # Every listing from these funders counts as a keyword match, even when its title
@@ -153,3 +155,60 @@ allowed_codes = [
 # The Calendar tab of the Google Sheet, read as CSV each run. The sheet must be
 # shared as "anyone with the link can view". Leave blank to use data/calendar.csv only.
 sheet_csv = "https://docs.google.com/spreadsheets/d/1Hdk8iebShtatUGKV1sUEGooQkF8m5A1FL6WhUsMt3ig/gviz/tq?tqx=out:csv&headers=1&sheet=Calendar"
+
+[leads]
+# News feeds of incubators, water clusters and funders. Every run reads them and
+# writes posts that look like a call for startups (apply, prize, deadline, ...)
+# to data/leads.csv and the sheet's Leads tab. Add a feed by copying a block.
+#   needs = "water"    keep only posts that also have a water keyword (feeds covering every industry)
+#   needs = "climate"  water keyword or one of climate_words (general startup hubs)
+#   standing = true    the feed lists open programs, so every post counts however old
+#   format = "wordpress" for a /wp-json/ address; leave it out for an RSS feed
+call_words = [
+  "apply", "applications open", "applications are open", "application deadline", "now accepting",
+  "accepting applications", "call for", "open call", "request for proposals", "request for applications",
+  "nominations open", "entries open", "submissions open",
+]
+# These count only when they are in a post's title ("challenge" alone is in lots of news stories).
+call_title_words = ["prize", "challenge", "competition", "award", "grant", "funding", "deadline", "pitch", "rfp"]
+# Posts whose title has one of these are news about past winners or programs
+# outside the US, not calls our startups can answer. Matched at the start of a word,
+# so "India)" catches "(India)" without catching Indiana.
+skip_title_words = [
+  "winner", "spotlight", "welcomes", "meet cohort", "meet the cohort", "participants", "recap",
+  "India)", "Africa", "Uganda", "Pakistan", "Maldives", "Australia", "Ghana", "Zimbabwe", "UK)",
+]
+climate_words = ["climate", "cleantech", "clean tech", "clean energy", "decarboni", "sustainab", "environment"]
+
+[[leads.feeds]]
+name = "Evergreen Climate Innovations (awards)"
+url = "https://evergreeninno.org/wp-json/wp/v2/awards?per_page=50"
+format = "wordpress"
+standing = true
+
+[[leads.feeds]]
+name = "The Water Council"
+url = "https://thewatercouncil.com/feed/"
+
+[[leads.feeds]]
+name = "Imagine H2O"
+url = "https://www.imagineh2o.org/feed/"
+
+[[leads.feeds]]
+name = "Current (Chicago)"
+url = "https://currentwater.org/feed/"
+
+[[leads.feeds]]
+name = "LACI (Los Angeles)"
+url = "https://laincubator.org/feed/"
+
+[[leads.feeds]]
+name = "JumpStart (Ohio)"
+url = "https://www.jumpstartinc.org/feed/"
+needs = "climate"
+
+[[leads.feeds]]
+name = "fundsforcompanies (awards and prizes)"
+url = "https://fundsforcompanies.fundsforngos.org/wp-json/wp/v2/posts?categories=218&per_page=50"
+format = "wordpress"
+needs = "water"
