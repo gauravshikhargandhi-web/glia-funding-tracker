@@ -33,11 +33,14 @@ water_agencies = [
   "Northeast Ohio Regional Sewer District",    # NEORSD, Cleveland area
   "Milwaukee Metropolitan Sewerage District",  # MMSD, Milwaukee area
   "Buffalo Sewer Authority",                   # Buffalo, NY
+  "City of Cleveland Division of Water",       # also matches Division of Water Pollution Control
+  "Metropolitan Council Environmental Services",  # Minneapolis-St. Paul wastewater
 ]
 
-# Sources a person picked by hand count as matches without water words
-# ("calendar" is the Calendar tab of the Google Sheet).
-hand_picked_sources = ["calendar"]
+# Sources that count as matches without water words: "calendar" is the
+# Calendar tab of the Google Sheet (picked by hand), "nsf-sbir" is NSF's
+# small-business research program, which fits every cohort company.
+hand_picked_sources = ["calendar", "nsf-sbir"]
 
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
@@ -92,7 +95,8 @@ contractor_only_title_words = [
 off_topic_title_words = [
   "rubbish", "refuse collection", "trash collection", "trash removal", "recycling services", "janitorial", "custodial",
   "elevator", "landscap", "turf", "mowing", "snow removal", "pest control", "flagger",
-  "hypochlorite", "activated carbon", "chemical supply", "uniform", "furniture",
+  "hypochlorite", "activated carbon", "chemical supply", "florosilicic", "bottled water", "bags of ice",
+  "uniform", "furniture",
   "snack bar", "statue", "basketball", "morgue", "doors and frames", "real estate",
   "emergency sewer work", "emergency water main", "water main break",
 ]

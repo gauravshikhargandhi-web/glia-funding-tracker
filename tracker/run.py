@@ -10,8 +10,9 @@ import datetime
 import collections
 import csv
 
-from tracker import (bonfire, buffalo, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, programs, samgov, virginia)
+from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois,
+                     massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
+                     programs, samgov, virginia)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -36,6 +37,9 @@ ABOUT = {
     "opengov": ("NEORSD (Cleveland)", "Water agency", "Northeast Ohio Regional Sewer District bids"),
     "mmsd": ("MMSD (Milwaukee)", "Water agency", "Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"),
     "buffalo-sewer": ("Buffalo Sewer Authority", "Water agency", "Buffalo Sewer Authority bids and RFPs"),
+    "cleveland": ("City of Cleveland", "City (Cleveland)", "City bids and RFPs, including the Division of Water"),
+    "metcouncil": ("Met Council (Minneapolis)", "Water agency", "Metropolitan Council bids, RFPs and RFIs, including regional wastewater"),
+    "nsf-sbir": ("NSF SBIR/STTR", "Federal", "NSF small-business research deadlines in the next 30 days"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
 }
@@ -65,6 +69,9 @@ def main():
         ("opengov", lambda: opengov.collect(today)),
         ("mmsd", lambda: mmsd.collect(today)),
         ("buffalo-sewer", lambda: buffalo.collect(today)),
+        ("cleveland", lambda: cleveland.collect(today)),
+        ("metcouncil", lambda: metcouncil.collect(today)),
+        ("nsf-sbir", lambda: nsf.collect(today)),
         ("illinois-gata", lambda: illinois.collect(today)),
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
