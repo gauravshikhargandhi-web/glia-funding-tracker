@@ -49,11 +49,7 @@ def apply(profile, rows, dropped=None):
 
     matches = []
     for row in rows:
-        text = f"{row['title']} {row['summary']}"
-        from_water_agency = any(a in row["funder"].lower() for a in water_agencies)
-        if include and not from_water_agency and not include.search(text):
-            continue
-        if exclude and exclude.search(text):
+        if not _on_topic(row, include, exclude, water_agencies):
             continue
         reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible)
         if reason:
@@ -71,6 +67,24 @@ def apply(profile, rows, dropped=None):
             continue
         matches.append(row)
     return matches
+
+
+def on_topic(profile, rows):
+    """The rows that match the keywords (or come from a water agency), before any
+    eligibility or "who can bid" rule. Used to decide what goes in the archive."""
+    rules = profile.get("filter", {})
+    include = _pattern(rules.get("keywords", []))
+    exclude = _pattern(rules.get("exclude_keywords", []))
+    water_agencies = [a.lower() for a in rules.get("water_agencies", [])]
+    return [r for r in rows if _on_topic(r, include, exclude, water_agencies)]
+
+
+def _on_topic(row, include, exclude, water_agencies):
+    text = f"{row['title']} {row['summary']}"
+    from_water_agency = any(a in row["funder"].lower() for a in water_agencies)
+    if include and not from_water_agency and not include.search(text):
+        return False
+    return not (exclude and exclude.search(text))
 
 
 def _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible):

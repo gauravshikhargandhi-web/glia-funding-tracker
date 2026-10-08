@@ -96,6 +96,7 @@ function writeAbout(ss, summary) {
   heading('FEATURES');
   add('Refreshes itself', 'Runs every day at 8am Eastern on GitHub; this sheet pulls the new data an hour later.');
   add('Each source runs on its own', 'If one website is down, the rest still update and yesterday\'s listings for that source are kept.');
+  add('Keeps history', 'Water listings that close move to a yearly archive (data/archive/) instead of disappearing, so future cohorts can see what funders offer and when.');
   add('Nothing is lost silently', 'Listings removed as not biddable are kept in a review file with the reason.');
   add('Built to hand off', 'Each startup can copy the project for free and tune its own keywords and filters in one settings file.');
   add('');
