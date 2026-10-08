@@ -6,8 +6,8 @@ import unittest
 import urllib.error
 from unittest import mock
 
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, massachusetts,
-                     metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
+from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
+                     massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -530,6 +530,66 @@ class ArchiveTest(unittest.TestCase):
             path = os.path.join(tmp, "archive", "2026.csv")
             self.assertEqual(pool.archive(path, water), 1)
             self.assertEqual(pool.archive(path, water), 1)  # the same listing is not added twice
+
+
+class LeadsTest(unittest.TestCase):
+    TODAY = datetime.date(2026, 10, 8)
+
+    def setUp(self):
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.calls = leads._words(prof["leads"]["call_words"])
+        self.title_calls = leads._words(prof["leads"]["call_title_words"])
+        water = prof["filter"]["keywords"]
+        self.topics = {"water": leads._words(water),
+                       "climate": leads._words(water + prof["leads"]["climate_words"])}
+
+    def _read(self, name):
+        with open(os.path.join(HERE, name), encoding="utf-8") as f:
+            return f.read()
+
+    def test_rss_keeps_recent_calls(self):
+        posts = leads.parse_rss(self._read("sample_leads.xml"))
+        self.assertEqual(len(posts), 3)
+        rows = leads.pick(posts, {"name": "Sample"}, self.calls, self.title_calls, self.topics, self.TODAY)
+        # The member profile has no call words; the 2025 post is old news.
+        self.assertEqual([r["title"] for r in rows], ["Applications Open: Stormwater Sensor Challenge"])
+        self.assertEqual(rows[0]["deadline"], "2026-11-20")
+        self.assertEqual(rows[0]["posted"], "2026-10-05")
+        self.assertIn("apply", rows[0]["why"])
+
+    def test_standing_feed_keeps_every_program(self):
+        posts = leads.parse_wp(self._read("sample_leads_wp.json"))
+        feed = {"name": "Awards", "standing": True}
+        rows = leads.pick(posts, feed, self.calls, self.title_calls, self.topics, self.TODAY)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["why"], "award")  # from the title
+        self.assertEqual(rows[1]["why"], "apply, prize")
+
+    def test_needs_water(self):
+        posts = leads.parse_wp(self._read("sample_leads_wp.json"))
+        feed = {"name": "Awards", "standing": True, "needs": "water"}
+        rows = leads.pick(posts, feed, self.calls, self.title_calls, self.topics, self.TODAY)
+        self.assertEqual([r["title"] for r in rows], ["The Gas Utility Innovator Award"])
+
+    def test_skips_winner_news(self):
+        posts = [{"title": "Tech Challenge Spotlight: Aqua Alarm", "link": "x", "posted": "2026-10-01", "text": ""}]
+        skip = leads._words(["spotlight"])
+        self.assertEqual(leads.pick(posts, {"name": "S"}, self.calls, self.title_calls, self.topics,
+                                    self.TODAY, skip), [])
+
+    def test_deadline_ignores_past_dates(self):
+        self.assertEqual(leads.deadline("Deadline: Sept 3, 2026.", self.TODAY), "")
+        self.assertEqual(leads.deadline("Applications close Dec. 1st, 2026", self.TODAY), "2026-12-01")
+
+    def test_merge_keeps_first_seen_and_drops_old(self):
+        old = [{"first_seen": "2026-10-01", "posted": "2026-09-30", "link": "a", "title": "A"},
+               {"first_seen": "2025-01-01", "posted": "2025-01-01", "link": "b", "title": "B"}]
+        fresh = [{"posted": "2026-09-30", "link": "a", "title": "A (edited)"},
+                 {"posted": "2026-10-07", "link": "c", "title": "C"}]
+        rows = leads.merge(old, fresh, self.TODAY)
+        self.assertEqual([r["link"] for r in rows], ["c", "a"])
+        self.assertEqual(rows[1]["first_seen"], "2026-10-01")
+        self.assertEqual(rows[1]["title"], "A (edited)")
 
 
 class TextTest(unittest.TestCase):

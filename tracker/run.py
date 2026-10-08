@@ -10,7 +10,7 @@ import datetime
 import collections
 import csv
 
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois,
+from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
                      massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
                      programs, samgov, virginia)
 
@@ -98,6 +98,13 @@ def main():
         rows = pool.merge(rows, name, fresh, today)
         print(f"{name}: {len(fresh)} open listings")
 
+    # Leads: calls posted on incubator and water-cluster news feeds. A feed that
+    # is down only means no new leads from it today, so it doesn't fail the run.
+    fresh_leads, leads_failed = leads.collect(today, prof)
+    lead_rows = leads.merge(leads.load(), fresh_leads, today)
+    leads.save(lead_rows)
+    print(f"leads: {len(fresh_leads)} calls in the feeds today, {len(lead_rows)} in {leads.PATH}")
+
     plain.add(rows)
     pool.save(POOL_PATH, rows)
     dropped = []
@@ -110,14 +117,14 @@ def main():
     pool.save(FILTERED_PATH, [dict(row, filtered_reason=reason) for row, reason in dropped],
               extra=["filtered_reason"])
     save_summary(SUMMARY_PATH, today, rows, matches, dropped, failed,
-                 programs.checks(today, programs.read_mirror()))
+                 programs.checks(today, programs.read_mirror()), lead_rows, leads_failed)
     print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}, "
           f"{len(dropped)} more set aside as not biddable (see {FILTERED_PATH})")
     if failed:
         raise SystemExit(f"sources failed: {', '.join(failed)}")
 
 
-def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()):
+def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=(), lead_rows=(), leads_failed=()):
     """A small table of today's counts, for the sheet's About tab."""
     pool_by = collections.Counter(r["source"] for r in rows)
     match_by = collections.Counter(r["source"] for r in matches)
@@ -145,6 +152,11 @@ def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()
     # Calendar rows a person should update (shown on the About tab).
     for program, todo in calendar_checks:
         out.append(["calendar_check", program, "", "", "", "", todo])
+    # Leads tab: how many are new today, and any feed that could not be read.
+    out.append(["leads", "New leads today", "", "", sum(1 for r in lead_rows if r["first_seen"] == today.isoformat()),
+                "", f"{len(lead_rows)} leads in the last year"])
+    for name in leads_failed:
+        out.append(["leads_failed", name, "", "", "", "", "Feed could not be read today"])
     with open(path, "w", newline="", encoding="utf-8") as f:
         csv.writer(f).writerows(out)
 
