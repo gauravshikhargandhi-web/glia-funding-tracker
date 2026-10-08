@@ -108,7 +108,7 @@ function writeAbout(ss, summary) {
   add('2. Water agencies', 'Every bid from a water agency counts, even without water words.');
   add('3. Who can apply', 'Keeps listings open to businesses, small businesses, or anyone. Grants that say "see listing" are kept.');
   add('4. Who can win', 'Drops construction bids (contracts only, never grants) and set-asides that need a certification (veteran-owned, 8(a), HUBZone, women-owned). Technical bids (monitoring, testing, sensors, SCADA, data) are always kept.');
-  add('5. Noise', 'Drops off-topic uses of "water" (water heaters, water damage, bottled water, lifeguards) and federal building repair and facility jobs.');
+  add('5. Noise', 'Drops off-topic uses of "water" (water heaters, water damage, bottled water, lifeguards) federal building repair and facility jobs, and bids for supplies, chemicals, grounds and building services (rubbish, elevators, landscaping).');
   add('6. Calendar', 'Programs in the Calendar tab always count. Open rounds and rolling programs show in Matches; rounds that have not opened yet show as Coming soon.');
   add('');
   heading('READING THE MATCHES TAB');
