@@ -1,32 +1,46 @@
 section,name,level,open,matches,set_aside,detail
 run,Last refresh,,,,,2026-10-08
-total,All sources,,11677,290,105,15 sources
+total,All sources,,12576,296,147,19 sources
 source,Grants.gov,Federal,1404,44,0,"All federal grants and cooperative agreements, including forecasts"
-source,SAM.gov,Federal,8222,89,47,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
+source,SAM.gov,Federal,9050,94,64,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
 source,Federal Register,Federal,17,1,0,Funding and prize notices published by agencies
 source,California Grants Portal,State (CA),167,4,0,California state grants and loans
 source,Illinois GATA,State (IL),116,30,0,Illinois state funding opportunities
-source,Massachusetts COMMBUYS,State (MA),936,44,11,"Massachusetts state and local bids, plus some grants"
-source,Virginia eVA,State (VA),572,37,40,Virginia state and local solicitations
-source,NYC City Record,City (New York),213,20,3,New York City solicitations
-source,Chicago eProcurement,City (Chicago),5,1,1,City of Chicago bids
-source,MWRD (Chicago),Water agency,4,2,2,Metropolitan Water Reclamation District bids
-source,Great Lakes Water Authority,Water agency,4,4,0,Detroit-area regional water authority bids
-source,NEORSD (Cleveland),Water agency,5,5,0,Northeast Ohio Regional Sewer District bids
-source,MMSD (Milwaukee),Water agency,10,9,1,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
+source,Massachusetts COMMBUYS,State (MA),936,40,15,"Massachusetts state and local bids, plus some grants"
+source,Virginia eVA,State (VA),572,35,42,Virginia state and local solicitations
+source,NYC City Record,City (New York),213,11,12,New York City solicitations
+source,Chicago eProcurement,City (Chicago),5,0,2,City of Chicago bids
+source,MWRD (Chicago),Water agency,4,1,3,Metropolitan Water Reclamation District bids
+source,Great Lakes Water Authority,Water agency,4,3,1,Detroit-area regional water authority bids
+source,NEORSD (Cleveland),Water agency,5,3,2,Northeast Ohio Regional Sewer District bids
+source,MMSD (Milwaukee),Water agency,10,7,3,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
 source,Buffalo Sewer Authority,Water agency,0,0,0,Buffalo Sewer Authority bids and RFPs
+source,City of Cleveland,City (Cleveland),39,8,2,"City bids and RFPs, including the Division of Water"
+source,Met Council (Minneapolis),Water agency,24,7,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
+source,NSF SBIR/STTR,Federal,2,2,0,NSF small-business research deadlines in the next 30 days
 source,"Army xTech, Bureau of Reclamation",Prizes,2,0,0,Open prize competitions
-kind,Contract,,,207,,
-kind,Grant,,,81,,
+source,Calendar (hand-kept),Programs,6,6,0,"Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"
+kind,Contract,,,205,,
+kind,Grant,,,87,,
+kind,Accelerator,,,2,,
 kind,Loan,,,1,,
 kind,Funding notice,,,1,,
-stage,Open,,,226,,
-stage,Info request,,,49,,
-stage,Coming soon,,,15,,
-who,Any company,,,206,,
+stage,Open,,,225,,
+stage,Info request,,,55,,
+stage,Coming soon,,,16,,
+who,Any company,,,207,,
 who,Check listing,,,59,,
+who,Companies eligible,,,17,,
 who,Small businesses only,,,13,,
-who,Companies eligible,,,12,,
-set_aside,Construction bids,,,,78,
-set_aside,Certification-only set-asides,,,,27,
-new,New matches today,,,24,,
+set_aside,Construction bids,,,,80,
+set_aside,Certification-only set-asides,,,,34,
+set_aside,"Off-topic bids (supplies, grounds, building services)",,,,33,
+new,New matches today,,,52,,
+calendar_check,Water Council Tech Challenge,,,,,Add this round's dates
+calendar_check,Techstars Founder Catalyst WaterTech,,,,,Add this round's dates
+calendar_check,Cleantech Open,,,,,Add this round's dates
+calendar_check,Google Water Replenishment RFI,,,,,Add this round's dates
+calendar_check,WEF UpLink water challenges,,,,,Add this round's dates
+calendar_check,AWWA ACE and WEFTEC innovation showcases,,,,,Add this round's dates
+calendar_check,Wisconsin SBIR Advance,,,,,Add this round's dates
+calendar_check,DOE American-Made prizes,,,,,Add this round's dates
