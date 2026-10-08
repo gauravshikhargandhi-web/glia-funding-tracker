@@ -571,6 +571,11 @@ class LeadsTest(unittest.TestCase):
         rows = leads.pick(posts, feed, self.calls, self.title_calls, self.topics, self.TODAY)
         self.assertEqual([r["title"] for r in rows], ["The Gas Utility Innovator Award"])
 
+    def test_skips_closed_calls(self):
+        posts = [{"title": "Entries open for a water award", "link": "x", "posted": "2026-07-15",
+                  "text": "Deadline Date: September 30, 2026. Apply online."}]
+        self.assertEqual(leads.pick(posts, {"name": "S"}, self.calls, self.title_calls, self.topics, self.TODAY), [])
+
     def test_skips_winner_news(self):
         posts = [{"title": "Tech Challenge Spotlight: Aqua Alarm", "link": "x", "posted": "2026-10-01", "text": ""}]
         skip = leads._words(["spotlight"])
@@ -578,15 +583,22 @@ class LeadsTest(unittest.TestCase):
                                     self.TODAY, skip), [])
 
     def test_deadline_ignores_past_dates(self):
-        self.assertEqual(leads.deadline("Deadline: Sept 3, 2026.", self.TODAY), "")
+        self.assertEqual(leads.deadline("Deadline: Sept 3, 2026.", self.TODAY), "closed")
+        self.assertEqual(leads.deadline("No dates here.", self.TODAY), "")
         self.assertEqual(leads.deadline("Applications close Dec. 1st, 2026", self.TODAY), "2026-12-01")
 
     def test_merge_keeps_first_seen_and_drops_old(self):
         old = [{"first_seen": "2026-10-01", "posted": "2026-09-30", "link": "a", "title": "A"},
-               {"first_seen": "2025-01-01", "posted": "2025-01-01", "link": "b", "title": "B"}]
+               {"first_seen": "2025-01-01", "posted": "2025-01-01", "link": "b", "title": "B"},
+               {"first_seen": "2025-02-01", "posted": "2021-11-15", "link": "d", "title": "Still listed"}]
         fresh = [{"posted": "2026-09-30", "link": "a", "title": "A (edited)"},
-                 {"posted": "2026-10-07", "link": "c", "title": "C"}]
+                 {"posted": "2026-10-07", "link": "c", "title": "C"},
+                 {"posted": "2021-11-15", "link": "e", "title": "Old award page, new to us"},
+                 {"posted": "2021-11-15", "link": "d", "title": "Still listed"}]
         rows = leads.merge(old, fresh, self.TODAY)
+        # b is gone from the feeds and over a year old; d and e are old posts still in a feed.
+        self.assertEqual(sorted(r["link"] for r in rows), ["a", "c", "d", "e"])
+        rows = [r for r in rows if r["link"] in ("a", "c")]
         self.assertEqual([r["link"] for r in rows], ["c", "a"])
         self.assertEqual(rows[1]["first_seen"], "2026-10-01")
         self.assertEqual(rows[1]["title"], "A (edited)")

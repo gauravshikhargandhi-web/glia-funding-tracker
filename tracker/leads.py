@@ -25,7 +25,7 @@ PATH = "data/leads.csv"
 COLUMNS = ["first_seen", "posted", "deadline", "source", "title", "link", "why", "summary"]
 # Posts older than this when first read are old news, not open calls.
 MAX_AGE_DAYS = 120
-# Leads drop out of the file a year after they were posted.
+# Leads no feed shows any more drop out of the file a year after they were first seen.
 KEEP_DAYS = 365
 
 _MONTHS = ("January|February|March|April|May|June|July|August|September|October|November|December|"
@@ -73,7 +73,12 @@ def parse_wp(text):
 
 
 def deadline(text, today):
-    """The first deadline-looking date in the text that is today or later; blank if none."""
+    """The first deadline in the text that is today or later.
+
+    Returns "closed" when the text gives deadlines and all of them have passed,
+    and blank when it gives none.
+    """
+    passed = False
     for match in _DEADLINE.finditer(text):
         month, day, year = match.groups()
         try:
@@ -82,7 +87,8 @@ def deadline(text, today):
             continue
         if date >= today:
             return date.isoformat()
-    return ""
+        passed = True
+    return "closed" if passed else ""
 
 
 def pick(posts, feed, call_words, title_words, topics, today, skip=None):
@@ -115,9 +121,12 @@ def pick(posts, feed, call_words, title_words, topics, today, skip=None):
         hits = sorted({m.lower() for m in need.findall(text[:400])}) if need else []
         if need and not hits:
             continue
+        due = deadline(text, today)
+        if due == "closed":
+            continue
         found.append({
             "posted": post["posted"],
-            "deadline": deadline(text, today),
+            "deadline": due,
             "source": feed["name"],
             "title": post["title"],
             "link": post["link"],
@@ -144,6 +153,11 @@ def collect(today, profile):
             print(f"leads: {feed['name']} FAILED ({exc})")
             failed.append(feed["name"])
             continue
+        if not posts:
+            # Every feed has posts; none at all means the site sent something else.
+            print(f"leads: {feed['name']} FAILED (no posts; got {text[:120]!r})")
+            failed.append(feed["name"])
+            continue
         picked = pick(posts, feed, call_words, title_words, topics, today, skip)
         print(f"leads: {feed['name']}: {len(posts)} posts, {len(picked)} look like calls")
         leads += picked
@@ -158,13 +172,19 @@ def load(path=PATH):
 
 
 def merge(old, fresh, today):
-    """Add new leads to the saved ones (matched by link); drop leads over a year old."""
+    """Add today's leads to the saved ones (matched by link).
+
+    A saved lead that no feed shows any more drops out a year after it was
+    first seen. Leads still in a feed stay, however old the post (Evergreen's
+    award pages were first posted years ago and are still open).
+    """
     by_link = {row["link"]: row for row in old}
     for row in fresh:
         saved = by_link.get(row["link"])
         by_link[row["link"]] = dict(row, first_seen=saved["first_seen"] if saved else today.isoformat())
     cutoff = (today - datetime.timedelta(days=KEEP_DAYS)).isoformat()
-    rows = [r for r in by_link.values() if (r["posted"] or r["first_seen"]) >= cutoff]
+    current = {row["link"] for row in fresh}
+    rows = [r for r in by_link.values() if r["link"] in current or r["first_seen"] >= cutoff]
     return sorted(rows, key=lambda r: (r["first_seen"], r["posted"]), reverse=True)
 
 
