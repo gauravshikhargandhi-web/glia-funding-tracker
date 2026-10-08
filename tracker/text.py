@@ -2,6 +2,8 @@
 
 import http.cookiejar
 import re
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -31,9 +33,23 @@ class _RedirectHandler(urllib.request.HTTPRedirectHandler):
 _opener = urllib.request.build_opener(_RedirectHandler, urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
 
+RETRY_WAIT = 60  # seconds before trying a site again after a server error
+
+
 def fetch(url, timeout=300, data=None, headers=None):
-    """Download a URL and return its bytes. Pass data (bytes) to POST."""
+    """Download a URL and return its bytes. Pass data (bytes) to POST.
+
+    A server error (HTTP 5xx) is often a passing hiccup, so it is tried once
+    more after a short wait before the source counts as failed.
+    """
     request = urllib.request.Request(url, data=data, headers={"User-Agent": USER_AGENT, **(headers or {})})
+    try:
+        with _opener.open(request, timeout=timeout) as resp:
+            return resp.read()
+    except urllib.error.HTTPError as error:
+        if error.code < 500:
+            raise
+    time.sleep(RETRY_WAIT)
     with _opener.open(request, timeout=timeout) as resp:
         return resp.read()
 
