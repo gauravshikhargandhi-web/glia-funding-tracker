@@ -1,7 +1,10 @@
 import datetime
+import io
 import json
 import os
 import unittest
+import urllib.error
+from unittest import mock
 
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, massachusetts,
                      metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
@@ -530,6 +533,43 @@ class ArchiveTest(unittest.TestCase):
 
 
 class TextTest(unittest.TestCase):
+    def _fetch_with(self, *results):
+        """Run text.fetch against a fake site that gives these results in turn."""
+        calls = []
+
+        class Response(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_open(request, timeout):
+            calls.append(request.full_url)
+            result = results[len(calls) - 1]
+            if isinstance(result, Exception):
+                raise result
+            return Response(result)
+
+        with mock.patch.object(text._opener, "open", fake_open), mock.patch.object(text.time, "sleep"):
+            return text.fetch("https://example.com/x"), calls
+
+    def _error(self, code):
+        return urllib.error.HTTPError("https://example.com/x", code, "error", {}, None)
+
+    def test_fetch_retries_a_server_error_once(self):
+        body, calls = self._fetch_with(self._error(500), b"ok")
+        self.assertEqual(body, b"ok")
+        self.assertEqual(len(calls), 2)
+
+    def test_fetch_gives_up_after_second_server_error(self):
+        with self.assertRaises(urllib.error.HTTPError):
+            self._fetch_with(self._error(503), self._error(503))
+
+    def test_fetch_does_not_retry_client_errors(self):
+        with self.assertRaises(urllib.error.HTTPError):
+            self._fetch_with(self._error(404), b"never reached")
+
     def test_drop_default_port(self):
         self.assertEqual(text.drop_default_port("https://s3.amazonaws.com:443/b/f.csv?X-Amz-Signature=abc"),
                          "https://s3.amazonaws.com/b/f.csv?X-Amz-Signature=abc")
