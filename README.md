@@ -19,7 +19,7 @@ Each row has the same columns whatever the source. Six plain columns come right 
 
 | Column | Values |
 | --- | --- |
-| kind | Grant, Contract, Prize, Loan, Funding notice |
+| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Funding notice |
 | stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
 | deadline | Closing date, or "Not set" for rolling and forecast listings |
 | amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
@@ -48,11 +48,28 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |
 | [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
+| Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
 | Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.
 
 Only free, public sources are used. Sites that need a login are left out.
+
+## Calendar of yearly programs
+
+Some of the best programs for water startups (Imagine H2O, BREW, Techstars WaterTech, Cleantech Open, the Google water RFI) open once a year on pages with no feed. Their dates are kept by hand in the **Calendar** tab of the Google Sheet, one row per program per round:
+
+| Column | What to put |
+| --- | --- |
+| program, run_by, kind | Name, who runs it, and Accelerator, Prize, Grant, Pilot or Pitch competition |
+| opens, closes | Dates as YYYY-MM-DD; leave blank when not announced |
+| rolling | "yes" for programs that take applications any time |
+| amount, who_can_apply, location | e.g. "Up to $10K", "Any company" or "Illinois small businesses", "Milwaukee, WI" |
+| usual_window | When it usually opens, e.g. "October to November", for planning next year |
+| link, about, notes | The apply page and a sentence or two |
+| last_checked | The date someone last confirmed the row |
+
+Each morning the job reads the tab (the sheet must be shared as "anyone with the link can view"; the address is in `profile.toml` under `[calendar]`) and keeps a copy in `data/calendar.csv`. Rounds that are open, rolling, or announced but not yet open go into the pool and always count as matches; closed rounds move to the archive, which builds a record of when each program runs. The About tab lists rows that need an update: a round that closed with no next round, a program with no dates, or a row not checked in 90 days. Updating the calendar once a quarter keeps it current.
 
 ## View it in Google Sheets
 

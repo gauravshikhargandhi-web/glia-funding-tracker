@@ -37,6 +37,12 @@ def kind(row):
         return "Grant"
     if "loan" in t:
         return "Loan"
+    if "accelerator" in t:
+        return "Accelerator"
+    if "pitch" in t:
+        return "Pitch competition"
+    if "pilot" in t:
+        return "Pilot"
     if t == "notice":
         return "Funding notice"
     return "Other"
@@ -81,7 +87,7 @@ def who_can_apply(row):
     e = row["eligibility"].lower()
     if "small business set aside" in e or "small business set-aside" in e:
         return "Small businesses only"
-    if "any vendor" in e or "unrestricted" in e:
+    if "any vendor" in e or "any company" in e or "unrestricted" in e:
         return "Any company"
     if "business" in e or "for-profit" in e:
         return "Companies eligible"

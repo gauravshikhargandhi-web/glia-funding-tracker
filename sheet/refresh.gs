@@ -10,6 +10,11 @@
  * After that the sheet refreshes itself every day shortly after the GitHub job,
  * and you can click Funding tracker > Refresh now any time. Each refresh rewrites
  * the "Matches" tab and the "About" tab, so don't type into those two tabs.
+ *
+ * The "Calendar" tab is the opposite: people type into it and the script never
+ * overwrites it. The first refresh creates it from the repo's data/calendar.csv;
+ * after that the GitHub job reads it every morning. Dates are YYYY-MM-DD.
+ * The sheet must stay shared as "Anyone with the link can view" for the job to read it.
  */
 
 // Swap in your own GitHub username and repository if you run your own copy.
@@ -17,6 +22,7 @@ const REPO = 'gauravshikhargandhi-web/glia-funding-tracker';
 const DATA_URL = 'https://raw.githubusercontent.com/' + REPO + '/main/data/';
 const MATCHES_TAB = 'Matches';
 const ABOUT_TAB = 'About';
+const CALENDAR_TAB = 'Calendar';
 
 function refreshNow() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -26,6 +32,7 @@ function refreshNow() {
   sheet.getRange(1, 1, matches.length, matches[0].length).setValues(matches);
   sheet.setFrozenRows(1);
   writeAbout(ss, fetchCsv('summary.csv'));
+  ensureCalendar(ss);
   ss.toast((matches.length - 1) + ' listings loaded', 'Funding tracker', 5);
 }
 
@@ -37,6 +44,21 @@ function fetchCsv(name) {
     throw new Error('Could not download ' + url + ' (HTTP ' + response.getResponseCode() + ')');
   }
   return Utilities.parseCsv(response.getContentText());
+}
+
+function ensureCalendar(ss) {
+  // Created once from the repo copy; never overwritten, because people edit it.
+  if (ss.getSheetByName(CALENDAR_TAB)) return;
+  const rows = fetchCsv('calendar.csv');
+  const sheet = ss.insertSheet(CALENDAR_TAB);
+  // Plain text everywhere, so Sheets doesn't turn dates into its own format.
+  sheet.getRange(1, 1, 500, rows[0].length).setNumberFormat('@');
+  sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows).setVerticalAlignment('top');
+  sheet.getRange(1, 1, 1, rows[0].length).setFontWeight('bold');
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(1);
+  sheet.setColumnWidth(1, 240);
+  sheet.setColumnWidth(12, 420);
 }
 
 function writeAbout(ss, summary) {
@@ -74,15 +96,23 @@ function writeAbout(ss, summary) {
   add('Source', 'Level', 'Open today', 'Matches', 'Set aside', 'What it covers');
   rowsIn('source').forEach(r => add(r[1], r[2], num(r[3]), num(r[4]), num(r[5]), r[6]));
   add('');
+  const checks = rowsIn('calendar_check');
+  if (checks.length) {
+    heading('CALENDAR: NEEDS AN UPDATE');
+    add('Update these rows in the Calendar tab (dates as YYYY-MM-DD, and today\'s date in last_checked).');
+    checks.forEach(r => add(r[1], r[6]));
+    add('');
+  }
   heading('HOW MATCHING WORKS');
   add('1. Water keywords', 'Water and water-adjacent terms (stormwater, wastewater, PFAS, coastal, aquaculture, flood, ...). The list grows as new terms show up.');
   add('2. Water agencies', 'Every bid from a water agency counts, even without water words.');
   add('3. Who can apply', 'Keeps listings open to businesses, small businesses, or anyone. Grants that say "see listing" are kept.');
   add('4. Who can win', 'Drops construction bids (contracts only, never grants) and set-asides that need a certification (veteran-owned, 8(a), HUBZone, women-owned). Technical bids (monitoring, testing, sensors, SCADA, data) are always kept.');
   add('5. Noise', 'Drops off-topic uses of "water" (water heaters, water damage, bottled water, lifeguards) and federal building repair and facility jobs.');
+  add('6. Calendar', 'Programs in the Calendar tab always count. Open rounds and rolling programs show in Matches; rounds that have not opened yet show as Coming soon.');
   add('');
   heading('READING THE MATCHES TAB');
-  add('kind', 'Grant, Contract, Prize, Loan or Funding notice');
+  add('kind', 'Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan or Funding notice');
   add('stage', 'Open: apply now. Coming soon: announced, not open yet. Info request: the buyer is asking questions, a chance to get known before a bid.');
   add('deadline', 'Closing date, or "Not set" for rolling and forecast listings');
   add('who_can_apply', 'Any company, Companies eligible, Small businesses only, or Check listing (the funder explains eligibility in the full listing)');

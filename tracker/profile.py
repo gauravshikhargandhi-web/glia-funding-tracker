@@ -41,6 +41,7 @@ def apply(profile, rows, dropped=None):
     skip_topics = rules.get("exclude_topics", [])
     allowed_codes = rules.get("allowed_codes", [])
     water_agencies = [a.lower() for a in rules.get("water_agencies", [])]
+    picked = rules.get("hand_picked_sources", [])
     set_asides = [a.lower() for a in rules.get("exclude_set_asides", [])]
     contractor_words = _pattern(rules.get("contractor_only_title_words", []))
     contractor_topics = rules.get("contractor_only_topics", [])
@@ -49,7 +50,7 @@ def apply(profile, rows, dropped=None):
 
     matches = []
     for row in rows:
-        if not _on_topic(row, include, exclude, water_agencies):
+        if not _on_topic(row, include, exclude, water_agencies, picked):
             continue
         reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words, not_eligible)
         if reason:
@@ -76,12 +77,15 @@ def on_topic(profile, rows):
     include = _pattern(rules.get("keywords", []))
     exclude = _pattern(rules.get("exclude_keywords", []))
     water_agencies = [a.lower() for a in rules.get("water_agencies", [])]
-    return [r for r in rows if _on_topic(r, include, exclude, water_agencies)]
+    picked = rules.get("hand_picked_sources", [])
+    return [r for r in rows if _on_topic(r, include, exclude, water_agencies, picked)]
 
 
-def _on_topic(row, include, exclude, water_agencies):
+def _on_topic(row, include, exclude, water_agencies, picked=()):
     text = f"{row['title']} {row['summary']}"
     from_water_agency = any(a in row["funder"].lower() for a in water_agencies)
+    if row["source"] in picked:
+        return True
     if include and not from_water_agency and not include.search(text):
         return False
     return not (exclude and exclude.search(text))
