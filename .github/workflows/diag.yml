@@ -10,18 +10,46 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Check links
+      - name: Probe candidate sources
         run: |
           python3 - <<'PY'
-          import json, re, urllib.parse
-          from tracker import virginia, text
-          ids = ["IV128282", "IV127561", "IV129310", "IV129311", "IV129323"]
-          d = virginia.download()
-          for doc in [x for x in d["response"]["docs"] if x["id"] in ids]:
-              link = virginia._link(doc)
-              page = text.fetch(link)
-              s = page.decode("utf-8", "replace") if isinstance(page, bytes) else page
-              t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s))
-              print("LINK", doc["id"], len(s), doc["shortdesc"][:50] in t, link)
-              print("   ", t[t.find(doc["shortdesc"][:20]) - 100: t.find(doc["shortdesc"][:20]) + 200] if doc["shortdesc"][:20] in t else t[:300])
+          import json, urllib.request
+          from tracker import text
+          def get(url, data=None, ctype=None):
+              try:
+                  req = urllib.request.Request(url, data=data, headers={"User-Agent": "glia-funding-tracker (+https://github.com/gauravshikhargandhi-web/glia-funding-tracker)", **({"Content-Type": ctype} if ctype else {})})
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      return r.status, r.read().decode("utf-8", "replace")
+              except Exception as e:
+                  return "ERR", repr(e)[:200]
+          robots = ["https://glwater.bonfirehub.com/robots.txt", "https://bonfirehub.com/robots.txt",
+                    "https://procurement.opengov.com/robots.txt", "https://api.procurement.opengov.com/robots.txt",
+                    "https://www.dodsbirsttr.mil/robots.txt", "https://www.herox.com/robots.txt",
+                    "https://passport.cityofnewyork.us/robots.txt", "https://ohiobuys.ohio.gov/robots.txt",
+                    "https://bidbuy.illinois.gov/robots.txt", "https://mmsd.diversitycompliance.com/robots.txt"]
+          for u in robots:
+              s, body = get(u)
+              print("=== ROBOTS", u, s); print(body[:700])
+          checks = [
+              ("sbir solicitations", "https://api.www.sbir.gov/public/api/solicitations?keyword=water&open=1&rows=5"),
+              ("waterrf rss", "https://www.waterrf.org/rss.xml"),
+              ("water council rss", "https://thewatercouncil.com/feed/"),
+              ("buffalo sewer rss", "https://buffalosewer.org/category/vendor-opportunities/feed/"),
+              ("mmsd list", "https://mmsd.diversitycompliance.com/frontend/proposalsearchpublic.asp?tn=mmsd&xid=8146"),
+              ("nsf rss", "https://www.nsf.gov/rss/rss_www_funding_upcoming.xml"),
+              ("current news", "https://currentwater.org/feed/"),
+              ("ctvc rss", "https://www.ctvc.co/rss/"),
+              ("cleveland itb", "https://www.clevelandohio.gov/city-hall/departments/finance/invitations-bid"),
+              ("met council", "https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx"),
+              ("cook county soda", "https://datacatalog.cookcountyil.gov/resource/ag43-fvd7.json?$limit=2"),
+          ]
+          for name, u in checks:
+              s, body = get(u)
+              print("=== CHECK", name, s, len(body)); print(body[:300].replace("\n", " "))
+          s, body = get("https://api.usaspending.gov/api/v2/search/spending_by_award/", json.dumps({
+              "filters": {"keywords": ["wastewater sensor"], "award_type_codes": ["A","B","C","D"], "time_period": [{"start_date": "2024-10-01", "end_date": "2026-09-30"}]},
+              "fields": ["Award ID", "Recipient Name", "Award Amount", "Awarding Agency"], "limit": 5}).encode(), "application/json")
+          print("=== CHECK usaspending", s); print(body[:800])
+          s, body = get("https://api.procurement.opengov.com/api/v1/government/neorsd/project/public", json.dumps({"filters":[{"type":"status","value":"open"}],"limit":5,"page":1}).encode(), "application/json")
+          print("=== CHECK opengov neorsd", s); print(body[:600])
           PY
