@@ -30,6 +30,9 @@ water_agencies = [
   "Metropolitan Water Reclamation District",  # MWRD, Chicago area
   "Great Lakes Water Authority",              # GLWA, Detroit area
   "Department Of Water Management",           # City of Chicago
+  "Northeast Ohio Regional Sewer District",    # NEORSD, Cleveland area
+  "Milwaukee Metropolitan Sewerage District",  # MMSD, Milwaukee area
+  "Buffalo Sewer Authority",                   # Buffalo, NY
 ]
 
 # Drop listings that mention any of these.

@@ -40,6 +40,9 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | [MWRD](https://apps.mwrd.org/ContractAnnouncements/) (Chicago water reclamation district) contract announcements | Live | No |
 | [City of Chicago eProcurement](https://eprocurement.cityofchicago.org/OA_HTML/OA.jsp?OAFunc=PON_ABSTRACT_PAGE) solicitations | Live | No |
 | [Great Lakes Water Authority](https://glwater.bonfirehub.com/portal/?tab=openOpportunities) (Detroit area) open bids on Bonfire | Live | No |
+| [Northeast Ohio Regional Sewer District](https://procurement.opengov.com/portal/neorsd) (Cleveland area) open bids on OpenGov | Live | No |
+| [Milwaukee Metropolitan Sewerage District](https://mmsd.diversitycompliance.com/FrontEnd/proposalsearchpublic.asp?tn=mmsd&xid=8146) bids, RFPs and RFIs (construction bids on QuestCDN not covered) | Live | No |
+| [Buffalo Sewer Authority](https://buffalosewer.org/category/vendor-opportunities/) bid and RFP posts (deadline read from the notice text) | Live | No |
 | Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
 | [Illinois GATA](https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx) state funding opportunities | Live | No |
 | [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |

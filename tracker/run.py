@@ -10,8 +10,8 @@ import datetime
 import collections
 import csv
 
-from tracker import (bonfire, california, chicago, federalregister, grantsgov, illinois, massachusetts,
-                     mwrd, nyc, plain, pool, prizes, profile, samgov, virginia)
+from tracker import (bonfire, buffalo, california, chicago, federalregister, grantsgov, illinois, massachusetts,
+                     mmsd, mwrd, nyc, opengov, plain, pool, prizes, profile, samgov, virginia)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -33,6 +33,9 @@ ABOUT = {
     "chicago-eprocurement": ("Chicago eProcurement", "City (Chicago)", "City of Chicago bids"),
     "mwrd": ("MWRD (Chicago)", "Water agency", "Metropolitan Water Reclamation District bids"),
     "bonfire": ("Great Lakes Water Authority", "Water agency", "Detroit-area regional water authority bids"),
+    "opengov": ("NEORSD (Cleveland)", "Water agency", "Northeast Ohio Regional Sewer District bids"),
+    "mmsd": ("MMSD (Milwaukee)", "Water agency", "Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"),
+    "buffalo-sewer": ("Buffalo Sewer Authority", "Water agency", "Buffalo Sewer Authority bids and RFPs"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
 }
 
@@ -56,6 +59,9 @@ def main():
         ("mwrd", lambda: mwrd.collect(today)),
         ("chicago-eprocurement", lambda: chicago.collect(today)),
         ("bonfire", lambda: bonfire.collect(today)),
+        ("opengov", lambda: opengov.collect(today)),
+        ("mmsd", lambda: mmsd.collect(today)),
+        ("buffalo-sewer", lambda: buffalo.collect(today)),
         ("illinois-gata", lambda: illinois.collect(today)),
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
