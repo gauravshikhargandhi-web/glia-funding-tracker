@@ -8,7 +8,7 @@ from unittest import mock
 
 from tracker import run
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
-                     massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
+                     massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -255,6 +255,26 @@ class NsfTest(unittest.TestCase):
         self.assertEqual(rows[0]["close_date"], "2026-11-04")
         self.assertEqual(rows[0]["eligibility"], "Small businesses")
         self.assertNotIn("Upcoming Due Dates item", rows[0]["summary"])
+
+
+class SbirTest(unittest.TestCase):
+    def test_open_and_upcoming_topics(self):
+        today = datetime.date(2026, 10, 9)
+        rows = sbir.collect(today, pages=[_read("sample_sbir.html"), _read("sample_sbir.html")])
+        # The closed topic is dropped and the repeated page adds nothing.
+        self.assertEqual([r["source_id"] for r in rows], ["12958", "13022"])
+        water, navy = rows
+        self.assertEqual(water["funder"], "Environmental Protection Agency")
+        self.assertEqual(water["status"], "posted")
+        self.assertEqual(water["close_date"], "2026-11-20")
+        self.assertEqual(water["listing_type"], "Contract (SBIR topic)")
+        self.assertIn("drinking water & distribution", water["summary"])
+        self.assertEqual(water["link"], "https://www.sbir.gov/topics/12958")
+        # Released but not open until Oct 28: shown as coming soon.
+        self.assertEqual(navy["status"], "forecast")
+        self.assertEqual(navy["funder_code"], "DOD")
+        self.assertEqual(navy["listing_type"], "Contract (STTR topic)")
+        self.assertIn("Opens 2026-10-28", navy["topics"])
 
 
 class FederalRegisterTest(unittest.TestCase):
