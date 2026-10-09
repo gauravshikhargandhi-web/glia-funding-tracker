@@ -164,6 +164,8 @@ sheet_csv = "https://docs.google.com/spreadsheets/d/1Hdk8iebShtatUGKV1sUEGooQkF8
 #   needs = "climate"  water keyword or one of climate_words (general startup hubs)
 #   standing = true    the feed lists open programs, so every post counts however old
 #   format = "wordpress" for a /wp-json/ address; leave it out for an RSS feed
+# Imagine H2O's feed is left out: its host now answers automated requests with a
+# captcha page. Its yearly call is in the Calendar tab instead.
 call_words = [
   "apply", "applications open", "applications are open", "application deadline", "now accepting",
   "accepting applications", "call for", "open call", "request for proposals", "request for applications",
@@ -189,10 +191,6 @@ standing = true
 [[leads.feeds]]
 name = "The Water Council"
 url = "https://thewatercouncil.com/feed/"
-
-[[leads.feeds]]
-name = "Imagine H2O"
-url = "https://www.imagineh2o.org/feed/"
 
 [[leads.feeds]]
 name = "Current (Chicago)"
