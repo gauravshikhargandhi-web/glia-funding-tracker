@@ -52,10 +52,10 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | [Met Council](https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx) (Minneapolis-St. Paul) bids, RFPs and RFIs, including regional wastewater | Live | No |
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
-| Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Imagine H2O, Current, LACI, JumpStart, fundsforcompanies); see below | Live | No |
+| Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies); see below | Live | No |
 | Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
 
-If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.
+If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
 
 Only free, public sources are used. Sites that need a login are left out.
 

@@ -6,6 +6,7 @@ import unittest
 import urllib.error
 from unittest import mock
 
+from tracker import run
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
                      massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, text, virginia)
 
@@ -602,6 +603,18 @@ class LeadsTest(unittest.TestCase):
         self.assertEqual([r["link"] for r in rows], ["c", "a"])
         self.assertEqual(rows[1]["first_seen"], "2026-10-01")
         self.assertEqual(rows[1]["title"], "A (edited)")
+
+
+class FailureStreakTest(unittest.TestCase):
+    def test_streaks_count_days_in_a_row(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "failures.csv")
+            self.assertEqual(run.update_streaks(path, ["mmsd"]), {"mmsd": 1})
+            self.assertEqual(run.update_streaks(path, ["mmsd", "chicago"]), {"mmsd": 2, "chicago": 1})
+            # A day without failure resets the count.
+            self.assertEqual(run.update_streaks(path, ["chicago"]), {"chicago": 2})
+            self.assertEqual(run.update_streaks(path, ["mmsd", "chicago"]), {"mmsd": 1, "chicago": 3})
 
 
 class TextTest(unittest.TestCase):
