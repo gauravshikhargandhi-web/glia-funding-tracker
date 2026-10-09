@@ -55,7 +55,7 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies); see below | Live | No |
 | Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
 
-If one source fails on a given day, the others still update and that source keeps its previous listings. The run shows as failed in the Actions tab so you notice.
+If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
 
 Only free, public sources are used. Sites that need a login are left out.
 

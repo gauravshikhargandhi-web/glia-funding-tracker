@@ -9,6 +9,7 @@ import datetime
 
 import collections
 import csv
+import os
 
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
                      massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
@@ -18,6 +19,10 @@ POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
 FILTERED_PATH = "data/filtered_out.csv"
 SUMMARY_PATH = "data/summary.csv"
+# How many days in a row each source has failed, so a one-day outage doesn't fail the run.
+STREAK_PATH = "data/failures.csv"
+# The run fails (and GitHub sends its failure email) once a source has failed this many days running.
+FAIL_AFTER_DAYS = 3
 # Closed water listings, one file per year so each stays well under GitHub's file limit.
 ARCHIVE_PATH = "data/archive/{year}.csv"
 
@@ -116,15 +121,34 @@ def main():
     pool.save(MATCHES_PATH, matches)
     pool.save(FILTERED_PATH, [dict(row, filtered_reason=reason) for row, reason in dropped],
               extra=["filtered_reason"])
+    streaks = update_streaks(STREAK_PATH, failed)
     save_summary(SUMMARY_PATH, today, rows, matches, dropped, failed,
-                 programs.checks(today, programs.read_mirror()), lead_rows, leads_failed)
+                 programs.checks(today, programs.read_mirror()), lead_rows, leads_failed, streaks)
     print(f"pool: {len(rows)} listings, {len(matches)} match {args.profile}, "
           f"{len(dropped)} more set aside as not biddable (see {FILTERED_PATH})")
+    broken = [name for name in failed if streaks[name] >= FAIL_AFTER_DAYS]
+    if broken:
+        raise SystemExit(f"sources failed {FAIL_AFTER_DAYS} days in a row: {', '.join(broken)}")
     if failed:
-        raise SystemExit(f"sources failed: {', '.join(failed)}")
+        print(f"sources failed today (not yet {FAIL_AFTER_DAYS} days in a row): {', '.join(failed)}")
 
 
-def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=(), lead_rows=(), leads_failed=()):
+def update_streaks(path, failed):
+    """Days in a row each failed source has failed, counting today. Saved for the next run."""
+    previous = {}
+    if os.path.exists(path):
+        with open(path, newline="", encoding="utf-8") as f:
+            previous = {row["source"]: int(row["days"]) for row in csv.DictReader(f)}
+    streaks = {name: previous.get(name, 0) + 1 for name in failed}
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["source", "days"])
+        writer.writerows(sorted(streaks.items()))
+    return streaks
+
+
+def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=(), lead_rows=(), leads_failed=(),
+                 streaks=None):
     """A small table of today's counts, for the sheet's About tab."""
     pool_by = collections.Counter(r["source"] for r in rows)
     match_by = collections.Counter(r["source"] for r in matches)
@@ -133,7 +157,11 @@ def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()
            ["run", "Last refresh", "", "", "", "", today.isoformat()],
            ["total", "All sources", "", len(rows), len(matches), len(dropped), f"{len(ABOUT)} sources"]]
     for source, (label, level, covers) in ABOUT.items():
-        note = "Failed today; showing yesterday's listings. " if source in failed else ""
+        days = (streaks or {}).get(source, 1)
+        note = ""
+        if source in failed:
+            note = (f"Failed {days} days in a row; showing the last listings it gave. " if days > 1
+                    else "Failed today; showing yesterday's listings. ")
         out.append(["source", label, level, pool_by[source], match_by[source], drop_by[source], note + covers])
     for name, n in collections.Counter(r["kind"] for r in matches).most_common():
         out.append(["kind", name, "", "", n, "", ""])
