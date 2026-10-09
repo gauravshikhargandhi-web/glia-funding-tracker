@@ -13,7 +13,7 @@ import os
 
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
                      massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
-                     programs, samgov, virginia)
+                     programs, samgov, sbir, virginia)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -44,6 +44,7 @@ ABOUT = {
     "buffalo-sewer": ("Buffalo Sewer Authority", "Water agency", "Buffalo Sewer Authority bids and RFPs"),
     "cleveland": ("City of Cleveland", "City (Cleveland)", "City bids and RFPs, including the Division of Water"),
     "metcouncil": ("Met Council (Minneapolis)", "Water agency", "Metropolitan Council bids, RFPs and RFIs, including regional wastewater"),
+    "sbir.gov": ("SBIR.gov topics", "Federal", "Open and upcoming SBIR/STTR research topics from every agency, including Defense"),
     "nsf-sbir": ("NSF SBIR/STTR", "Federal", "NSF small-business research deadlines in the next 30 days"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -76,6 +77,7 @@ def main():
         ("buffalo-sewer", lambda: buffalo.collect(today)),
         ("cleveland", lambda: cleveland.collect(today)),
         ("metcouncil", lambda: metcouncil.collect(today)),
+        ("sbir.gov", lambda: sbir.collect(today)),
         ("nsf-sbir", lambda: nsf.collect(today)),
         ("illinois-gata", lambda: illinois.collect(today)),
         ("commbuys", lambda: massachusetts.collect(today)),

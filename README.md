@@ -50,6 +50,7 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
 | [City of Cleveland](https://www.clevelandohio.gov/city-hall/departments/finance/invitations-bid) bids and [RFPs](https://www.clevelandohio.gov/city-hall/departments/finance/request-qualificationsproposal), including the Division of Water | Live | No |
 | [Met Council](https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx) (Minneapolis-St. Paul) bids, RFPs and RFIs, including regional wastewater | Live | No |
+| [SBIR.gov topics](https://www.sbir.gov/topics) from every agency (Defense, Energy, NASA, EPA, ...), open and upcoming; SBIR.gov's data API refuses automated requests, so the public topic search page is read | Live | No |
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
 | Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies); see below | Live | No |
