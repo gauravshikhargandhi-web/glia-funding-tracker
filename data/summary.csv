@@ -1,41 +1,42 @@
 section,name,level,open,matches,set_aside,detail
-run,Last refresh,,,,,2026-10-09
-total,All sources,,12723,291,156,19 sources
-source,Grants.gov,Federal,1421,44,0,"All federal grants and cooperative agreements, including forecasts"
-source,SAM.gov,Federal,9195,98,71,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
-source,Federal Register,Federal,17,1,0,Funding and prize notices published by agencies
+run,Last refresh,,,,,2026-10-10
+total,All sources,,12637,309,160,20 sources
+source,Grants.gov,Federal,1422,44,0,"All federal grants and cooperative agreements, including forecasts"
+source,SAM.gov,Federal,8816,100,71,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
+source,Federal Register,Federal,16,1,0,Funding and prize notices published by agencies
 source,California Grants Portal,State (CA),173,4,0,California state grants and loans
-source,Illinois GATA,State (IL),117,31,0,Illinois state funding opportunities
-source,Massachusetts COMMBUYS,State (MA),917,39,17,"Massachusetts state and local bids, plus some grants"
-source,Virginia eVA,State (VA),568,32,42,Virginia state and local solicitations
-source,NYC City Record,City (New York),209,9,12,New York City solicitations
-source,Chicago eProcurement,City (Chicago),5,0,2,Failed today; showing yesterday's listings. City of Chicago bids
+source,Illinois GATA,State (IL),119,31,0,Illinois state funding opportunities
+source,Massachusetts COMMBUYS,State (MA),909,39,17,"Massachusetts state and local bids, plus some grants"
+source,Virginia eVA,State (VA),583,34,46,Virginia state and local solicitations
+source,NYC City Record,City (New York),195,11,12,New York City solicitations
+source,Chicago eProcurement,City (Chicago),5,0,2,City of Chicago bids
 source,MWRD (Chicago),Water agency,4,1,3,Metropolitan Water Reclamation District bids
 source,Great Lakes Water Authority,Water agency,4,3,1,Detroit-area regional water authority bids
 source,NEORSD (Cleveland),Water agency,6,4,2,Northeast Ohio Regional Sewer District bids
-source,MMSD (Milwaukee),Water agency,9,6,3,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
+source,MMSD (Milwaukee),Water agency,10,7,3,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
 source,Buffalo Sewer Authority,Water agency,0,0,0,Buffalo Sewer Authority bids and RFPs
-source,City of Cleveland,City (Cleveland),44,6,2,"City bids and RFPs, including the Division of Water"
-source,Met Council (Minneapolis),Water agency,21,5,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
+source,City of Cleveland,City (Cleveland),45,6,2,"City bids and RFPs, including the Division of Water"
+source,Met Council (Minneapolis),Water agency,20,5,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
+source,SBIR.gov topics,Federal,297,11,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
 source,NSF SBIR/STTR,Federal,2,2,0,NSF small-business research deadlines in the next 30 days
 source,"Army xTech, Bureau of Reclamation",Prizes,2,0,0,Open prize competitions
 source,Calendar (hand-kept),Programs,9,6,0,"Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"
-kind,Contract,,,199,,
-kind,Grant,,,88,,
+kind,Contract,,,215,,
+kind,Grant,,,90,,
 kind,Accelerator,,,2,,
 kind,Loan,,,1,,
 kind,Funding notice,,,1,,
-stage,Open,,,220,,
-stage,Info request,,,55,,
-stage,Coming soon,,,16,,
-who,Any company,,,200,,
+stage,Open,,,229,,
+stage,Info request,,,59,,
+stage,Coming soon,,,21,,
+who,Any company,,,208,,
 who,Check listing,,,60,,
-who,Companies eligible,,,17,,
-who,Small businesses only,,,14,,
-set_aside,Construction bids,,,,83,
-set_aside,Certification-only set-asides,,,,39,
-set_aside,"Off-topic bids (supplies, grounds, building services)",,,,34,
-new,New matches today,,,13,,
+who,Companies eligible,,,28,,
+who,Small businesses only,,,13,,
+set_aside,Construction bids,,,,87,
+set_aside,Certification-only set-asides,,,,40,
+set_aside,"Off-topic bids (supplies, grounds, building services)",,,,33,
+new,New matches today,,,26,,
 calendar_check,Water Council Tech Challenge,,,,,Add this round's dates
 calendar_check,Techstars Founder Catalyst WaterTech,,,,,Add this round's dates
 calendar_check,Cleantech Open,,,,,Add this round's dates
@@ -45,4 +46,3 @@ calendar_check,AWWA ACE and WEFTEC innovation showcases,,,,,Add this round's dat
 calendar_check,Wisconsin SBIR Advance,,,,,Add this round's dates
 calendar_check,DOE American-Made prizes,,,,,Add this round's dates
 leads,New leads today,,,0,,9 leads in the last year
-leads_failed,Imagine H2O,,,,,Feed could not be read today
