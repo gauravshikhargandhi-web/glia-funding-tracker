@@ -1,42 +1,42 @@
 section,name,level,open,matches,set_aside,detail
-run,Last refresh,,,,,2026-10-12
-total,All sources,,12622,313,160,20 sources
-source,Grants.gov,Federal,1419,44,0,"All federal grants and cooperative agreements, including forecasts"
-source,SAM.gov,Federal,8787,101,71,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
+run,Last refresh,,,,,2026-10-13
+total,All sources,,12814,311,161,20 sources
+source,Grants.gov,Federal,1417,43,0,"All federal grants and cooperative agreements, including forecasts"
+source,SAM.gov,Federal,9100,101,72,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
 source,Federal Register,Federal,12,1,0,Funding and prize notices published by agencies
-source,California Grants Portal,State (CA),173,4,0,California state grants and loans
+source,California Grants Portal,State (CA),172,4,0,California state grants and loans
 source,Illinois GATA,State (IL),119,31,0,Illinois state funding opportunities
-source,Massachusetts COMMBUYS,State (MA),916,39,17,"Massachusetts state and local bids, plus some grants"
-source,Virginia eVA,State (VA),581,34,46,Virginia state and local solicitations
+source,Massachusetts COMMBUYS,State (MA),925,39,17,"Massachusetts state and local bids, plus some grants"
+source,Virginia eVA,State (VA),562,35,46,Virginia state and local solicitations
 source,NYC City Record,City (New York),195,11,12,New York City solicitations
 source,Chicago eProcurement,City (Chicago),5,0,2,City of Chicago bids
 source,MWRD (Chicago),Water agency,4,1,3,Metropolitan Water Reclamation District bids
 source,Great Lakes Water Authority,Water agency,4,3,1,Detroit-area regional water authority bids
 source,NEORSD (Cleveland),Water agency,6,4,2,Northeast Ohio Regional Sewer District bids
-source,MMSD (Milwaukee),Water agency,10,7,3,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
+source,MMSD (Milwaukee),Water agency,10,7,3,"Failed today; showing yesterday's listings. Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
 source,Buffalo Sewer Authority,Water agency,0,0,0,Buffalo Sewer Authority bids and RFPs
-source,City of Cleveland,City (Cleveland),45,6,2,"City bids and RFPs, including the Division of Water"
+source,City of Cleveland,City (Cleveland),43,6,2,"City bids and RFPs, including the Division of Water"
 source,Met Council (Minneapolis),Water agency,20,5,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
-source,SBIR.gov topics,Federal,313,14,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
+source,SBIR.gov topics,Federal,207,12,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
 source,NSF SBIR/STTR,Federal,2,2,0,NSF small-business research deadlines in the next 30 days
 source,"Army xTech, Bureau of Reclamation",Prizes,2,0,0,Open prize competitions
 source,Calendar (hand-kept),Programs,9,6,0,"Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"
-kind,Contract,,,216,,
-kind,Grant,,,93,,
+kind,Contract,,,217,,
+kind,Grant,,,90,,
 kind,Accelerator,,,2,,
 kind,Loan,,,1,,
 kind,Funding notice,,,1,,
-stage,Open,,,233,,
+stage,Open,,,231,,
 stage,Info request,,,59,,
 stage,Coming soon,,,21,,
-who,Any company,,,209,,
-who,Check listing,,,60,,
-who,Companies eligible,,,31,,
+who,Any company,,,210,,
+who,Check listing,,,59,,
+who,Companies eligible,,,29,,
 who,Small businesses only,,,13,,
 set_aside,Construction bids,,,,87,
-set_aside,Certification-only set-asides,,,,40,
-set_aside,"Off-topic bids (supplies, grounds, building services)",,,,33,
-new,New matches today,,,0,,
+set_aside,Certification-only set-asides,,,,42,
+set_aside,"Off-topic bids (supplies, grounds, building services)",,,,32,
+new,New matches today,,,4,,
 calendar_check,Water Council Tech Challenge,,,,,Add this round's dates
 calendar_check,Techstars Founder Catalyst WaterTech,,,,,Add this round's dates
 calendar_check,Cleantech Open,,,,,Add this round's dates
