@@ -47,6 +47,7 @@ The source's own wording follows: listing type, status, post and close dates, aw
 | [Illinois GATA](https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx) state funding opportunities | Live | No |
 | [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |
 | [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
+| [Great Lakes Restoration Initiative](https://glri.us/funding/funding-opportunities) open funding opportunities (USDA Forest Service, Ohio, NFWF and others; links to Grants.gov are skipped since Grants.gov is already a source) | Live | No |
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
 | [City of Cleveland](https://www.clevelandohio.gov/city-hall/departments/finance/invitations-bid) bids and [RFPs](https://www.clevelandohio.gov/city-hall/departments/finance/request-qualificationsproposal), including the Division of Water | Live | No |
 | [Met Council](https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx) (Minneapolis-St. Paul) bids, RFPs and RFIs, including regional wastewater | Live | No |

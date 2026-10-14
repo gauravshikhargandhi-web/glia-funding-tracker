@@ -7,7 +7,7 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, grantsgov, illinois, leads,
+from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois, leads,
                      massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
 
 HERE = os.path.dirname(__file__)
@@ -333,6 +333,29 @@ class VirginiaTest(unittest.TestCase):
         link = virginia._link({"app": "IV", "internalid": "128282", "version": "1"})
         self.assertEqual(link, "https://mvendor.cgieva.com/Vendor/public/IVDetails.jsp?"
                                "PageTitle=SO+Details&rfp_id_lot=128282&rfp_id_round=1")
+
+
+class GlriTest(unittest.TestCase):
+    def test_reads_open_list_and_fills_details_from_yearly_table(self):
+        rows = glri.collect(TODAY, page=_read("sample_glri.html"))
+        self.assertEqual([r["title"] for r in rows], [
+            "Community Forest Grant in Lake Superior Basin", "Lake Erie Community Grant Program",
+            "Southeast Michigan Resilience Fund"])
+        self.assertEqual(rows[0]["funder"], "USDA Forest Service")
+        self.assertEqual(rows[2]["funder"], "DOI-USFWS and the National Fish and Wildlife Foundation")
+        self.assertIn("stormwater", rows[2]["summary"])
+        self.assertIn("Usually announced: Fall.", rows[2]["summary"])
+        self.assertEqual(rows[1]["source_id"], rows[1]["link"])
+
+    def test_skips_grants_gov_links(self):
+        page = _read("sample_glri.html").replace(
+            "https://lakeerie.ohio.gov/funding-oportunities/protection-fund/lake+erie+community+grant",
+            "https://www.grants.gov/search-results-detail/123")
+        self.assertEqual(len(glri.collect(TODAY, page=page)), 2)
+
+    def test_changed_layout_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            glri.collect(TODAY, page="<html>moved</html>")
 
 
 class PrizesTest(unittest.TestCase):
