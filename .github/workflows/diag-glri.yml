@@ -1,0 +1,25 @@
+name: Probe GLRI page (temporary)
+on:
+  push:
+    branches: [claude/glri-source-gk093t]
+    paths: [.github/workflows/diag-glri.yml]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 - <<'PY'
+          import urllib.request
+          from tracker.text import fetch
+          page = fetch("https://glri.us/funding/funding-opportunities", timeout=60)
+          open("tests/sample_glri.html", "wb").write(page)
+          print(len(page))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/sample_glri.html
+          git commit -m "diag: save GLRI page"
+          git push
