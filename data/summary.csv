@@ -1,12 +1,12 @@
 section,name,level,open,matches,set_aside,detail
-run,Last refresh,,,,,2026-10-18
-total,All sources,,13356,346,158,21 sources
+run,Last refresh,,,,,2026-10-19
+total,All sources,,13426,341,162,21 sources
 source,Grants.gov,Federal,1413,52,0,"All federal grants and cooperative agreements, including forecasts"
-source,SAM.gov,Federal,9603,115,80,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
-source,Federal Register,Federal,8,1,0,Funding and prize notices published by agencies
+source,SAM.gov,Federal,9822,115,84,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
+source,Federal Register,Federal,6,1,0,Funding and prize notices published by agencies
 source,California Grants Portal,State (CA),170,4,0,California state grants and loans
 source,Illinois GATA,State (IL),122,31,0,Illinois state funding opportunities
-source,Massachusetts COMMBUYS,State (MA),886,46,14,"Massachusetts state and local bids, plus some grants"
+source,Massachusetts COMMBUYS,State (MA),892,46,14,"Massachusetts state and local bids, plus some grants"
 source,Virginia eVA,State (VA),581,34,41,Virginia state and local solicitations
 source,NYC City Record,City (New York),198,10,12,New York City solicitations
 source,Chicago eProcurement,City (Chicago),6,0,2,City of Chicago bids
@@ -17,27 +17,27 @@ source,MMSD (Milwaukee),Water agency,10,6,4,"Milwaukee Metropolitan Sewerage Dis
 source,Buffalo Sewer Authority,Water agency,0,0,0,Buffalo Sewer Authority bids and RFPs
 source,City of Cleveland,City (Cleveland),39,5,1,"City bids and RFPs, including the Division of Water"
 source,Met Council (Minneapolis),Water agency,17,5,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
-source,SBIR.gov topics,Federal,272,14,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
+source,SBIR.gov topics,Federal,120,10,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
 source,NSF SBIR/STTR,Federal,2,2,0,NSF small-business research deadlines in the next 30 days
-source,Great Lakes Restoration Initiative,Federal,3,3,0,Open opportunities listed on the GLRI funding page (Grants.gov links skipped)
+source,Great Lakes Restoration Initiative,Federal,2,2,0,Open opportunities listed on the GLRI funding page (Grants.gov links skipped)
 source,"Army xTech, Bureau of Reclamation",Prizes,2,0,0,Open prize competitions
 source,Calendar (hand-kept),Programs,9,6,0,"Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"
 kind,Contract,,,237,,
-kind,Grant,,,105,,
+kind,Grant,,,100,,
 kind,Accelerator,,,2,,
 kind,Loan,,,1,,
 kind,Funding notice,,,1,,
-stage,Open,,,257,,
+stage,Open,,,252,,
 stage,Info request,,,65,,
 stage,Coming soon,,,24,,
 who,Any company,,,231,,
-who,Check listing,,,70,,
-who,Companies eligible,,,32,,
+who,Check listing,,,69,,
+who,Companies eligible,,,28,,
 who,Small businesses only,,,13,,
 set_aside,Construction bids,,,,81,
-set_aside,Certification-only set-asides,,,,52,
+set_aside,Certification-only set-asides,,,,56,
 set_aside,"Off-topic bids (supplies, grounds, building services)",,,,25,
-new,New matches today,,,1,,
+new,New matches today,,,0,,
 calendar_check,Water Council Tech Challenge,,,,,Add this round's dates
 calendar_check,Techstars Founder Catalyst WaterTech,,,,,Add this round's dates
 calendar_check,Cleantech Open,,,,,Add this round's dates
