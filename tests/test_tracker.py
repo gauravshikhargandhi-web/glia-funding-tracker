@@ -552,13 +552,16 @@ class ProfileTest(unittest.TestCase):
                      topics="NAICS 33999; PSC 9999"),
             self.row(source_id="serdp", title="Strategic Environmental Research and Development Program (SERDP) BAA",
                      topics="NAICS 541715; PSC AJ11"),
+            self.row(source_id="cerl", title="Engineer Research and Development Center (ERDC) - Construction "
+                     "Engineering Research Laboratory (CERL) Annual Commercial Solutions Opening (CSO)",
+                     topics="NAICS 541715; PSC 9999"),
             self.row(source_id="setaside", title="ERDC Commercial Solutions Opening", eligibility="8(a) Set-Aside"),
             self.row(source_id="other", title="Commercial Solutions Opening", topics="NAICS 33999; PSC 9999"),
         ]
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
         dropped = []
         ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
-        self.assertEqual(ids, {"crrel", "serdp"})
+        self.assertEqual(ids, {"crrel", "serdp", "cerl"})
         self.assertEqual([row["source_id"] for row, _ in dropped], ["setaside"])  # who-can-bid rules still apply
 
     def test_university_only_grants_are_kept_as_partner_needed(self):

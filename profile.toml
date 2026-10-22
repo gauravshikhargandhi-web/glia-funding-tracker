@@ -121,6 +121,7 @@ not_construction_words = [
   "monitoring", "instrumentation", "sensor", "SCADA", "inspection", "assessment",
   "study", "testing", "locating", "optimization", "data", "water quality",
   "mitigation credit", "mitigation cred",
+  "research",  # e.g. the Army's Construction Engineering Research Laboratory calls
 ]
 
 # Grant text that rules businesses out. Checked in the eligibility notes and
