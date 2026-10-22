@@ -7,8 +7,8 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois, leads,
-                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
+from tracker import (americanmade, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois, leads,
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -355,6 +355,68 @@ class MassCecTest(unittest.TestCase):
     def test_changed_layout_fails_loudly(self):
         with self.assertRaises(ValueError):
             masscec.collect(TODAY, pages=["<html>new design</html>"], details={})
+
+
+class NyserdaTest(unittest.TestCase):
+    LINK = "https://portal.nyserda.ny.gov/CORE_Solicitation_Detail_Page?SolicitationId="
+
+    def setUp(self):
+        closed = "<html><h1>PON 6161</h1><p>This solicitation is closed</p></html>"
+        details = {self.LINK + "a0rcr00001L5iYZ": _read("sample_nyserda_detail.html"),
+                   self.LINK + "a0rcr0000191nvf": closed}
+        rows = nyserda.collect(datetime.date(2026, 10, 22), page=_read("sample_nyserda.html"), details=details)
+        self.rows = {r["source_id"]: r for r in rows}
+
+    def test_keeps_open_calls_and_drops_closed_ones(self):
+        self.assertEqual(set(self.rows), {"PON-6149", "PON-6239", "RFI-6169"})
+
+    def test_normalizes_fields_from_the_portal_page(self):
+        row = self.rows["PON-6239"]
+        self.assertEqual(row["title"], "Commercialization Cohort Programs (PON 6239)")
+        self.assertEqual(row["close_date"], "2026-12-02")
+        self.assertEqual(row["link"], self.LINK + "a0rcr00001L5iYZ")  # tracking dropped
+        self.assertTrue(row["summary"].startswith("Due: 12/02/2026 (Round 1). NYSERDA is making $37.9M"))
+        self.assertEqual(self.rows["RFI-6169"]["listing_type"], "Contract (request for information)")
+        self.assertEqual(self.rows["PON-6149"]["close_date"], "")  # portal page not read
+
+
+class AmericanMadeTest(unittest.TestCase):
+    def test_keeps_challenges_open_for_entries(self):
+        rows = americanmade.collect(datetime.date(2026, 10, 22), page=_read("sample_herox.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["TECEPrize", "GEMSPrize"])
+        self.assertEqual(rows[0]["close_date"], "2026-12-06")  # 45 days remaining
+        self.assertEqual(rows[0]["total_funding"], "6000000")
+        self.assertEqual(rows[1]["total_funding"], "300000")
+        self.assertEqual(rows[1]["close_date"], "")
+        self.assertEqual(rows[0]["link"], "https://www.herox.com/TECEPrize")
+
+
+class UsaGovChallengesTest(unittest.TestCase):
+    def test_reads_key_information_and_skips_student_and_ended_challenges(self):
+        ended = _read("sample_usagov_challenge.html").replace("9/30/2027", "9/30/2025")
+        rows = challenges.collect(datetime.date(2026, 10, 22), page=_read("sample_usagov_challenges.html"),
+                                  details={"/challenges/halt-the-hitchhiker-invasive-species":
+                                           _read("sample_usagov_challenge.html"),
+                                           "/challenges/old-challenge": ended})
+        self.assertEqual([r["source_id"] for r in rows], ["halt-the-hitchhiker-invasive-species"])
+        row = rows[0]
+        self.assertEqual(row["funder"], "Bureau of Reclamation")
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-10-01", "2027-09-30"))
+        self.assertEqual(row["total_funding"], "550000")
+        self.assertEqual(row["link"], "https://haltthehitchhiker.yet2.com/")
+        self.assertIn("quagga and zebra mussels", row["summary"])
+
+
+class DoeWaterTest(unittest.TestCase):
+    def test_reads_table_and_skips_fellowships_and_closed_rows(self):
+        rows = doewater.collect(datetime.date(2026, 10, 22), page=_read("sample_doewater.html"))
+        self.assertEqual([r["title"] for r in rows], ["Hydropower Technical Collaboration Program"])
+        row = rows[0]
+        self.assertEqual((row["post_date"], row["close_date"]), ("2024-04-30", ""))
+        self.assertTrue(row["link"].startswith("https://www.energy.gov/eere/water/articles/"))
+        plain.add(rows)
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual(len(profile.apply(prof, rows)), 1)  # every DOE water listing counts
 
 
 class VirginiaTest(unittest.TestCase):

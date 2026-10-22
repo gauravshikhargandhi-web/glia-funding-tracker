@@ -60,13 +60,17 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
 | [Great Lakes Restoration Initiative](https://glri.us/funding/funding-opportunities) open funding opportunities (USDA Forest Service, Ohio, NFWF and others; links to Grants.gov are skipped since Grants.gov is already a source) | Live | No |
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
+| [DOE American-Made prizes](https://www.herox.com/American-Made-Challenges) open for entries (listed on HeroX; American-Made's own site needs a browser) | Live | No |
+| [Federal prize challenges](https://www.usa.gov/find-active-challenge) listed on USA.gov, Challenge.gov's successor (student competitions skipped) | Live | No |
+| [DOE Water Power Technologies Office](https://www.energy.gov/eere/water/funding-opportunities) funding and technical support (TEAMER and others); every listing counts as a match | Live | No |
+| [NYSERDA](https://nyserda.ny.gov/All-Programs/Innovation-at-NYSERDA/Funding-Opportunities) current innovation calls (PONs and RFIs), with due dates from each call's portal page; NYSERDA's full list needs a browser | Live | No |
 | [City of Cleveland](https://www.clevelandohio.gov/city-hall/departments/finance/invitations-bid) bids and [RFPs](https://www.clevelandohio.gov/city-hall/departments/finance/request-qualificationsproposal), including the Division of Water | Live | No |
 | [Met Council](https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx) (Minneapolis-St. Paul) bids, RFPs and RFIs, including regional wastewater | Live | No |
 | [SBIR.gov topics](https://www.sbir.gov/topics) from every agency (Defense, Energy, NASA, EPA, ...), open and upcoming; SBIR.gov's data API refuses automated requests, so the public topic search page is read | Live | No |
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
 | Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies, GLOS, NAWI, ERDCWERX, mHUB, SeaAhead, Ocean Exchange, Climate Tech VC); see below | Live | No |
-| Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
+| Michigan EGLE (site refuses automated requests); Minnesota Pollution Control Agency (site sends automated requests to a bot check); other New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
 

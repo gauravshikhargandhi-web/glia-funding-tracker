@@ -15,6 +15,8 @@ BASE = "https://www.usa.gov"
 PAGE_URL = BASE + "/find-active-challenge"
 
 _CARD = re.compile(r'(?s)<a href="(/challenges/[^"]+)" class="usa-card__container.*?<h2[^>]*>(.*?)</h2>.*?<p>(.*?)</p>')
+# Competitions for students and college teams, not companies.
+SKIP_TITLE_WORDS = re.compile(r"\b(student|collegiate)", re.IGNORECASE)
 _ROW = re.compile(r"(?s)<tr><th>(.*?)</th><td>(.*?)</td></tr>")
 _DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")
 
@@ -88,6 +90,8 @@ def collect(today, page=None, details=None):
         page = fetch(PAGE_URL, timeout=60).decode("utf-8", "replace")
     rows = []
     for path, title, teaser in parse_list(page):
+        if SKIP_TITLE_WORDS.search(title):
+            continue
         if details is not None:
             detail = details.get(path, "")
         else:

@@ -11,8 +11,8 @@ import collections
 import csv
 import os
 
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois,
-                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
+from tracker import (americanmade, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois,
+                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, plain, pool, prizes, profile,
                      programs, samgov, sbir, virginia)
 
 POOL_PATH = "data/listings.csv"
@@ -47,6 +47,10 @@ ABOUT = {
     "sbir.gov": ("SBIR.gov topics", "Federal", "Open and upcoming SBIR/STTR research topics from every agency, including Defense"),
     "nsf-sbir": ("NSF SBIR/STTR", "Federal", "NSF small-business research deadlines in the next 30 days"),
     "masscec": ("MassCEC", "State (MA)", "Massachusetts Clean Energy Center open grants, investments and programs"),
+    "nyserda": ("NYSERDA", "State (NY)", "New York energy research authority's current innovation calls (PONs and RFIs)"),
+    "american-made": ("DOE American-Made prizes", "Federal", "Department of Energy prize competitions open for entries, listed on HeroX"),
+    "usa.gov-challenges": ("Federal prize challenges", "Federal", "Active federal challenges and prize competitions listed on USA.gov (Challenge.gov's successor)"),
+    "doe-water": ("DOE Water Power Office", "Federal", "Open funding and technical support from DOE's Water Power Technologies Office"),
     "glri": ("Great Lakes Restoration Initiative", "Federal", "Open opportunities listed on the GLRI funding page (Grants.gov links skipped)"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -88,6 +92,10 @@ def main():
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
         ("masscec", lambda: masscec.collect(today)),
+        ("nyserda", lambda: nyserda.collect(today)),
+        ("american-made", lambda: americanmade.collect(today)),
+        ("usa.gov-challenges", lambda: challenges.collect(today)),
+        ("doe-water", lambda: doewater.collect(today)),
         ("glri", lambda: glri.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),
