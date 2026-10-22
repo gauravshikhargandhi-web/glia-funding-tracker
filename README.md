@@ -50,7 +50,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [MWRD](https://apps.mwrd.org/ContractAnnouncements/) (Chicago water reclamation district) contract announcements | Live | No |
 | [City of Chicago eProcurement](https://eprocurement.cityofchicago.org/OA_HTML/OA.jsp?OAFunc=PON_ABSTRACT_PAGE) solicitations | Live | No |
 | [Great Lakes Water Authority](https://glwater.bonfirehub.com/portal/?tab=openOpportunities) (Detroit area) open bids on Bonfire | Live | No |
-| [Northeast Ohio Regional Sewer District](https://procurement.opengov.com/portal/neorsd) (Cleveland area) open bids on OpenGov | Live | No |
+| Open bids on OpenGov: [Northeast Ohio Regional Sewer District](https://procurement.opengov.com/portal/neorsd) (Cleveland area), [City of Cleveland](https://procurement.opengov.com/portal/clevelandoh) and [City of Syracuse](https://procurement.opengov.com/portal/syrgov) | Live | No |
 | [Milwaukee Metropolitan Sewerage District](https://mmsd.diversitycompliance.com/FrontEnd/proposalsearchpublic.asp?tn=mmsd&xid=8146) bids, RFPs and RFIs (construction bids on QuestCDN not covered) | Live | No |
 | [Buffalo Sewer Authority](https://buffalosewer.org/category/vendor-opportunities/) bid and RFP posts (deadline read from the notice text) | Live | No |
 | Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
@@ -64,7 +64,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [SBIR.gov topics](https://www.sbir.gov/topics) from every agency (Defense, Energy, NASA, EPA, ...), open and upcoming; SBIR.gov's data API refuses automated requests, so the public topic search page is read | Live | No |
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
-| Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies); see below | Live | No |
+| Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies, GLOS, NAWI, ERDCWERX, mHUB, SeaAhead, Ocean Exchange, Climate Tech VC); see below | Live | No |
 | Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
@@ -89,7 +89,7 @@ Each morning the job reads the tab (the sheet must be shared as "anyone with the
 
 ## Leads from incubators and water clusters
 
-Awards like the Nicor Gas Illinois Innovator Award are posted on incubator and water-cluster websites, not on government portals. Each morning the job reads the news feeds listed in `profile.toml` under `[leads]` and keeps the posts that look like a call for startups: words like "apply", "applications open" or "call for" anywhere in the post, or "prize", "challenge", "award" or "deadline" in the title. Feeds that cover every industry must also mention water near the top. News about past winners and programs outside the US are skipped.
+Awards like the Nicor Gas Illinois Innovator Award are posted on incubator and water-cluster websites, not on government portals. Each morning the job reads the news feeds listed in `profile.toml` under `[leads]` and keeps the posts that look like a call for startups: words like "apply", "applications open" or "call for" anywhere in the post, or "prize", "challenge", "award" or "deadline" in the title. Feeds that cover every industry must also mention water near the top. News about past winners, programs outside the US and fellowships (kept by hand in the sheet) are skipped. For newsletters that list several calls in one issue, like Climate Tech VC, the feed's `section` setting reads each item under the "Opportunities & Events" heading as its own lead.
 
 The results go to `data/leads.csv` and the sheet's **Leads** tab, newest first, with any deadline found in the post. Nothing needs approving. Leads stay for a year. Some will be news rather than open calls, so open the link before acting on one. To add a feed, copy one of the `[[leads.feeds]]` blocks in `profile.toml`. A feed that is down only means no new leads from it that day; it doesn't fail the run.
 

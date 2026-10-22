@@ -147,6 +147,14 @@ class OpenGovTest(unittest.TestCase):
         self.assertEqual(row["link"], "https://procurement.opengov.com/portal/neorsd/projects/279486")
         self.assertIn("requirement contract awarded", row["summary"])  # split spans rejoined
 
+    def test_reads_every_portal(self):
+        payload = json.loads(_read("sample_opengov.json"))
+        rows = opengov.collect(TODAY, payloads={"neorsd": [payload], "syrgov": [payload]})
+        syracuse = [r for r in rows if r["source_id"].startswith("syrgov-")]
+        self.assertEqual(len(syracuse), len(self.rows))
+        self.assertEqual(syracuse[0]["location"], "Syracuse, NY")
+        self.assertTrue(syracuse[0]["link"].startswith("https://procurement.opengov.com/portal/syrgov/"))
+
     def test_coming_soon_request_for_information(self):
         row = dict(self.rows["neorsd-2"])
         self.assertEqual((row["status"], row["close_date"]), ("forecast", ""))
@@ -699,6 +707,31 @@ class LeadsTest(unittest.TestCase):
         skip = leads._words(["spotlight"])
         self.assertEqual(leads.pick(posts, {"name": "S"}, self.calls, self.title_calls, self.topics,
                                     self.TODAY, skip), [])
+
+    def test_newsletter_section_gives_one_post_per_call(self):
+        feed = """<rss><channel><item><title>Issue #318</title><link>https://example.org/318</link>
+        <pubDate>Mon, 05 Oct 2026 12:00:00 GMT</pubDate><content:encoded><![CDATA[
+        <h2 id="deals">Deals</h2><p><a href="https://example.org/deal">A deal</a>: apply now.</p>
+        <h2 id="opportunities-events"><strong>Opportunities &amp; Events</strong></h2>
+        <p><a href="https://example.org/award?ref=ctvc.co"><strong>Coastal Resilience Awards</strong></a>: Apply by
+        <strong>November 20, 2026</strong>.</p>
+        <p><a href="https://example.org/summit">Climatetech Summit</a>: Register for October 29.</p>
+        <p><a href="https://example.org/fellows">Founder Fellows</a>: Applications due November 2, 2026.</p>
+        <h2 id="jobs">Jobs</h2><p><a href="https://example.org/job">Engineer</a>: apply.</p>
+        ]]></content:encoded></item><item><title>Issue #317</title><pubDate>Mon, 28 Sep 2026 12:00:00 GMT</pubDate>
+        <content:encoded><![CDATA[<h2 id="opportunities-events">Opportunities</h2>
+        <p><a href="https://example.org/award?ref=ctvc.co">Coastal Resilience Awards</a>: apply.</p>
+        ]]></content:encoded></item></channel></rss>"""
+        posts = leads.parse_rss(feed, section="opportunities-events")
+        self.assertEqual([p["link"] for p in posts], ["https://example.org/award", "https://example.org/summit",
+                                                      "https://example.org/fellows"])
+        self.assertEqual(posts[0]["posted"], "2026-10-05")
+        skip = leads._words(["fellow"])
+        rows = leads.pick(posts, {"name": "S"}, self.calls, self.title_calls, self.topics, self.TODAY, skip)
+        # The summit has no call words and fellowships are skipped.
+        self.assertEqual([r["title"] for r in rows], ["Coastal Resilience Awards"])
+        self.assertEqual(rows[0]["deadline"], "2026-11-20")
+        self.assertEqual(len(leads.parse_rss(feed)), 2)  # without section, each issue is one post
 
     def test_deadline_ignores_past_dates(self):
         self.assertEqual(leads.deadline("Deadline: Sept 3, 2026.", self.TODAY), "closed")

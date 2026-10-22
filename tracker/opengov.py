@@ -1,7 +1,8 @@
 """Collector for public agency portals on OpenGov Procurement (no login for open projects).
 
-Starts with the Northeast Ohio Regional Sewer District (Cleveland area).
-Many cities and utilities use OpenGov, so more portals can be added to PORTALS.
+Covers the Northeast Ohio Regional Sewer District (Cleveland area), the City of
+Cleveland and the City of Syracuse. Many cities and utilities use OpenGov, so
+more portals can be added to PORTALS.
 """
 
 import html
@@ -13,6 +14,8 @@ from tracker.text import clean, fetch
 # portal code -> (short code, location)
 PORTALS = {
     "neorsd": ("NEORSD", "Cleveland area, OH"),
+    "clevelandoh": ("CLE", "Cleveland, OH"),
+    "syrgov": ("SYR", "Syracuse, NY"),
 }
 DATA_URL = "https://api.procurement.opengov.com/api/v1/government/{portal}/project/public"
 LINK_URL = "https://procurement.opengov.com/portal/{portal}/projects/{id}"
@@ -69,7 +72,7 @@ def collect(today, payloads=None):
     Pass payloads (portal -> list of parsed JSON pages) to skip the download, e.g. in tests.
     """
     rows = []
-    for portal in PORTALS:
+    for portal in (payloads if payloads is not None else PORTALS):
         pages = payloads[portal] if payloads is not None else _pages(portal)
         for data in pages:
             for project in data.get("rows") or []:

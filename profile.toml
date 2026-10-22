@@ -202,6 +202,8 @@ sheet_csv = "https://docs.google.com/spreadsheets/d/1Hdk8iebShtatUGKV1sUEGooQkF8
 #   needs = "climate"  water keyword or one of climate_words (general startup hubs)
 #   standing = true    the feed lists open programs, so every post counts however old
 #   format = "wordpress" for a /wp-json/ address; leave it out for an RSS feed
+#   section = "..."    for newsletters: the id of the heading over their list of calls;
+#                      each paragraph under it is read as its own post
 # Imagine H2O's feed is left out: its host now answers automated requests with a
 # captcha page. Its yearly call is in the Calendar tab instead.
 call_words = [
@@ -212,10 +214,11 @@ call_words = [
 # These count only when they are in a post's title ("challenge" alone is in lots of news stories).
 call_title_words = ["prize", "challenge", "competition", "award", "grant", "funding", "deadline", "pitch", "rfp"]
 # Posts whose title has one of these are news about past winners or programs
-# outside the US, not calls our startups can answer. Matched at the start of a word,
+# outside the US, not calls our startups can answer. Fellowships are tracked
+# by hand in the sheet, so they are skipped here too. Matched at the start of a word,
 # so "India)" catches "(India)" without catching Indiana.
 skip_title_words = [
-  "winner", "spotlight", "welcomes", "meet cohort", "meet the cohort", "participants", "recap",
+  "winner", "awarded", "finalists", "fellow", "spotlight", "welcomes", "meet cohort", "meet the cohort", "participants", "recap",
   "India)", "Africa", "Uganda", "Pakistan", "Maldives", "Australia", "Ghana", "Zimbabwe", "UK)",
 ]
 climate_words = ["climate", "cleantech", "clean tech", "clean energy", "decarboni", "sustainab", "environment"]
@@ -248,3 +251,34 @@ name = "fundsforcompanies (awards and prizes)"
 url = "https://fundsforcompanies.fundsforngos.org/wp-json/wp/v2/posts?categories=218&per_page=50"
 format = "wordpress"
 needs = "water"
+
+[[leads.feeds]]
+name = "GLOS (Great Lakes Observing System)"
+url = "https://glos.org/feed/"
+
+[[leads.feeds]]
+name = "NAWI (National Alliance for Water Innovation)"
+url = "https://www.nawihub.org/category/opportunities/feed/"
+
+[[leads.feeds]]
+name = "ERDCWERX (Army Corps tech challenges)"
+url = "https://erdcwerx.org/category/event-tech-challenges/current/feed/"
+standing = true
+
+[[leads.feeds]]
+name = "mHUB (Chicago)"
+url = "https://mhub.org/blog/rss.xml"
+needs = "climate"
+
+[[leads.feeds]]
+name = "SeaAhead (Boston)"
+url = "https://www.sea-ahead.com/insights-news?format=rss"
+
+[[leads.feeds]]
+name = "Ocean Exchange"
+url = "https://www.oceanexchange.org/feed/"
+
+[[leads.feeds]]
+name = "Climate Tech VC newsletter"
+url = "https://www.ctvc.co/rss/"
+section = "opportunities-events"

@@ -39,7 +39,7 @@ ABOUT = {
     "chicago-eprocurement": ("Chicago eProcurement", "City (Chicago)", "City of Chicago bids"),
     "mwrd": ("MWRD (Chicago)", "Water agency", "Metropolitan Water Reclamation District bids"),
     "bonfire": ("Great Lakes Water Authority", "Water agency", "Detroit-area regional water authority bids"),
-    "opengov": ("NEORSD (Cleveland)", "Water agency", "Northeast Ohio Regional Sewer District bids"),
+    "opengov": ("OpenGov portals", "Water agency, cities", "Bids from NEORSD (Cleveland area sewer district) and the cities of Cleveland and Syracuse"),
     "mmsd": ("MMSD (Milwaukee)", "Water agency", "Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"),
     "buffalo-sewer": ("Buffalo Sewer Authority", "Water agency", "Buffalo Sewer Authority bids and RFPs"),
     "cleveland": ("City of Cleveland", "City (Cleveland)", "City bids and RFPs, including the Division of Water"),

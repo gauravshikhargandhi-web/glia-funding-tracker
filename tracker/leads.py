@@ -41,8 +41,13 @@ def _words(words):
     return re.compile(r"\b(" + "|".join(re.escape(w) for w in words) + r")", re.IGNORECASE)
 
 
-def parse_rss(text):
-    """Posts from an RSS feed: title, link, posted date and text."""
+def parse_rss(text, section=""):
+    """Posts from an RSS feed: title, link, posted date and text.
+
+    Newsletters list several calls inside one issue. Pass section, the id of
+    the heading over that list (e.g. "opportunities-events"), to get one post
+    per paragraph under it instead, each with the paragraph's first link.
+    """
     posts = []
     for item in re.findall(r"<item\b[^>]*>(.*?)</item>", text, re.S):
         def tag(name):
@@ -56,8 +61,26 @@ def parse_rss(text):
             except (TypeError, ValueError):
                 pass
         body = tag("content:encoded") or tag("description")
+        if section:
+            # Calls repeat in several issues; keep the newest (feeds list newest first).
+            seen = {p["link"] for p in posts}
+            posts += [p for p in _section_posts(body, section, posted) if p["link"] not in seen]
+            continue
         posts.append({"title": html.unescape(clean(tag("title"))), "link": clean(tag("link")),
                       "posted": posted, "text": html.unescape(clean(body))})
+    return posts
+
+
+def _section_posts(body, section, posted):
+    found = re.search(rf'<h(\d)\b[^>]*\bid="{re.escape(section)}"[^>]*>.*?</h\1>(.*?)(?=<h\d\b|$)', body, re.S)
+    posts = []
+    for paragraph in re.findall(r"<p\b[^>]*>(.*?)</p>", found.group(2) if found else "", re.S):
+        link = re.search(r'<a\b[^>]*href="([^"]+)"[^>]*>(.*?)</a>', paragraph, re.S)
+        if link:
+            # Drop the newsletter's tracking tag (?ref=...) so the same call keeps one link.
+            url = re.sub(r"[?&]ref=[^&#]*$", "", html.unescape(link.group(1)))
+            posts.append({"title": html.unescape(clean(link.group(2))), "link": url,
+                          "posted": posted, "text": html.unescape(clean(paragraph))})
     return posts
 
 
@@ -148,7 +171,7 @@ def collect(today, profile):
     for feed in settings.get("feeds", []):
         try:
             text = fetch(feed["url"], timeout=60).decode("utf-8", "replace")
-            posts = parse_wp(text) if feed.get("format") == "wordpress" else parse_rss(text)
+            posts = parse_wp(text) if feed.get("format") == "wordpress" else parse_rss(text, feed.get("section", ""))
         except Exception as exc:
             print(f"leads: {feed['name']} FAILED ({exc})")
             failed.append(feed["name"])
