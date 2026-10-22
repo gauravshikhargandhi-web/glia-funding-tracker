@@ -268,10 +268,11 @@ class NsfTest(unittest.TestCase):
 class SbirTest(unittest.TestCase):
     def test_open_and_upcoming_topics(self):
         today = datetime.date(2026, 10, 9)
-        rows = sbir.collect(today, pages=[_read("sample_sbir.html"), _read("sample_sbir.html")])
-        # The closed topic is dropped and the repeated page adds nothing.
+        rows = sbir.collect(today, csv_text=_read("sample_sbir.csv"))
+        # The closed topic is dropped and the repeated row adds nothing.
         self.assertEqual([r["source_id"] for r in rows], ["12958", "13022"])
         water, navy = rows
+        self.assertEqual(water["title"], "Innovative Technologies for Drinking Water & Distribution")
         self.assertEqual(water["funder"], "Environmental Protection Agency")
         self.assertEqual(water["status"], "posted")
         self.assertEqual(water["close_date"], "2026-11-20")
@@ -283,6 +284,12 @@ class SbirTest(unittest.TestCase):
         self.assertEqual(navy["funder_code"], "DOD")
         self.assertEqual(navy["listing_type"], "Contract (STTR topic)")
         self.assertIn("Opens 2026-10-28", navy["topics"])
+
+    def test_short_download_fails_instead_of_dropping_topics(self):
+        with self.assertRaises(ValueError):
+            sbir.collect(TODAY, csv_text=_read("sample_sbir.csv"), expected=306)
+        with self.assertRaises(ValueError):
+            sbir.collect(TODAY, csv_text="<html>maintenance</html>")
 
 
 class FederalRegisterTest(unittest.TestCase):

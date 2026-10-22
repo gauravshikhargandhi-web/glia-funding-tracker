@@ -2,21 +2,28 @@
 SBIR/STTR research topics (Defense, Energy, NSF, NASA and others).
 
 SBIR.gov's data API refuses automated requests, but its public topic search
-page (www.sbir.gov/topics) is plain HTML, ten topics per page. Most Defense
-topics reach us only this way. Topics are kept when they match the water
-keywords like any other listing.
+(www.sbir.gov/topics) has a Download button that returns every open topic as
+one CSV. That is used rather than the result pages, whose order changes from
+one request to the next, so paging through them skips and repeats topics.
+Most Defense topics reach us only this way. Topics are kept when they match
+the water keywords like any other listing.
 """
 
+import csv
 import datetime
 import html
+import io
 import re
+import urllib.parse
 
 from tracker.text import clean, fetch
 
 BASE = "https://www.sbir.gov"
-SEARCH_URL = BASE + "/topics?status=1&page={page}"
-# Safety stop: about 350 topics are open or upcoming at a time, ten per page.
-MAX_PAGES = 80
+SEARCH_URL = BASE + "/topics?status=1&page=0"
+# The download is checked against the result count the search page shows; a
+# much shorter file means something went wrong, so the source fails for the
+# day (and keeps yesterday's topics) instead of dropping topics.
+MIN_SHARE = 0.9
 AGENCIES = {
     "DOD": "Department of Defense", "DOE": "Department of Energy", "NSF": "National Science Foundation",
     "NASA": "NASA", "HHS": "Department of Health and Human Services", "USDA": "Department of Agriculture",
@@ -25,7 +32,6 @@ AGENCIES = {
 }
 # Agencies that award SBIR/STTR as grants; the rest (Defense, NASA, EPA, ...) award contracts.
 GRANT_AGENCIES = {"NSF", "DOE", "USDA", "HHS"}
-_DATE = r"([A-Z][a-z]+ \d{1,2}, \d{4})"
 
 
 def _date(text):
@@ -35,85 +41,81 @@ def _date(text):
         return ""
 
 
-def parse(page):
-    """Topics on one search results page."""
-    topics = []
-    blocks = re.split(r'<h3 class="margin-top-2[^"]*">', page)[1:]
-    for block in blocks:
-        link = re.search(r'<a href="(/topics/(\d+))">(.*?)</a>', block, re.S)
-        if not link:
-            continue
-        found = lambda label: re.search(rf"<b>{label}:</b>\s*{_DATE}", block)
-        dates = {label: _date(m.group(1)) if (m := found(label)) else ""
-                 for label in ("Release Date", "Open Date", "Close Date")}
-        badge = re.search(r'<span class="[^"]*radius-sm[^"]*">\s*([^<]+?)\s*</span>', block)
-        agency = re.search(r'alt="Seal of the Agency:\s*([A-Z]+)"', block)
-        summary = re.search(r'<p class="measure-6">(.*?)</p>', block, re.S)
-        tags = re.findall(r'<p class="[^"]*bg-base-dark[^"]*">\s*([^<]+?)\s*</p>', block)
-        topics.append({
-            "id": link.group(2),
-            "link": BASE + link.group(1),
-            "title": html.unescape(clean(link.group(3))),
-            "badge": badge.group(1) if badge else "",
-            "agency": agency.group(1) if agency else "",
-            "summary": html.unescape(clean(summary.group(1))) if summary else "",
-            "tags": tags,
-            **dates,
-        })
-    return topics
-
-
 def normalize(topic, today):
-    code = topic["agency"]
-    not_open_yet = topic["Open Date"] and topic["Open Date"] > today.isoformat()
-    programs = [t for t in topic["tags"] if t in ("SBIR", "STTR")]
+    """One row of the downloaded CSV in the common format."""
+    code = topic.get("Agency", "").strip()
+    dates = {label: _date(topic.get(label, "").strip()) for label in ("Release Date", "Open Date", "Close Date")}
+    not_open_yet = dates["Open Date"] and dates["Open Date"] > today.isoformat()
+    program = topic.get("Program", "").strip()
+    programs = "SBIR / STTR" if program == "BOTH" else (program or "SBIR")
+    link = topic.get("SBIRTopicLink", "").strip()
     return {
         "source": "sbir.gov",
-        "source_id": topic["id"],
-        "title": topic["title"],
+        "source_id": link.rstrip("/").rsplit("/", 1)[-1],
+        "title": html.unescape(clean(topic.get("Topic Title", ""))),
         "funder": AGENCIES.get(code, code),
         "funder_code": code,
-        "listing_type": ("Grant" if code in GRANT_AGENCIES else "Contract") + f" ({' / '.join(programs or ['SBIR'])} topic)",
+        "listing_type": ("Grant" if code in GRANT_AGENCIES else "Contract") + f" ({programs} topic)",
         "status": "forecast" if not_open_yet else "posted",
-        "post_date": topic["Release Date"],
-        "close_date": topic["Close Date"],
+        "post_date": dates["Release Date"],
+        "close_date": dates["Close Date"],
         "award_floor": "",
         "award_ceiling": "",
         "total_funding": "",
         "eligibility": "Small businesses",
-        "topics": "; ".join(["SBIR/STTR"] + ([f"Opens {topic['Open Date']}"] if not_open_yet else [])),
+        "topics": "; ".join(["SBIR/STTR"] + ([f"Opens {dates['Open Date']}"] if not_open_yet else [])),
         "location": "National",
-        "link": topic["link"],
-        "summary": topic["summary"],
+        "link": link,
+        "summary": html.unescape(clean(topic.get("Topic Description", ""))),
     }
 
 
-def collect(today, pages=None):
+def collect(today, csv_text=None, expected=None):
     """Return open and upcoming SBIR/STTR topics in the common format.
 
-    Pass pages (a list of result-page HTML) to skip the download, e.g. in tests.
+    Pass csv_text (the downloaded CSV) and optionally expected (the result count
+    the search page shows) to skip the download, e.g. in tests.
     """
-    if pages is None:
-        pages = _download()
+    if csv_text is None:
+        csv_text, expected = download()
+    reader = csv.DictReader(io.StringIO(csv_text))
+    if "SBIRTopicLink" not in (reader.fieldnames or []):
+        raise ValueError("SBIR.gov download changed: no SBIRTopicLink column")
+    topics = list(reader)
+    if expected and len(topics) < expected * MIN_SHARE:
+        raise ValueError(f"SBIR.gov download has {len(topics)} topics but the search shows {expected}")
     seen, rows = set(), []
-    for page in pages:
-        for topic in parse(page):
-            if topic["id"] in seen:
-                continue
-            seen.add(topic["id"])
-            if topic["Close Date"] and topic["Close Date"] < today.isoformat():
-                continue
-            rows.append(normalize(topic, today))
+    for topic in topics:
+        row = normalize(topic, today)
+        if not row["source_id"] or row["source_id"] in seen:
+            continue
+        seen.add(row["source_id"])
+        if row["close_date"] and row["close_date"] < today.isoformat():
+            continue
+        rows.append(row)
     return rows
 
 
-def _download():
-    pages, seen = [], set()
-    for number in range(MAX_PAGES):
-        page = fetch(SEARCH_URL.format(page=number), timeout=60).decode("utf-8", errors="replace")
-        ids = {t["id"] for t in parse(page)}
-        if not ids or ids <= seen:
-            break  # past the last page
-        seen |= ids
-        pages.append(page)
-    return pages
+def download():
+    """(CSV text, result count shown on the search page). The Download button
+    posts the search form back with op=Download."""
+    page = fetch(SEARCH_URL, timeout=60).decode("utf-8", errors="replace")
+    count = re.search(r"of\s+([\d,]+)\s+results", page)
+    form = page[page.find('<form class="topics-search'):]
+    form = form[:form.find("</form>")]
+    if not form:
+        raise ValueError("SBIR.gov page layout changed: no search form")
+    fields = {}
+    for tag in re.findall(r"<input[^>]*>", form):
+        name = re.search(r'name="([^"]+)"', tag)
+        kind = re.search(r'type="([^"]+)"', tag)
+        kind = kind.group(1) if kind else "text"
+        if not name or kind == "submit" or (kind in ("checkbox", "radio") and "checked" not in tag):
+            continue
+        value = re.search(r'value="([^"]*)"', tag)
+        fields[name.group(1)] = html.unescape(value.group(1)) if value else ""
+    fields["op"] = "Download"
+    text = fetch(SEARCH_URL, timeout=180, data=urllib.parse.urlencode(fields).encode(), headers={
+        "Content-Type": "application/x-www-form-urlencoded", "Referer": SEARCH_URL,
+    }).decode("utf-8", errors="replace")
+    return text, int(count.group(1).replace(",", "")) if count else None
