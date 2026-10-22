@@ -37,6 +37,8 @@ def kind(row):
         return "Grant"
     if "loan" in t:
         return "Loan"
+    if "invest" in t or "equity" in t:
+        return "Equity"
     if "accelerator" in t:
         return "Accelerator"
     if "pitch" in t:

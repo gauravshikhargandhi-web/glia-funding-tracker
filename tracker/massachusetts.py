@@ -2,7 +2,8 @@
 authorities; grants are posted here too). Public search, no login.
 
 The open-bid search shows 25 rows a page, so we page through it the way the
-site's own "next page" button does.
+site's own "next page" button does. Illinois BidBuy runs on the same platform
+(Periscope BuySpeed), so tracker/bidbuy.py reuses this code with its own host.
 """
 
 import datetime
@@ -12,8 +13,9 @@ import urllib.parse
 
 from tracker.text import clean, fetch
 
-SEARCH_URL = "https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml"
-DETAIL_URL = "https://www.commbuys.com/bso/external/bidDetail.sda?docId={id}&external=true&parentUrl=close"
+HOST = "https://www.commbuys.com"
+SEARCH_PATH = "/bso/view/search/external/advancedSearchBid.xhtml"
+DETAIL_PATH = "/bso/external/bidDetail.sda?docId={id}&external=true&parentUrl=close"
 TABLE = "bidSearchResultsForm:bidResultId"
 PAGE_SIZE = 25
 MAX_PAGES = 100  # safety stop: 2,500 bids
@@ -41,14 +43,14 @@ def parse(page):
     return rows
 
 
-def normalize(row):
+def normalize(row, host=HOST, source="commbuys", code="MA", location="Massachusetts"):
     grant = "grant" in row["description"].lower()
     return {
-        "source": "commbuys",
+        "source": source,
         "source_id": row["id"],
         "title": row["description"],
         "funder": row["org"],
-        "funder_code": "MA",
+        "funder_code": code,
         "listing_type": "Grant" if grant else "Contract (bid)",
         "status": "posted",
         "post_date": "",
@@ -58,14 +60,15 @@ def normalize(row):
         "total_funding": "",
         "eligibility": "Any vendor",
         "topics": "",
-        "location": "Massachusetts",
-        "link": DETAIL_URL.format(id=urllib.parse.quote(row["id"])),
+        "location": location,
+        "link": host + DETAIL_PATH.format(id=urllib.parse.quote(row["id"])),
         "summary": "",
     }
 
 
-def download():
-    first = fetch(SEARCH_URL + "?openBids=true", timeout=180).decode("utf-8", errors="replace")
+def download(host=HOST):
+    search_url = host + SEARCH_PATH
+    first = fetch(search_url + "?openBids=true", timeout=180).decode("utf-8", errors="replace")
     form = first[first.find('<form id="bidSearchResultsForm"'):]
     form = form[:form.find("</form>")]
     state = re.search(r'name="javax.faces.ViewState"[^>]*value="([^"]+)"', form).group(1)
@@ -81,25 +84,26 @@ def download():
             TABLE + "_encodeFeature": "true", "bidSearchResultsForm": "bidSearchResultsForm",
             "_csrf": csrf, "openBids": "true", "javax.faces.ViewState": state,
         }
-        pages.append(fetch(SEARCH_URL, timeout=120, data=urllib.parse.urlencode(body).encode(), headers={
+        pages.append(fetch(search_url, timeout=120, data=urllib.parse.urlencode(body).encode(), headers={
             "Faces-Request": "partial/ajax", "X-Requested-With": "XMLHttpRequest",
-            "Origin": "https://www.commbuys.com", "Referer": SEARCH_URL + "?openBids=true",
+            "Origin": host, "Referer": search_url + "?openBids=true",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         }).decode("utf-8", errors="replace"))
     return pages
 
 
-def collect(today, pages=None):
+def collect(today, pages=None, **site):
     """Return open COMMBUYS bids in the common format.
 
     Pass pages (the result pages' HTML) to skip the download, e.g. in tests.
+    Pass host, source, code and location to read another site on the same platform.
     """
     if pages is None:
-        pages = download()
+        pages = download(site.get("host", HOST))
     seen, out = set(), []
     for page in pages:
         for row in parse(page):
-            item = normalize(row)
+            item = normalize(row, **site)
             if item["source_id"] in seen or (item["close_date"] and item["close_date"] < today.isoformat()):
                 continue
             seen.add(item["source_id"])

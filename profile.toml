@@ -23,6 +23,8 @@ keywords = [
   "pumping station", "lift station", "hydrant",
   # Added 2026-10-08 from the incubator feeds (Leads tab).
   "blue economy",
+  # Added 2026-10-22 with the DOE Water Power source.
+  "hydropower", "marine energy", "hydrokinetic", "wave energy",
 ]
 
 # Every listing from these funders counts as a keyword match, even when its title
@@ -52,8 +54,11 @@ research_funders = [
 
 # Sources that count as matches without water words: "calendar" is the
 # Calendar tab of the Google Sheet (picked by hand), "nsf-sbir" is NSF's
-# small-business research program, which fits every cohort company.
-hand_picked_sources = ["calendar", "nsf-sbir"]
+# small-business research program, which fits every cohort company, and
+# "masscec" is the Massachusetts Clean Energy Center (a few open climate
+# programs at a time, in a priority state), "doe-water" is DOE's Water
+# Power Technologies Office and "ohio-tvsf" is Ohio's start-up fund.
+hand_picked_sources = ["calendar", "nsf-sbir", "masscec", "doe-water", "ohio-tvsf"]
 
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.

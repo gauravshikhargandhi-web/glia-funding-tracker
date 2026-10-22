@@ -19,7 +19,7 @@ Each row has the same columns whatever the source. Six plain columns come right 
 
 | Column | Values |
 | --- | --- |
-| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
+| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Equity (investment programs), Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
 | stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
 | deadline | Closing date, or "Not set" for rolling and forecast listings |
 | amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
@@ -56,16 +56,28 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
 | [Illinois GATA](https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx) state funding opportunities | Live | No |
 | [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |
+| [MassCEC](https://www.masscec.com/funding?status%5Bopen%5D=open) (Massachusetts Clean Energy Center) open grants, investments and programs; every program counts as a match | Live | No |
 | [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
+| [Indiana state bids](https://www.in.gov/idoa/procurement/current-business-opportunities/) (IDOA current business opportunities; links go to each bid's documents) | Live | No |
+| [Illinois BidBuy](https://www.bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids (state agencies and universities; same platform as COMMBUYS) | Live | No |
+| [Pennsylvania eMarketplace](https://www.emarketplace.state.pa.us/Search.aspx) open solicitations (state agencies, universities and authorities) | Live | No |
+| [Water Research Foundation](https://portal.waterrf.org/outbound-grants) open research RFPs | Live | No |
+| [Great Lakes Commission](https://www.glc.org/news/) RFPs (posted as news; kept while the deadline is ahead) | Live | No |
+| [H2Ohio](https://h2.ohio.gov/wps/portal/gov/h2ohio/partner-with-us/find-a-grant/find-a-grant) grant programs that are open or rolling | Live | No |
+| [Ohio Third Frontier Technology Validation and Start-up Fund](https://development.ohio.gov/business/third-frontier-and-technology/technology-validation-start-up-fund), listed while a round is open; counts as a match | Live | No |
 | [Great Lakes Restoration Initiative](https://glri.us/funding/funding-opportunities) open funding opportunities (USDA Forest Service, Ohio, NFWF and others; links to Grants.gov are skipped since Grants.gov is already a source) | Live | No |
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
+| [DOE American-Made prizes](https://www.herox.com/American-Made-Challenges) open for entries (listed on HeroX; American-Made's own site needs a browser) | Live | No |
+| [Federal prize challenges](https://www.usa.gov/find-active-challenge) listed on USA.gov, Challenge.gov's successor (student competitions skipped) | Live | No |
+| [DOE Water Power Technologies Office](https://www.energy.gov/eere/water/funding-opportunities) funding and technical support (TEAMER and others); every listing counts as a match | Live | No |
+| [NYSERDA](https://nyserda.ny.gov/All-Programs/Innovation-at-NYSERDA/Funding-Opportunities) current innovation calls (PONs and RFIs), with due dates from each call's portal page; NYSERDA's full list needs a browser | Live | No |
 | [City of Cleveland](https://www.clevelandohio.gov/city-hall/departments/finance/invitations-bid) bids and [RFPs](https://www.clevelandohio.gov/city-hall/departments/finance/request-qualificationsproposal), including the Division of Water | Live | No |
 | [Met Council](https://metrocouncil.org/About-Us/What-We-Do/DoingBusiness/Contracting-Opportunities.aspx) (Minneapolis-St. Paul) bids, RFPs and RFIs, including regional wastewater | Live | No |
 | [SBIR.gov topics](https://www.sbir.gov/topics) from every agency (Defense, Energy, NASA, EPA, ...), open and upcoming; SBIR.gov's data API refuses automated requests, so the public topic search page is read | Live | No |
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
 | Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies, GLOS, NAWI, ERDCWERX, mHUB, SeaAhead, Ocean Exchange, Climate Tech VC); see below | Live | No |
-| Michigan EGLE (site refuses automated requests); New York state grants (no open source found yet) | Not covered | |
+| Michigan EGLE (site refuses automated requests); Minnesota Pollution Control Agency (site sends automated requests to a bot check); Minnesota state RFPs (robots.txt disallows automated access); Pennsylvania grants search (its CSV download only works inside a browser, through a third-party search service); Ohio Lake Erie Commission (program descriptions only, no open dates); NOAA Sea Grant (national notices also reach Grants.gov); CIGLR (feed refuses automated requests); Defense Innovation Unit (listings only render in a browser; many also reach SAM.gov); Greentown Labs (no feed; its challenges usually appear in the Climate Tech VC newsletter); SERDP/ESTCP site (unreliable; its calls also reach SAM.gov); other New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
 

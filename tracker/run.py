@@ -11,9 +11,9 @@ import collections
 import csv
 import os
 
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois,
-                     leads, massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
-                     programs, samgov, sbir, virginia)
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana,
+                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile,
+                     programs, samgov, sbir, virginia, waterrf)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -34,6 +34,9 @@ ABOUT = {
     "grants.ca.gov": ("California Grants Portal", "State (CA)", "California state grants and loans"),
     "illinois-gata": ("Illinois GATA", "State (IL)", "Illinois state funding opportunities"),
     "commbuys": ("Massachusetts COMMBUYS", "State (MA)", "Massachusetts state and local bids, plus some grants"),
+    "indiana": ("Indiana state bids", "State (IN)", "Indiana state agency bids and RFPs (IDOA)"),
+    "bidbuy-illinois": ("Illinois BidBuy", "State (IL)", "Illinois state agency and university bids"),
+    "pa-emarketplace": ("Pennsylvania eMarketplace", "State (PA)", "Pennsylvania state agency, university and authority solicitations"),
     "eva-virginia": ("Virginia eVA", "State (VA)", "Virginia state and local solicitations"),
     "nyc-city-record": ("NYC City Record", "City (New York)", "New York City solicitations"),
     "chicago-eprocurement": ("Chicago eProcurement", "City (Chicago)", "City of Chicago bids"),
@@ -46,6 +49,15 @@ ABOUT = {
     "metcouncil": ("Met Council (Minneapolis)", "Water agency", "Metropolitan Council bids, RFPs and RFIs, including regional wastewater"),
     "sbir.gov": ("SBIR.gov topics", "Federal", "Open and upcoming SBIR/STTR research topics from every agency, including Defense"),
     "nsf-sbir": ("NSF SBIR/STTR", "Federal", "NSF small-business research deadlines in the next 30 days"),
+    "masscec": ("MassCEC", "State (MA)", "Massachusetts Clean Energy Center open grants, investments and programs"),
+    "nyserda": ("NYSERDA", "State (NY)", "New York energy research authority's current innovation calls (PONs and RFIs)"),
+    "american-made": ("DOE American-Made prizes", "Federal", "Department of Energy prize competitions open for entries, listed on HeroX"),
+    "usa.gov-challenges": ("Federal prize challenges", "Federal", "Active federal challenges and prize competitions listed on USA.gov (Challenge.gov's successor)"),
+    "doe-water": ("DOE Water Power Office", "Federal", "Open funding and technical support from DOE's Water Power Technologies Office"),
+    "waterrf": ("Water Research Foundation", "Research", "Open WRF research RFPs (teams of consultants, universities, utilities and companies)"),
+    "h2ohio": ("H2Ohio", "State (OH)", "Ohio water quality grant programs that are open or rolling"),
+    "ohio-tvsf": ("Ohio Third Frontier TVSF", "State (OH)", "Technology Validation and Start-up Fund round, while proposals are open"),
+    "glc": ("Great Lakes Commission", "Regional", "Commission RFPs posted as news, while their deadlines are ahead"),
     "glri": ("Great Lakes Restoration Initiative", "Federal", "Open opportunities listed on the GLRI funding page (Grants.gov links skipped)"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -86,6 +98,18 @@ def main():
         ("illinois-gata", lambda: illinois.collect(today)),
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
+        ("indiana", lambda: indiana.collect(today)),
+        ("bidbuy-illinois", lambda: bidbuy.collect(today)),
+        ("pa-emarketplace", lambda: pennsylvania.collect(today)),
+        ("masscec", lambda: masscec.collect(today)),
+        ("nyserda", lambda: nyserda.collect(today)),
+        ("american-made", lambda: americanmade.collect(today)),
+        ("usa.gov-challenges", lambda: challenges.collect(today)),
+        ("doe-water", lambda: doewater.collect(today)),
+        ("waterrf", lambda: waterrf.collect(today)),
+        ("h2ohio", lambda: h2ohio.collect(today)),
+        ("ohio-tvsf", lambda: ohiotvsf.collect(today)),
+        ("glc", lambda: glc.collect(today)),
         ("glri", lambda: glri.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),

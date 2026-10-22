@@ -7,8 +7,8 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois, leads,
-                     massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads,
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -323,6 +323,184 @@ class MassachusettsTest(unittest.TestCase):
         self.assertEqual(rows["BD-1"]["close_date"], "2026-11-06")
         self.assertEqual(rows["BD-2"]["funder"], "City of Fitchburg")
         self.assertIn("docId=BD-2", rows["BD-2"]["link"])
+
+
+class MassCecTest(unittest.TestCase):
+    def setUp(self):
+        rows = masscec.collect(datetime.date(2026, 10, 22), pages=[_read("sample_masscec.html")],
+                               details={"/program/2030-fund": _read("sample_masscec_detail.html")})
+        self.rows = {r["source_id"]: r for r in rows}
+
+    def test_keeps_open_programs_and_drops_passed_deadlines(self):
+        # InnovateMass is still marked open but its only deadline has passed.
+        self.assertEqual(set(self.rows), {"climatetech-pathmaker-grants", "2030-fund", "mass-fleet-advisor"})
+        self.assertEqual(self.rows["climatetech-pathmaker-grants"]["close_date"], "2027-01-08")
+        self.assertEqual(self.rows["mass-fleet-advisor"]["close_date"], "")  # rolling
+
+    def test_normalizes_fields(self):
+        row = self.rows["2030-fund"]
+        self.assertEqual(row["funder"], "Massachusetts Clean Energy Center")
+        self.assertEqual(row["link"], "https://www.masscec.com/program/2030-fund")
+        self.assertEqual(row["eligibility"], "Others (see listing)")
+        self.assertIn("early-stage climatetech companies", row["summary"])
+        self.assertEqual(plain.kind(row), "Equity")
+        self.assertTrue(self.rows["climatetech-pathmaker-grants"]["summary"].startswith("Award: Up to $450,000."))
+
+    def test_every_program_is_a_match(self):
+        rows = list(self.rows.values())
+        plain.add(rows)
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual(len(profile.apply(prof, rows)), 3)
+
+    def test_changed_layout_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            masscec.collect(TODAY, pages=["<html>new design</html>"], details={})
+
+
+class NyserdaTest(unittest.TestCase):
+    LINK = "https://portal.nyserda.ny.gov/CORE_Solicitation_Detail_Page?SolicitationId="
+
+    def setUp(self):
+        closed = "<html><h1>PON 6161</h1><p>This solicitation is closed</p></html>"
+        details = {self.LINK + "a0rcr00001L5iYZ": _read("sample_nyserda_detail.html"),
+                   self.LINK + "a0rcr0000191nvf": closed}
+        rows = nyserda.collect(datetime.date(2026, 10, 22), page=_read("sample_nyserda.html"), details=details)
+        self.rows = {r["source_id"]: r for r in rows}
+
+    def test_keeps_open_calls_and_drops_closed_ones(self):
+        self.assertEqual(set(self.rows), {"PON-6149", "PON-6239", "RFI-6169"})
+
+    def test_normalizes_fields_from_the_portal_page(self):
+        row = self.rows["PON-6239"]
+        self.assertEqual(row["title"], "Commercialization Cohort Programs (PON 6239)")
+        self.assertEqual(row["close_date"], "2026-12-02")
+        self.assertEqual(row["link"], self.LINK + "a0rcr00001L5iYZ")  # tracking dropped
+        self.assertTrue(row["summary"].startswith("Due: 12/02/2026 (Round 1). NYSERDA is making $37.9M"))
+        self.assertEqual(self.rows["RFI-6169"]["listing_type"], "Contract (request for information)")
+        self.assertEqual(self.rows["PON-6149"]["close_date"], "")  # portal page not read
+
+
+class AmericanMadeTest(unittest.TestCase):
+    def test_keeps_challenges_open_for_entries(self):
+        rows = americanmade.collect(datetime.date(2026, 10, 22), page=_read("sample_herox.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["TECEPrize", "GEMSPrize"])
+        self.assertEqual(rows[0]["close_date"], "2026-12-06")  # 45 days remaining
+        self.assertEqual(rows[0]["total_funding"], "6000000")
+        self.assertEqual(rows[1]["total_funding"], "300000")
+        self.assertEqual(rows[1]["close_date"], "")
+        self.assertEqual(rows[0]["link"], "https://www.herox.com/TECEPrize")
+
+
+class UsaGovChallengesTest(unittest.TestCase):
+    def test_reads_key_information_and_skips_student_and_ended_challenges(self):
+        ended = _read("sample_usagov_challenge.html").replace("9/30/2027", "9/30/2025")
+        rows = challenges.collect(datetime.date(2026, 10, 22), page=_read("sample_usagov_challenges.html"),
+                                  details={"/challenges/halt-the-hitchhiker-invasive-species":
+                                           _read("sample_usagov_challenge.html"),
+                                           "/challenges/old-challenge": ended})
+        self.assertEqual([r["source_id"] for r in rows], ["halt-the-hitchhiker-invasive-species"])
+        row = rows[0]
+        self.assertEqual(row["funder"], "Bureau of Reclamation")
+        self.assertEqual((row["post_date"], row["close_date"]), ("2026-10-01", "2027-09-30"))
+        self.assertEqual(row["total_funding"], "550000")
+        self.assertEqual(row["link"], "https://haltthehitchhiker.yet2.com/")
+        self.assertIn("quagga and zebra mussels", row["summary"])
+
+
+class DoeWaterTest(unittest.TestCase):
+    def test_reads_table_and_skips_fellowships_and_closed_rows(self):
+        rows = doewater.collect(datetime.date(2026, 10, 22), page=_read("sample_doewater.html"))
+        self.assertEqual([r["title"] for r in rows], ["Hydropower Technical Collaboration Program"])
+        row = rows[0]
+        self.assertEqual((row["post_date"], row["close_date"]), ("2024-04-30", ""))
+        self.assertTrue(row["link"].startswith("https://www.energy.gov/eere/water/articles/"))
+        plain.add(rows)
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual(len(profile.apply(prof, rows)), 1)  # every DOE water listing counts
+
+
+class IndianaTest(unittest.TestCase):
+    def test_reads_open_events(self):
+        rows = indiana.collect(datetime.date(2026, 10, 22), page=_read("sample_indiana.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["003000000088676", "000000000087814"])
+        row = rows[0]
+        self.assertEqual(row["title"], "300 SP Tippecanoe River Coliform Bacteria Testing")
+        self.assertEqual(row["funder"], "State of Indiana - Natural Resources")
+        self.assertEqual(row["close_date"], "2026-10-28")
+        self.assertEqual(row["link"], "https://www.in.gov/idoa/proc/solicitations/files/003000000088676.zip")
+        self.assertIn("E. coli testing of river water", row["summary"])
+        self.assertEqual(rows[1]["listing_type"], "Contract (RFP)")
+
+
+class BidBuyTest(unittest.TestCase):
+    def test_reuses_commbuys_parser_with_its_own_host(self):
+        rows = bidbuy.collect(TODAY, pages=[_read("sample_commbuys_p1.html")])
+        self.assertTrue(rows)
+        self.assertTrue(all(r["source"] == "bidbuy-illinois" and r["location"] == "Illinois" for r in rows))
+        self.assertTrue(rows[0]["link"].startswith("https://www.bidbuy.illinois.gov/bso/external/bidDetail.sda?docId="))
+
+
+class PennsylvaniaTest(unittest.TestCase):
+    def test_reads_export_and_drops_closed_bids(self):
+        rows = pennsylvania.collect(datetime.date(2026, 10, 22), csv_text=_read("sample_pa_emarketplace.csv"))
+        got = {r["source_id"]: r for r in rows}
+        self.assertEqual(set(got), {"COSTARS-41", "OSM 02(1454)102.1", "RFI-2026-07"})
+        self.assertEqual(got["COSTARS-41"]["close_date"], "")  # 9999 means no end date
+        self.assertEqual(got["OSM 02(1454)102.1"]["close_date"], "2026-11-12")
+        self.assertEqual(got["OSM 02(1454)102.1"]["link"],
+                         "https://www.emarketplace.state.pa.us/Solicitations.aspx?SID=OSM%2002%281454%29102.1")
+        self.assertEqual(plain.stage(got["RFI-2026-07"]), "Info request")
+        self.assertEqual(got["RFI-2026-07"]["funder"], "Department of Environmental Protection")
+
+    def test_changed_export_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            pennsylvania.collect(TODAY, csv_text="<html>error</html>")
+
+
+class WaterRfTest(unittest.TestCase):
+    def test_reads_open_rfps_once(self):
+        rows = waterrf.collect(datetime.date(2026, 10, 22), page=_read("sample_waterrf.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["5407"])  # 5300 closed; the grid view repeats 5407
+        row = rows[0]
+        self.assertEqual((row["close_date"], row["award_ceiling"], row["topics"]), ("2026-11-03", "250000", "Sponsored Programs"))
+        self.assertEqual(row["link"], "https://portal.waterrf.org/outbound-grant-details/3337")
+        self.assertIn("managed aquifer recharge", row["summary"])
+
+
+class H2OhioTest(unittest.TestCase):
+    def test_reads_table_data_and_skips_awarded_programs(self):
+        rows = h2ohio.collect(TODAY, page=_read("sample_h2ohio.html"))
+        self.assertEqual([r["title"] for r in rows], ["Wetland Grant Program"])
+        self.assertEqual(rows[0]["funder"], "H2Ohio - Ohio DNR")
+        self.assertIn("rolling basis", rows[0]["summary"])
+
+
+class OhioTvsfTest(unittest.TestCase):
+    def test_lists_the_round_until_proposals_are_due(self):
+        page = _read("sample_ohio_tvsf.html")
+        rows = ohiotvsf.collect(datetime.date(2026, 7, 30), page=page)
+        self.assertEqual([(r["source_id"], r["close_date"]) for r in rows], [("round-46", "2026-08-06")])
+        self.assertIn("start-up companies", rows[0]["summary"])
+        self.assertEqual(ohiotvsf.collect(datetime.date(2026, 8, 7), page=page), [])
+
+    def test_changed_layout_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            ohiotvsf.collect(TODAY, page="<html>new design</html>")
+
+
+class GlcTest(unittest.TestCase):
+    def test_keeps_open_rfp_posts(self):
+        posts = {
+            "https://www.glc.org/news/economic-rfp-031326":
+                "<article><p>The deadline for submissions is 5 p.m. Eastern on April 30, 2026.</p></article>",
+            "https://www.glc.org/news/glsnrp-rfp-021226":
+                "<article><p>Applications are due by 5 p.m. Eastern on April 27 and will be reviewed.</p></article>",
+        }
+        rows = glc.collect(datetime.date(2026, 4, 28), pages=[_read("sample_glc_news.html")], posts=posts)
+        self.assertEqual([(r["source_id"], r["close_date"]) for r in rows], [("economic-rfp-031326", "2026-04-30")])
+        self.assertEqual(rows[0]["title"], "Economic Evaluation of Nature-Based Solutions for Stormwater Management")
+        rows = glc.collect(datetime.date(2026, 3, 20), pages=[_read("sample_glc_news.html")], posts=posts)
+        self.assertEqual(rows[1]["close_date"], "2026-04-27")  # year taken from the post date
 
 
 class VirginiaTest(unittest.TestCase):
