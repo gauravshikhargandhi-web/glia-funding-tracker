@@ -11,9 +11,9 @@ import collections
 import csv
 import os
 
-from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois, indiana,
-                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, pennsylvania, plain, pool, prizes, profile,
-                     programs, samgov, sbir, virginia)
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana,
+                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile,
+                     programs, samgov, sbir, virginia, waterrf)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -54,6 +54,10 @@ ABOUT = {
     "american-made": ("DOE American-Made prizes", "Federal", "Department of Energy prize competitions open for entries, listed on HeroX"),
     "usa.gov-challenges": ("Federal prize challenges", "Federal", "Active federal challenges and prize competitions listed on USA.gov (Challenge.gov's successor)"),
     "doe-water": ("DOE Water Power Office", "Federal", "Open funding and technical support from DOE's Water Power Technologies Office"),
+    "waterrf": ("Water Research Foundation", "Research", "Open WRF research RFPs (teams of consultants, universities, utilities and companies)"),
+    "h2ohio": ("H2Ohio", "State (OH)", "Ohio water quality grant programs that are open or rolling"),
+    "ohio-tvsf": ("Ohio Third Frontier TVSF", "State (OH)", "Technology Validation and Start-up Fund round, while proposals are open"),
+    "glc": ("Great Lakes Commission", "Regional", "Commission RFPs posted as news, while their deadlines are ahead"),
     "glri": ("Great Lakes Restoration Initiative", "Federal", "Open opportunities listed on the GLRI funding page (Grants.gov links skipped)"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -102,6 +106,10 @@ def main():
         ("american-made", lambda: americanmade.collect(today)),
         ("usa.gov-challenges", lambda: challenges.collect(today)),
         ("doe-water", lambda: doewater.collect(today)),
+        ("waterrf", lambda: waterrf.collect(today)),
+        ("h2ohio", lambda: h2ohio.collect(today)),
+        ("ohio-tvsf", lambda: ohiotvsf.collect(today)),
+        ("glc", lambda: glc.collect(today)),
         ("glri", lambda: glri.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),

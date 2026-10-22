@@ -56,9 +56,9 @@ research_funders = [
 # Calendar tab of the Google Sheet (picked by hand), "nsf-sbir" is NSF's
 # small-business research program, which fits every cohort company, and
 # "masscec" is the Massachusetts Clean Energy Center (a few open climate
-# programs at a time, in a priority state), and "doe-water" is DOE's Water
-# Power Technologies Office.
-hand_picked_sources = ["calendar", "nsf-sbir", "masscec", "doe-water"]
+# programs at a time, in a priority state), "doe-water" is DOE's Water
+# Power Technologies Office and "ohio-tvsf" is Ohio's start-up fund.
+hand_picked_sources = ["calendar", "nsf-sbir", "masscec", "doe-water", "ohio-tvsf"]
 
 # Drop listings that mention any of these.
 # "Watervliet" is an Army arsenal; "Marine Corps" notices match "marine" but are rarely about water.
