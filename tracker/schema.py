@@ -26,7 +26,7 @@ FIELDS = [
     "topics",          # source's categories, "; " separated
     "location",        # where the applicant or work must be; "National" for federal
     "link",            # the original listing page
-    "summary",         # first part of the description
+    "summary",         # first 600 characters of the description
     "first_seen",      # date this pool first saw the listing
     "last_seen",       # most recent date it was still open
 ]

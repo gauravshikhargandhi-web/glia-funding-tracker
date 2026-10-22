@@ -96,7 +96,7 @@ def normalize(item):
         "topics": "Great Lakes Restoration Initiative",
         "location": "Great Lakes",
         "link": item["link"],
-        "summary": summary[:600],
+        "summary": summary,
     }
 
 

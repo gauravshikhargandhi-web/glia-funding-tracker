@@ -53,7 +53,7 @@ def normalize(row):
         "topics": row.get("Categories", ""),
         "location": "California",
         "link": row.get("GrantURL") or row.get("AgencyURL", ""),
-        "summary": summary[:600],
+        "summary": summary,
     }
 
 

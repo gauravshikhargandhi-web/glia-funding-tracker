@@ -39,6 +39,17 @@ water_agencies = [
   "Metropolitan Council Environmental Services",  # Minneapolis-St. Paul wastewater
 ]
 
+# Every call from these research funders counts as a match, even without water
+# words (their open calls cover water, coasts, flooding and sediment deep in the
+# notice). Matched against the title and funder column, ignoring case. The
+# exclusions and product/service code rules below are skipped for them; the
+# "who can bid" rules still apply.
+research_funders = [
+  "Engineer Research and Development Center", "ERDC",       # Army Corps of Engineers labs
+  "Strategic Environmental Research and Development Program", "SERDP",  # Defense
+  "Environmental Security Technology Certification Program", "ESTCP",   # Defense
+]
+
 # Sources that count as matches without water words: "calendar" is the
 # Calendar tab of the Google Sheet (picked by hand), "nsf-sbir" is NSF's
 # small-business research program, which fits every cohort company.
@@ -113,14 +124,40 @@ not_construction_words = [
 ]
 
 # Grant text that rules businesses out. Checked in the eligibility notes and
-# summary. Grants that just say "see listing" are kept.
+# full description. Grants that just say "see listing" are kept.
 not_eligible_patterns = [
   'for[- ]profit (organizations|entities|businesses|companies|applicants)?[^.]{0,40}(are|is) not eligible',
   'not eligible[^.]{0,40}for[- ]profit',
   'not open to for[- ]profit',
-  'eligib\w* (applicants|entities) (are|is) limited to (states?|state agencies|local|units of local government|tribes|tribal|federally[- ]recognized|non-?profit|public|institutions of higher education|universities)',
-  'only (states|state agencies|tribes|federally[- ]recognized tribes|units of local government|local governments|non-?profit organizations|public agencies|institutions of higher education) (are eligible|may apply|can apply)',
+  'eligib\w* (applicants|entities) (are|is) limited to (states?|state agencies|local|units of local government|tribes|tribal|federally[- ]recognized|non-?profit|public)',
+  'only (states|state agencies|tribes|federally[- ]recognized tribes|units of local government|local governments|non-?profit organizations|public agencies) (are eligible|may apply|can apply)',
 ]
+
+# Grants open only to universities stay in data/matches.csv with
+# who_can_apply = "Partner needed": a startup can join as a partner or
+# subrecipient. A grant counts when its text matches one of these patterns
+# (checked before not_eligible_patterns), or when its eligibility column lists
+# one of partner_needed_eligibility and nothing from eligibility_any.
+partner_needed_patterns = [
+  'eligib\w* (applicants|entities) (are|is) limited to (accredited )?(institutions of higher education|universities|colleges)',
+  'only (accredited )?(institutions of higher education|universities|colleges) (are eligible|may apply|can apply)',
+  'limited to (accredited )?(institutions of higher education|universities|colleges)',
+]
+partner_needed_eligibility = ["institutions of higher education"]
+
+# Local and utility bids for building, repair, supplies or services stay in
+# data/matches.csv but get kind = "Construction/maintenance", so they can be
+# filtered out. A contract keeps its usual kind when its title has one of
+# tech_bid_words, when it is an info request, or when it comes from one of
+# maintenance_label_skip_sources (federal research and SBIR topics).
+tech_bid_words = [
+  "pilot", "technolog", "innovat", "research", "study", "software", "platform", "SaaS", "data",
+  "analytic", "digital", "sensor", "monitoring", "SCADA", "telemetry", "metering", "automat",
+  "artificial intelligence", "machine learning", "model", "optimization", "unmanned", "drone",
+  "CMMS", "ERP", "ITSM", "computer aided", "IT service", "request for information", "RFI",
+  "RFEI", "expressions of interest", "water quality", "laboratory analysis",
+]
+maintenance_label_skip_sources = ["sam.gov", "sbir.gov", "nsf-sbir"]
 
 # Skip funders whose code starts with any of these (HHS is mostly health research).
 exclude_funder_codes = ["HHS"]

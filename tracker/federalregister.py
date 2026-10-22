@@ -55,7 +55,7 @@ def normalize(doc):
         "topics": "; ".join(agencies),
         "location": "National",
         "link": doc.get("html_url", ""),
-        "summary": clean(doc.get("abstract"))[:600],
+        "summary": clean(doc.get("abstract")),
     }
 
 

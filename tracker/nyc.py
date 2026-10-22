@@ -44,7 +44,7 @@ def normalize(row):
         "topics": row.get("category_description", ""),
         "location": "New York City",
         "link": NOTICE_URL.format(id=row.get("request_id", "")),
-        "summary": summary[:600],
+        "summary": summary,
     }
 
 

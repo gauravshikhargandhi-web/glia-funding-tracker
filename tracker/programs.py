@@ -107,7 +107,7 @@ def normalize(row, today):
         "topics": "Hand-kept calendar",
         "location": row.get("location", ""),
         "link": row.get("link", ""),
-        "summary": " ".join(filter(None, [row.get("amount", "") and f"{row['amount']}.", about]))[:600],
+        "summary": " ".join(filter(None, [row.get("amount", "") and f"{row['amount']}.", about])),
     }
 
 

@@ -55,7 +55,7 @@ def parse_xtech(page):
             "topics": "",
             "location": "National",
             "link": link.group(1),
-            "summary": _element(card, 5)[:600],
+            "summary": _element(card, 5),
         })
     return rows
 
@@ -84,7 +84,7 @@ def parse_usbr(page, today):
         "topics": "",
         "location": "National",
         "link": USBR_URL,
-        "summary": main[:600],
+        "summary": main,
     }]
 
 

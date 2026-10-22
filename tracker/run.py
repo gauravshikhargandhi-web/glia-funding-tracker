@@ -61,6 +61,9 @@ def main():
 
     today = datetime.date.fromisoformat(args.today) if args.today else datetime.date.today()
     rows = pool.load(POOL_PATH)
+    # Yesterday's matches, kept for any source that fails today (its rows then
+    # have only the cut summary, not the full text the keywords were found in).
+    matched_before = {(r["source"], r["source_id"]) for r in pool.load(MATCHES_PATH)}
     prof = profile.load(args.profile)
     calendar_url = prof.get("calendar", {}).get("sheet_csv", "")
 
@@ -117,8 +120,8 @@ def main():
     plain.add(rows)
     pool.save(POOL_PATH, rows)
     dropped = []
-    matches = profile.apply(prof, rows, dropped)
-    to_archive = profile.on_topic(prof, closed)
+    matches = profile.apply(prof, rows, dropped, keep=matched_before)
+    to_archive = profile.on_topic(prof, closed, keep=matched_before)
     archive_path = ARCHIVE_PATH.format(year=today.year)
     archived = pool.archive(archive_path, to_archive)
     print(f"archive: {len(to_archive)} water listings closed today, {archived} in {archive_path}")

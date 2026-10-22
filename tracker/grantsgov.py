@@ -154,7 +154,7 @@ def normalize(record):
         "topics": "; ".join(CATEGORIES.get(c, c) for c in record.get("CategoryOfFundingActivity", [])),
         "location": "National",
         "link": LISTING_URL.format(id=record.get("OpportunityID", "")),
-        "summary": clean(record.get("Description"))[:600],
+        "summary": clean(record.get("Description")),
     }
 
 
