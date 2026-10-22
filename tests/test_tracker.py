@@ -7,8 +7,8 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (americanmade, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois, leads,
-                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois, indiana, leads,
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -417,6 +417,44 @@ class DoeWaterTest(unittest.TestCase):
         plain.add(rows)
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
         self.assertEqual(len(profile.apply(prof, rows)), 1)  # every DOE water listing counts
+
+
+class IndianaTest(unittest.TestCase):
+    def test_reads_open_events(self):
+        rows = indiana.collect(datetime.date(2026, 10, 22), page=_read("sample_indiana.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["003000000088676", "000000000087814"])
+        row = rows[0]
+        self.assertEqual(row["title"], "300 SP Tippecanoe River Coliform Bacteria Testing")
+        self.assertEqual(row["funder"], "State of Indiana - Natural Resources")
+        self.assertEqual(row["close_date"], "2026-10-28")
+        self.assertEqual(row["link"], "https://www.in.gov/idoa/proc/solicitations/files/003000000088676.zip")
+        self.assertIn("E. coli testing of river water", row["summary"])
+        self.assertEqual(rows[1]["listing_type"], "Contract (RFP)")
+
+
+class BidBuyTest(unittest.TestCase):
+    def test_reuses_commbuys_parser_with_its_own_host(self):
+        rows = bidbuy.collect(TODAY, pages=[_read("sample_commbuys_p1.html")])
+        self.assertTrue(rows)
+        self.assertTrue(all(r["source"] == "bidbuy-illinois" and r["location"] == "Illinois" for r in rows))
+        self.assertTrue(rows[0]["link"].startswith("https://www.bidbuy.illinois.gov/bso/external/bidDetail.sda?docId="))
+
+
+class PennsylvaniaTest(unittest.TestCase):
+    def test_reads_export_and_drops_closed_bids(self):
+        rows = pennsylvania.collect(datetime.date(2026, 10, 22), csv_text=_read("sample_pa_emarketplace.csv"))
+        got = {r["source_id"]: r for r in rows}
+        self.assertEqual(set(got), {"COSTARS-41", "OSM 02(1454)102.1", "RFI-2026-07"})
+        self.assertEqual(got["COSTARS-41"]["close_date"], "")  # 9999 means no end date
+        self.assertEqual(got["OSM 02(1454)102.1"]["close_date"], "2026-11-12")
+        self.assertEqual(got["OSM 02(1454)102.1"]["link"],
+                         "https://www.emarketplace.state.pa.us/Solicitations.aspx?SID=OSM%2002%281454%29102.1")
+        self.assertEqual(plain.stage(got["RFI-2026-07"]), "Info request")
+        self.assertEqual(got["RFI-2026-07"]["funder"], "Department of Environmental Protection")
+
+    def test_changed_export_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            pennsylvania.collect(TODAY, csv_text="<html>error</html>")
 
 
 class VirginiaTest(unittest.TestCase):
