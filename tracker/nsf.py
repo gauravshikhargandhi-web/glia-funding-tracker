@@ -63,7 +63,7 @@ def normalize(item):
         "topics": "SBIR/STTR",
         "location": "National",
         "link": item["link"],
-        "summary": item["text"][:600],
+        "summary": item["text"],
     }
 
 

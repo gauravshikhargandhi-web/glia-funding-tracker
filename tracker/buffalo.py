@@ -74,7 +74,7 @@ def normalize(item):
         "topics": "; ".join(item["topics"]),
         "location": "Buffalo, NY",
         "link": item["link"],
-        "summary": item["text"][:600],
+        "summary": item["text"],
     }
 
 

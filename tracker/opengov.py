@@ -46,7 +46,7 @@ def normalize(portal, project):
         "topics": "; ".join(t for t in (department, kind.title()) if t),
         "location": location,
         "link": LINK_URL.format(portal=portal, id=project["id"]),
-        "summary": summary[:600],
+        "summary": summary,
     }
 
 

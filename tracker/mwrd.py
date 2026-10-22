@@ -72,7 +72,7 @@ def normalize(row, detail):
         "topics": "",
         "location": "Chicago area, IL",
         "link": DETAIL_URL.format(id=row["id"]),
-        "summary": summary[:600],
+        "summary": summary,
     }
 
 

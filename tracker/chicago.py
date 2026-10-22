@@ -70,7 +70,7 @@ def normalize(row):
         "topics": event,
         "location": "Chicago, IL",
         "link": ABSTRACTS_URL,
-        "summary": summary[:600],
+        "summary": summary,
     }
 
 

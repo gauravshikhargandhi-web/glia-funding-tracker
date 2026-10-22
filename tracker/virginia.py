@@ -59,7 +59,7 @@ def normalize(doc):
         "topics": "; ".join(([f"Category: {doc['category']}"] if doc.get("category") else []) + (doc.get("commdesc") or [])),
         "location": f"{doc['workloc']}, VA" if doc.get("workloc") else "Virginia",
         "link": _link(doc),
-        "summary": clean(doc.get("longdesc"))[:600],
+        "summary": clean(doc.get("longdesc")),
     }
 
 

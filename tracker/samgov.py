@@ -58,7 +58,7 @@ def normalize(row):
         "topics": f"NAICS {row.get('NaicsCode', '')}; PSC {row.get('ClassificationCode', '')}",
         "location": _location(row),
         "link": row.get("Link", ""),
-        "summary": clean(row.get("Description"))[:600],
+        "summary": clean(row.get("Description")),
     }
 
 

@@ -84,7 +84,7 @@ def normalize(topic, today):
         "topics": "; ".join(["SBIR/STTR"] + ([f"Opens {topic['Open Date']}"] if not_open_yet else [])),
         "location": "National",
         "link": topic["link"],
-        "summary": topic["summary"][:600],
+        "summary": topic["summary"],
     }
 
 

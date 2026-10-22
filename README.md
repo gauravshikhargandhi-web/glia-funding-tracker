@@ -19,14 +19,24 @@ Each row has the same columns whatever the source. Six plain columns come right 
 
 | Column | Values |
 | --- | --- |
-| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Funding notice |
+| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
 | stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
 | deadline | Closing date, or "Not set" for rolling and forecast listings |
 | amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
-| who_can_apply | Any company, Companies eligible, Small businesses only, Check listing, Not companies |
+| who_can_apply | Any company, Companies eligible, Small businesses only, Check listing, Not companies; in `matches.csv`, Partner needed marks a grant open only to universities, which a startup can join as a partner or subrecipient |
 | short_summary | The first sentences of the summary |
 
-The source's own wording follows: listing type, status, post and close dates, award floor and ceiling, total funding, eligibility, eligibility notes, topics, location, link, the full summary, and the dates the tracker first and last saw the listing.
+The source's own wording follows: listing type, status, post and close dates, award floor and ceiling, total funding, eligibility, eligibility notes, topics, location, link, the summary (first 600 characters), and the dates the tracker first and last saw the listing.
+
+## How matching works
+
+The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
+
+- A listing matches when its title or full description has one of the `keywords`. The `summary` column only keeps the first 600 characters, but long federal notices often name the topic further down, so the whole text is searched.
+- Every listing from a `water_agencies` funder, a `research_funders` funder (Army Corps ERDC, SERDP, ESTCP) or a `hand_picked_sources` source counts, whatever its words.
+- The "who can bid" rules then set aside certification-only set-asides, construction and off-topic bids, and grants closed to companies, with the reason in `filtered_out.csv`.
+- Grants open only to universities are kept with who_can_apply = Partner needed.
+- Local and utility bids whose titles have no technology, pilot or information-request word (`tech_bid_words`) are kept with kind = Construction/maintenance, so they can be filtered out. Federal research and SBIR topics never get this label.
 
 ## Sources
 

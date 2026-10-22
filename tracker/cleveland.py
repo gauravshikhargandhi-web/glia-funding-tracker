@@ -97,7 +97,7 @@ def normalize(item, page_name, listing_type):
         "topics": item["division"],
         "location": "Cleveland, OH",
         "link": f"{BASE}{page_name}#{item['anchor']}",
-        "summary": item["text"][:600],
+        "summary": item["text"],
     }
 
 

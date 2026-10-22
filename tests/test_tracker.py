@@ -432,21 +432,26 @@ class PoolTest(unittest.TestCase):
             {"source": "grants.gov", "source_id": "999", "first_seen": "2026-08-01"},
             {"source": "nyc", "source_id": "A", "first_seen": "2026-09-15"},
         ]
-        fresh = [{"source": "grants.gov", "source_id": "100"}, {"source": "grants.gov", "source_id": "200"}]
+        fresh = [{"source": "grants.gov", "source_id": "100", "summary": "x" * 700},
+                 {"source": "grants.gov", "source_id": "200", "summary": "short"}]
         merged = {r["source_id"]: r for r in pool.merge(previous, "grants.gov", fresh, TODAY)}
         self.assertEqual(set(merged), {"100", "200", "A"})  # 999 closed and dropped
         self.assertEqual(merged["100"]["first_seen"], "2026-09-01")
         self.assertEqual(merged["200"]["first_seen"], "2026-10-05")
         self.assertEqual(merged["100"]["last_seen"], "2026-10-05")
+        # The summary column is cut; the full text stays on the row for matching.
+        self.assertEqual(len(merged["100"]["summary"]), pool.SUMMARY_LIMIT)
+        self.assertEqual(len(merged["100"]["match_text"]), 700)
 
 
 class ProfileTest(unittest.TestCase):
     def test_default_profile_filters_by_keyword_and_eligibility(self):
         rows = grantsgov.collect(TODAY, xml_source=SAMPLE)
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
-        ids = {r["source_id"] for r in profile.apply(prof, rows)}
-        # 102 is water-related but open to universities only.
-        self.assertEqual(ids, {"100", "103"})
+        got = {r["source_id"]: r for r in profile.apply(prof, rows)}
+        self.assertEqual(set(got), {"100", "102", "103"})
+        # 102 is open to universities only, so a startup would join as a partner.
+        self.assertEqual(got["102"]["who_can_apply"], "Partner needed")
 
     def test_default_profile_keeps_matching_city_solicitations(self):
         with open(os.path.join(HERE, "sample_nyc.json"), encoding="utf-8") as f:
@@ -520,6 +525,75 @@ class ProfileTest(unittest.TestCase):
         reasons = {row["source_id"]: reason for row, reason in dropped}
         self.assertEqual(reasons, {"rubbish": "off-topic bid: rubbish", "chlorine": "off-topic bid: hypochlorite"})
 
+
+    def row(self, **fields):
+        base = {k: "" for k in pool.FIELDS}
+        base.update(source="sam.gov", eligibility="Any vendor", funder="Dept Of The Army",
+                    listing_type="Contract (Solicitation)")
+        base.update(fields)
+        return base
+
+    def test_keywords_match_the_full_text_but_csv_summary_stays_cut(self):
+        long_text = "Boilerplate about the contracting process. " * 20 + "Areas include flood risk management."
+        fresh = [self.row(source_id="deep", title="Commercial Solutions Opening", summary=long_text,
+                          topics="NAICS 541715; PSC AH13")]
+        rows = pool.merge([], "sam.gov", fresh, TODAY)
+        self.assertNotIn("flood", rows[0]["summary"])
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual([r["source_id"] for r in profile.apply(prof, rows)], ["deep"])
+        # Without the full text (the source failed today), yesterday's match is kept.
+        loaded = [{k: v for k, v in rows[0].items() if k != "match_text"}]
+        self.assertEqual(profile.apply(prof, loaded), [])
+        self.assertEqual(len(profile.apply(prof, loaded, keep={("sam.gov", "deep")})), 1)
+
+    def test_research_funders_always_match_and_skip_the_code_check(self):
+        rows = [
+            self.row(source_id="crrel", title="Commercial Solutions Opening - ERDC Cold Regions Research",
+                     topics="NAICS 33999; PSC 9999"),
+            self.row(source_id="serdp", title="Strategic Environmental Research and Development Program (SERDP) BAA",
+                     topics="NAICS 541715; PSC AJ11"),
+            self.row(source_id="cerl", title="Engineer Research and Development Center (ERDC) - Construction "
+                     "Engineering Research Laboratory (CERL) Annual Commercial Solutions Opening (CSO)",
+                     topics="NAICS 541715; PSC 9999"),
+            self.row(source_id="setaside", title="ERDC Commercial Solutions Opening", eligibility="8(a) Set-Aside"),
+            self.row(source_id="other", title="Commercial Solutions Opening", topics="NAICS 33999; PSC 9999"),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        dropped = []
+        ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(ids, {"crrel", "serdp", "cerl"})
+        self.assertEqual([row["source_id"] for row, _ in dropped], ["setaside"])  # who-can-bid rules still apply
+
+    def test_university_only_grants_are_kept_as_partner_needed(self):
+        base = dict(source="grants.gov", title="Coastal resilience research", listing_type="Grant",
+                    eligibility="Others (see listing)")
+        rows = [
+            self.row(source_id="uni", eligibility_notes="Eligibility is limited to institutions of higher education.",
+                     **base),
+            self.row(source_id="states", eligibility_notes="Eligible applicants are limited to states and tribes.",
+                     **base),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        dropped = []
+        got = {r["source_id"]: r for r in profile.apply(prof, rows, dropped)}
+        self.assertEqual(set(got), {"uni"})
+        self.assertEqual(got["uni"]["who_can_apply"], "Partner needed")
+        self.assertEqual(rows[0]["who_can_apply"], "")  # the pool row is left as it was
+        self.assertTrue(dropped[0][1].startswith("not open to businesses"))
+
+    def test_utility_maintenance_bids_are_labelled_not_dropped(self):
+        base = dict(source="cleveland", funder="City of Cleveland Division of Water", kind="Contract")
+        rows = [
+            self.row(source_id="clamps", title="Pipe Repair Clamps and Couplings", **base),
+            self.row(source_id="cmms", title="Procure a New Computerized Maintenance Management System (CMMS)", **base),
+            self.row(source_id="rfi", title="Water meters", listing_type="Contract (Request for Information)", **base),
+            self.row(source_id="sbir", source="sbir.gov", title="Fire Resistant Joiner Bulkhead for vessels",
+                     funder="Navy", kind="Contract"),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        kinds = {r["source_id"]: r["kind"] for r in profile.apply(prof, rows)}
+        self.assertEqual(kinds, {"clamps": "Construction/maintenance", "cmms": "Contract", "rfi": "Contract",
+                                 "sbir": "Contract"})
 
 
 class PlainTest(unittest.TestCase):

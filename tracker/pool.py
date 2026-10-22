@@ -5,6 +5,11 @@ import os
 
 from tracker.schema import FIELDS
 
+# The summary column keeps this many characters. The full text is kept on each
+# fresh row as match_text, so keywords deep in a long notice still match; it is
+# not saved, which keeps listings.csv small.
+SUMMARY_LIMIT = 600
+
 
 def load(path):
     if not os.path.exists(path):
@@ -50,4 +55,6 @@ def merge(previous, source, fresh, today):
     for row in fresh:
         row["first_seen"] = first_seen.get(row["source_id"], stamp)
         row["last_seen"] = stamp
+        row["match_text"] = row["summary"]
+        row["summary"] = row["summary"][:SUMMARY_LIMIT]
     return kept + fresh
