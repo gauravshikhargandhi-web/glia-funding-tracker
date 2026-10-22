@@ -7,8 +7,8 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois, indiana, leads,
-                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads,
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -455,6 +455,52 @@ class PennsylvaniaTest(unittest.TestCase):
     def test_changed_export_fails_loudly(self):
         with self.assertRaises(ValueError):
             pennsylvania.collect(TODAY, csv_text="<html>error</html>")
+
+
+class WaterRfTest(unittest.TestCase):
+    def test_reads_open_rfps_once(self):
+        rows = waterrf.collect(datetime.date(2026, 10, 22), page=_read("sample_waterrf.html"))
+        self.assertEqual([r["source_id"] for r in rows], ["5407"])  # 5300 closed; the grid view repeats 5407
+        row = rows[0]
+        self.assertEqual((row["close_date"], row["award_ceiling"], row["topics"]), ("2026-11-03", "250000", "Sponsored Programs"))
+        self.assertEqual(row["link"], "https://portal.waterrf.org/outbound-grant-details/3337")
+        self.assertIn("managed aquifer recharge", row["summary"])
+
+
+class H2OhioTest(unittest.TestCase):
+    def test_reads_table_data_and_skips_awarded_programs(self):
+        rows = h2ohio.collect(TODAY, page=_read("sample_h2ohio.html"))
+        self.assertEqual([r["title"] for r in rows], ["Wetland Grant Program"])
+        self.assertEqual(rows[0]["funder"], "H2Ohio - Ohio DNR")
+        self.assertIn("rolling basis", rows[0]["summary"])
+
+
+class OhioTvsfTest(unittest.TestCase):
+    def test_lists_the_round_until_proposals_are_due(self):
+        page = _read("sample_ohio_tvsf.html")
+        rows = ohiotvsf.collect(datetime.date(2026, 7, 30), page=page)
+        self.assertEqual([(r["source_id"], r["close_date"]) for r in rows], [("round-46", "2026-08-06")])
+        self.assertIn("start-up companies", rows[0]["summary"])
+        self.assertEqual(ohiotvsf.collect(datetime.date(2026, 8, 7), page=page), [])
+
+    def test_changed_layout_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            ohiotvsf.collect(TODAY, page="<html>new design</html>")
+
+
+class GlcTest(unittest.TestCase):
+    def test_keeps_open_rfp_posts(self):
+        posts = {
+            "https://www.glc.org/news/economic-rfp-031326":
+                "<article><p>The deadline for submissions is 5 p.m. Eastern on April 30, 2026.</p></article>",
+            "https://www.glc.org/news/glsnrp-rfp-021226":
+                "<article><p>Applications are due by 5 p.m. Eastern on April 27 and will be reviewed.</p></article>",
+        }
+        rows = glc.collect(datetime.date(2026, 4, 28), pages=[_read("sample_glc_news.html")], posts=posts)
+        self.assertEqual([(r["source_id"], r["close_date"]) for r in rows], [("economic-rfp-031326", "2026-04-30")])
+        self.assertEqual(rows[0]["title"], "Economic Evaluation of Nature-Based Solutions for Stormwater Management")
+        rows = glc.collect(datetime.date(2026, 3, 20), pages=[_read("sample_glc_news.html")], posts=posts)
+        self.assertEqual(rows[1]["close_date"], "2026-04-27")  # year taken from the post date
 
 
 class VirginiaTest(unittest.TestCase):
