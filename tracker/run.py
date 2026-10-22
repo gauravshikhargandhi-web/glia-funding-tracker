@@ -11,8 +11,8 @@ import collections
 import csv
 import os
 
-from tracker import (americanmade, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois,
-                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, plain, pool, prizes, profile,
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glri, grantsgov, illinois, indiana,
+                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, opengov, pennsylvania, plain, pool, prizes, profile,
                      programs, samgov, sbir, virginia)
 
 POOL_PATH = "data/listings.csv"
@@ -34,6 +34,9 @@ ABOUT = {
     "grants.ca.gov": ("California Grants Portal", "State (CA)", "California state grants and loans"),
     "illinois-gata": ("Illinois GATA", "State (IL)", "Illinois state funding opportunities"),
     "commbuys": ("Massachusetts COMMBUYS", "State (MA)", "Massachusetts state and local bids, plus some grants"),
+    "indiana": ("Indiana state bids", "State (IN)", "Indiana state agency bids and RFPs (IDOA)"),
+    "bidbuy-illinois": ("Illinois BidBuy", "State (IL)", "Illinois state agency and university bids"),
+    "pa-emarketplace": ("Pennsylvania eMarketplace", "State (PA)", "Pennsylvania state agency, university and authority solicitations"),
     "eva-virginia": ("Virginia eVA", "State (VA)", "Virginia state and local solicitations"),
     "nyc-city-record": ("NYC City Record", "City (New York)", "New York City solicitations"),
     "chicago-eprocurement": ("Chicago eProcurement", "City (Chicago)", "City of Chicago bids"),
@@ -91,6 +94,9 @@ def main():
         ("illinois-gata", lambda: illinois.collect(today)),
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
+        ("indiana", lambda: indiana.collect(today)),
+        ("bidbuy-illinois", lambda: bidbuy.collect(today)),
+        ("pa-emarketplace", lambda: pennsylvania.collect(today)),
         ("masscec", lambda: masscec.collect(today)),
         ("nyserda", lambda: nyserda.collect(today)),
         ("american-made", lambda: americanmade.collect(today)),

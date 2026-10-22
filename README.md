@@ -58,6 +58,9 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |
 | [MassCEC](https://www.masscec.com/funding?status%5Bopen%5D=open) (Massachusetts Clean Energy Center) open grants, investments and programs; every program counts as a match | Live | No |
 | [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
+| [Indiana state bids](https://www.in.gov/idoa/procurement/current-business-opportunities/) (IDOA current business opportunities; links go to each bid's documents) | Live | No |
+| [Illinois BidBuy](https://www.bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids (state agencies and universities; same platform as COMMBUYS) | Live | No |
+| [Pennsylvania eMarketplace](https://www.emarketplace.state.pa.us/Search.aspx) open solicitations (state agencies, universities and authorities) | Live | No |
 | [Great Lakes Restoration Initiative](https://glri.us/funding/funding-opportunities) open funding opportunities (USDA Forest Service, Ohio, NFWF and others; links to Grants.gov are skipped since Grants.gov is already a source) | Live | No |
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |
 | [DOE American-Made prizes](https://www.herox.com/American-Made-Challenges) open for entries (listed on HeroX; American-Made's own site needs a browser) | Live | No |
@@ -70,7 +73,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
 | Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies, GLOS, NAWI, ERDCWERX, mHUB, SeaAhead, Ocean Exchange, Climate Tech VC); see below | Live | No |
-| Michigan EGLE (site refuses automated requests); Minnesota Pollution Control Agency (site sends automated requests to a bot check); other New York state grants (no open source found yet) | Not covered | |
+| Michigan EGLE (site refuses automated requests); Minnesota Pollution Control Agency (site sends automated requests to a bot check); Minnesota state RFPs (robots.txt disallows automated access); Pennsylvania grants search (its CSV download only works inside a browser, through a third-party search service); other New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
 
