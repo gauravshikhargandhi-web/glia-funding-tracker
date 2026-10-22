@@ -19,7 +19,7 @@ Each row has the same columns whatever the source. Six plain columns come right 
 
 | Column | Values |
 | --- | --- |
-| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
+| kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Equity (investment programs), Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
 | stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
 | deadline | Closing date, or "Not set" for rolling and forecast listings |
 | amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
@@ -56,6 +56,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
 | [Illinois GATA](https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx) state funding opportunities | Live | No |
 | [Massachusetts COMMBUYS](https://www.commbuys.com/bso/view/search/external/advancedSearchBid.xhtml?openBids=true) open bids and grants (state, cities, authorities) | Live | No |
+| [MassCEC](https://www.masscec.com/funding?status%5Bopen%5D=open) (Massachusetts Clean Energy Center) open grants, investments and programs; every program counts as a match | Live | No |
 | [Virginia eVA](https://mvendor.cgieva.com/Vendor/public/AllOpportunities.jsp) open solicitations (state, universities, localities) | Live | No |
 | [Great Lakes Restoration Initiative](https://glri.us/funding/funding-opportunities) open funding opportunities (USDA Forest Service, Ohio, NFWF and others; links to Grants.gov are skipped since Grants.gov is already a source) | Live | No |
 | Prize competitions: [Army xTech](https://xtech.army.mil/competitions/) and [Bureau of Reclamation](https://www.usbr.gov/research/challenges/accepting.html) | Live | No |

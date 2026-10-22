@@ -8,7 +8,7 @@ from unittest import mock
 
 from tracker import run
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois, leads,
-                     massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -323,6 +323,38 @@ class MassachusettsTest(unittest.TestCase):
         self.assertEqual(rows["BD-1"]["close_date"], "2026-11-06")
         self.assertEqual(rows["BD-2"]["funder"], "City of Fitchburg")
         self.assertIn("docId=BD-2", rows["BD-2"]["link"])
+
+
+class MassCecTest(unittest.TestCase):
+    def setUp(self):
+        rows = masscec.collect(datetime.date(2026, 10, 22), pages=[_read("sample_masscec.html")],
+                               details={"/program/2030-fund": _read("sample_masscec_detail.html")})
+        self.rows = {r["source_id"]: r for r in rows}
+
+    def test_keeps_open_programs_and_drops_passed_deadlines(self):
+        # InnovateMass is still marked open but its only deadline has passed.
+        self.assertEqual(set(self.rows), {"climatetech-pathmaker-grants", "2030-fund", "mass-fleet-advisor"})
+        self.assertEqual(self.rows["climatetech-pathmaker-grants"]["close_date"], "2027-01-08")
+        self.assertEqual(self.rows["mass-fleet-advisor"]["close_date"], "")  # rolling
+
+    def test_normalizes_fields(self):
+        row = self.rows["2030-fund"]
+        self.assertEqual(row["funder"], "Massachusetts Clean Energy Center")
+        self.assertEqual(row["link"], "https://www.masscec.com/program/2030-fund")
+        self.assertEqual(row["eligibility"], "Others (see listing)")
+        self.assertIn("early-stage climatetech companies", row["summary"])
+        self.assertEqual(plain.kind(row), "Equity")
+        self.assertTrue(self.rows["climatetech-pathmaker-grants"]["summary"].startswith("Award: Up to $450,000."))
+
+    def test_every_program_is_a_match(self):
+        rows = list(self.rows.values())
+        plain.add(rows)
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual(len(profile.apply(prof, rows)), 3)
+
+    def test_changed_layout_fails_loudly(self):
+        with self.assertRaises(ValueError):
+            masscec.collect(TODAY, pages=["<html>new design</html>"], details={})
 
 
 class VirginiaTest(unittest.TestCase):

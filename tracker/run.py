@@ -12,7 +12,7 @@ import csv
 import os
 
 from tracker import (bonfire, buffalo, california, chicago, cleveland, federalregister, glri, grantsgov, illinois,
-                     leads, massachusetts, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
+                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, opengov, plain, pool, prizes, profile,
                      programs, samgov, sbir, virginia)
 
 POOL_PATH = "data/listings.csv"
@@ -46,6 +46,7 @@ ABOUT = {
     "metcouncil": ("Met Council (Minneapolis)", "Water agency", "Metropolitan Council bids, RFPs and RFIs, including regional wastewater"),
     "sbir.gov": ("SBIR.gov topics", "Federal", "Open and upcoming SBIR/STTR research topics from every agency, including Defense"),
     "nsf-sbir": ("NSF SBIR/STTR", "Federal", "NSF small-business research deadlines in the next 30 days"),
+    "masscec": ("MassCEC", "State (MA)", "Massachusetts Clean Energy Center open grants, investments and programs"),
     "glri": ("Great Lakes Restoration Initiative", "Federal", "Open opportunities listed on the GLRI funding page (Grants.gov links skipped)"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -86,6 +87,7 @@ def main():
         ("illinois-gata", lambda: illinois.collect(today)),
         ("commbuys", lambda: massachusetts.collect(today)),
         ("eva-virginia", lambda: virginia.collect(today)),
+        ("masscec", lambda: masscec.collect(today)),
         ("glri", lambda: glri.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),
