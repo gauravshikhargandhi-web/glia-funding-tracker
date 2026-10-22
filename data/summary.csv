@@ -1,43 +1,60 @@
 section,name,level,open,matches,set_aside,detail
-run,Last refresh,,,,,2026-10-21
-total,All sources,,13153,354,152,21 sources
-source,Grants.gov,Federal,1421,54,0,"All federal grants and cooperative agreements, including forecasts"
-source,SAM.gov,Federal,9391,121,76,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
-source,Federal Register,Federal,8,1,0,Funding and prize notices published by agencies
+run,Last refresh,,,,,2026-10-22
+total,All sources,,12889,543,192,33 sources
+source,Grants.gov,Federal,1420,65,1,"All federal grants and cooperative agreements, including forecasts"
+source,SAM.gov,Federal,8848,229,110,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
+source,Federal Register,Federal,7,1,0,Funding and prize notices published by agencies
 source,California Grants Portal,State (CA),170,4,0,California state grants and loans
 source,Illinois GATA,State (IL),119,31,0,Illinois state funding opportunities
-source,Massachusetts COMMBUYS,State (MA),908,52,12,"Massachusetts state and local bids, plus some grants"
-source,Virginia eVA,State (VA),572,29,40,Virginia state and local solicitations
-source,NYC City Record,City (New York),196,10,12,New York City solicitations
+source,Massachusetts COMMBUYS,State (MA),902,50,12,"Massachusetts state and local bids, plus some grants"
+source,Indiana state bids,State (IN),67,13,0,Indiana state agency bids and RFPs (IDOA)
+source,Illinois BidBuy,State (IL),179,9,1,Illinois state agency and university bids
+source,Pennsylvania eMarketplace,State (PA),190,18,0,"Pennsylvania state agency, university and authority solicitations"
+source,Virginia eVA,State (VA),568,31,42,Virginia state and local solicitations
+source,NYC City Record,City (New York),198,13,14,New York City solicitations
 source,Chicago eProcurement,City (Chicago),6,0,2,City of Chicago bids
 source,MWRD (Chicago),Water agency,7,5,2,Metropolitan Water Reclamation District bids
 source,Great Lakes Water Authority,Water agency,5,4,1,Detroit-area regional water authority bids
-source,NEORSD (Cleveland),Water agency,9,8,1,Northeast Ohio Regional Sewer District bids
+source,OpenGov portals,"Water agency, cities",28,9,1,Bids from NEORSD (Cleveland area sewer district) and the cities of Cleveland and Syracuse
 source,MMSD (Milwaukee),Water agency,10,6,4,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
 source,Buffalo Sewer Authority,Water agency,0,0,0,Buffalo Sewer Authority bids and RFPs
-source,City of Cleveland,City (Cleveland),39,5,1,"City bids and RFPs, including the Division of Water"
-source,Met Council (Minneapolis),Water agency,17,4,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
-source,SBIR.gov topics,Federal,262,10,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
+source,City of Cleveland,City (Cleveland),34,6,1,"City bids and RFPs, including the Division of Water"
+source,Met Council (Minneapolis),Water agency,18,4,1,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
+source,SBIR.gov topics,Federal,50,7,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
 source,NSF SBIR/STTR,Federal,2,2,0,NSF small-business research deadlines in the next 30 days
+source,MassCEC,State (MA),16,16,0,"Massachusetts Clean Energy Center open grants, investments and programs"
+source,NYSERDA,State (NY),5,0,0,New York energy research authority's current innovation calls (PONs and RFIs)
+source,DOE American-Made prizes,Federal,5,0,0,"Department of Energy prize competitions open for entries, listed on HeroX"
+source,Federal prize challenges,Federal,13,1,0,Active federal challenges and prize competitions listed on USA.gov (Challenge.gov's successor)
+source,DOE Water Power Office,Federal,2,2,0,Open funding and technical support from DOE's Water Power Technologies Office
+source,Water Research Foundation,Research,6,6,0,"Open WRF research RFPs (teams of consultants, universities, utilities and companies)"
+source,H2Ohio,State (OH),3,3,0,Ohio water quality grant programs that are open or rolling
+source,Ohio Third Frontier TVSF,State (OH),0,0,0,"Technology Validation and Start-up Fund round, while proposals are open"
+source,Great Lakes Commission,Regional,0,0,0,"Commission RFPs posted as news, while their deadlines are ahead"
 source,Great Lakes Restoration Initiative,Federal,2,2,0,Open opportunities listed on the GLRI funding page (Grants.gov links skipped)
-source,"Army xTech, Bureau of Reclamation",Prizes,1,0,0,Open prize competitions
+source,"Army xTech, Bureau of Reclamation",Prizes,1,0,0,Failed today; showing yesterday's listings. Open prize competitions
 source,Calendar (hand-kept),Programs,8,6,0,"Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"
-kind,Contract,,,244,,
-kind,Grant,,,106,,
+kind,Contract,,,252,,
+kind,Construction/maintenance,,,151,,
+kind,Grant,,,126,,
+kind,Other,,,8,,
 kind,Accelerator,,,2,,
 kind,Loan,,,1,,
 kind,Funding notice,,,1,,
-stage,Open,,,266,,
-stage,Info request,,,62,,
-stage,Coming soon,,,26,,
-who,Any company,,,237,,
-who,Check listing,,,71,,
-who,Companies eligible,,,28,,
-who,Small businesses only,,,18,,
-set_aside,Construction bids,,,,77,
-set_aside,Certification-only set-asides,,,,48,
-set_aside,"Off-topic bids (supplies, grounds, building services)",,,,27,
-new,New matches today,,,30,,
+kind,Equity,,,1,,
+kind,Prize,,,1,,
+stage,Open,,,378,,
+stage,Info request,,,116,,
+stage,Coming soon,,,49,,
+who,Any company,,,380,,
+who,Check listing,,,106,,
+who,Small businesses only,,,31,,
+who,Companies eligible,,,26,,
+set_aside,Construction bids,,,,97,
+set_aside,Certification-only set-asides,,,,62,
+set_aside,"Off-topic bids (supplies, grounds, building services)",,,,32,
+set_aside,Grants closed to companies,,,,1,
+new,New matches today,,,96,,
 calendar_check,Water Council Tech Challenge,,,,,Add this round's dates
 calendar_check,Techstars Founder Catalyst WaterTech,,,,,Add this round's dates
 calendar_check,Cleantech Open,,,,,Add this round's dates
@@ -47,4 +64,4 @@ calendar_check,AWWA ACE and WEFTEC innovation showcases,,,,,Add this round's dat
 calendar_check,Wisconsin SBIR Advance,,,,,Add this round's dates
 calendar_check,DOE American-Made prizes,,,,,Add this round's dates
 calendar_check,InnovateMass,,,,,Round closed; add next round's dates
-leads,New leads today,,,0,,9 leads in the last year
+leads,New leads today,,,19,,28 leads in the last year
