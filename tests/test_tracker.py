@@ -397,6 +397,10 @@ class AmericanMadeTest(unittest.TestCase):
         self.assertEqual(rows[1]["close_date"], "")
         self.assertEqual(rows[0]["link"], "https://www.herox.com/TECEPrize")
 
+    def test_unexpected_page_fails_and_says_what_came_back(self):
+        with self.assertRaisesRegex(ValueError, "titled 'Just a moment...'"):
+            americanmade.collect(TODAY, page="<html><head><title>Just a moment...</title></head></html>")
+
 
 class UsaGovChallengesTest(unittest.TestCase):
     def test_reads_key_information_and_skips_student_and_ended_challenges(self):
