@@ -52,6 +52,7 @@ def apply(profile, rows, dropped=None, keep=()):
     not_eligible = _regex(rules.get("not_eligible_patterns", []))
     partner_text = _regex(rules.get("partner_needed_patterns", []))
     partner_types = [e.lower() for e in rules.get("partner_needed_eligibility", [])]
+    partner_sources = rules.get("partner_needed_sources", [])
     tech_bid_words = _pattern(rules.get("tech_bid_words", []))
     label_skip = rules.get("maintenance_label_skip_sources", [])
 
@@ -59,7 +60,7 @@ def apply(profile, rows, dropped=None, keep=()):
     for row in rows:
         if not _on_topic(row, topic, keep):
             continue
-        partner = _partner_needed(row, partner_text, partner_types, eligible)
+        partner = row["source"] in partner_sources or _partner_needed(row, partner_text, partner_types, eligible)
         reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words,
                               None if partner else not_eligible, off_topic_words)
         if reason:

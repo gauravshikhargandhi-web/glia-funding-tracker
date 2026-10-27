@@ -13,7 +13,7 @@ import os
 
 from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana,
                      leads, madsewer, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile,
-                     programs, samgov, sbir, virginia, waterrf)
+                     programs, samgov, sbir, virginia, waterrf, widnr)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -59,6 +59,7 @@ ABOUT = {
     "h2ohio": ("H2Ohio", "State (OH)", "Ohio water quality grant programs that are open or rolling"),
     "ohio-tvsf": ("Ohio Third Frontier TVSF", "State (OH)", "Technology Validation and Start-up Fund round, while proposals are open"),
     "glc": ("Great Lakes Commission", "Regional", "Commission RFPs posted as news, while their deadlines are ahead"),
+    "wi-dnr": ("Wisconsin DNR water grants", "State (WI)", "DNR water grant programs (stormwater, PFAS, lakes, dams) while a deadline is ahead; for towns and nonprofits, so startups join as partners"),
     "glri": ("Great Lakes Restoration Initiative", "Federal", "Open opportunities listed on the GLRI funding page (Grants.gov links skipped)"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -112,6 +113,7 @@ def main():
         ("h2ohio", lambda: h2ohio.collect(today)),
         ("ohio-tvsf", lambda: ohiotvsf.collect(today)),
         ("glc", lambda: glc.collect(today)),
+        ("wi-dnr", lambda: widnr.collect(today, prof.get("wi_dnr", {}).get("programs", []))),
         ("glri", lambda: glri.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),

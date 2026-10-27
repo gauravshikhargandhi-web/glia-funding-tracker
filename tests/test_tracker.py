@@ -8,7 +8,7 @@ from unittest import mock
 
 from tracker import run
 from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads, madsewer,
-                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf)
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf, widnr)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -527,6 +527,33 @@ class MadSewerTest(unittest.TestCase):
         self.assertEqual((pump["post_date"], pump["close_date"]), ("2026-09-22", ""))
         self.assertNotIn("appeared first", pump["summary"])
         self.assertEqual(pump["funder"], "Madison Metropolitan Sewerage District")
+
+
+class WiDnrTest(unittest.TestCase):
+    PFAS = "https://dnr.wisconsin.gov/aid/PFASsampling"
+    SURFACE = "https://dnr.wisconsin.gov/Aid/SurfaceWater.html"
+
+    def collect(self, today):
+        pages = {self.PFAS: _read("sample_widnr_pfas.html"), self.SURFACE: _read("sample_widnr_closed.html")}
+        return widnr.collect(today, [self.PFAS, self.SURFACE], pages=pages)
+
+    def test_lists_programs_while_a_deadline_is_ahead(self):
+        rows = self.collect(datetime.date(2026, 10, 27))
+        self.assertEqual([(r["source_id"], r["title"], r["close_date"]) for r in rows],
+                         [("pfassampling", "PFAS Sampling", "2027-04-30")])
+        rows = self.collect(datetime.date(2026, 9, 1))
+        self.assertEqual({r["source_id"]: r["close_date"] for r in rows},
+                         {"pfassampling": "2027-04-30", "surfacewater": "2026-09-15"})
+
+    def test_programs_are_kept_as_partner_needed(self):
+        rows = pool.merge([], "wi-dnr", self.collect(datetime.date(2026, 10, 27)), TODAY)
+        plain.add(rows)
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual([r["who_can_apply"] for r in profile.apply(prof, rows)], ["Partner needed"])
+
+    def test_profile_lists_program_pages(self):
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertIn(self.PFAS, prof["wi_dnr"]["programs"])
 
 
 class VirginiaTest(unittest.TestCase):

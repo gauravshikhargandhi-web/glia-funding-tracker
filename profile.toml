@@ -151,6 +151,10 @@ partner_needed_patterns = [
   'limited to (accredited )?(institutions of higher education|universities|colleges)',
 ]
 partner_needed_eligibility = ["institutions of higher education"]
+# Sources whose grants all go to governments or nonprofits that bring in
+# companies as partners (Wisconsin DNR's water grants go to towns, lake
+# districts and nonprofits).
+partner_needed_sources = ["wi-dnr"]
 
 # Local and utility bids for building, repair, supplies or services stay in
 # data/matches.csv but get kind = "Construction/maintenance", so they can be
@@ -193,6 +197,22 @@ allowed_codes = [
   "PSC 5845",  # underwater sound equipment
   "PSC 66",    # instruments and laboratory equipment
   "PSC 7",     # IT equipment and software
+]
+
+[wi_dnr]
+# Wisconsin DNR water grant programs to watch. Each is listed while a deadline
+# on its page is still ahead. Find more at https://dnr.wisconsin.gov/aid/Grants.html
+programs = [
+  "https://dnr.wisconsin.gov/Aid/SurfaceWater.html",
+  "https://dnr.wisconsin.gov/Aid/UrbanNonpoint.html",       # urban stormwater
+  "https://dnr.wisconsin.gov/Aid/TargetedRunoff.html",
+  "https://dnr.wisconsin.gov/Aid/MunFloodControl.html",
+  "https://dnr.wisconsin.gov/Aid/DamRemoval.html",
+  "https://dnr.wisconsin.gov/Aid/DamMunicipal.html",
+  "https://dnr.wisconsin.gov/aid/PFASsampling",
+  "https://dnr.wisconsin.gov/aid/EC-SDC.html",             # emerging contaminants in small water systems
+  "https://dnr.wisconsin.gov/Aid/CleanVessel.html",
+  "https://dnr.wisconsin.gov/node/95546",                  # underserved drinking water systems
 ]
 
 [calendar]
