@@ -7,7 +7,7 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads,
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads, madsewer,
                      massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf)
 
 HERE = os.path.dirname(__file__)
@@ -512,6 +512,21 @@ class GlcTest(unittest.TestCase):
         self.assertEqual(rows[0]["title"], "Economic Evaluation of Nature-Based Solutions for Stormwater Management")
         rows = glc.collect(datetime.date(2026, 3, 20), pages=[_read("sample_glc_news.html")], posts=posts)
         self.assertEqual(rows[1]["close_date"], "2026-04-27")  # year taken from the post date
+
+
+class MadSewerTest(unittest.TestCase):
+    def test_reads_deadlines_and_keeps_recent_notices_without_one(self):
+        rows = madsewer.collect(datetime.date(2026, 10, 28), feed=_read("sample_madsewer.xml"))
+        got = {r["source_id"]: r for r in rows}
+        # The forklift bid closed Oct 27; the August notice has no date and is past 45 days.
+        self.assertEqual(set(got), {"pfas-testing-of-wastewater-and-biosolids-consultant",
+                                    "rfp-for-pumping-station-2-force-main-condition-assessment"})
+        pfas = got["pfas-testing-of-wastewater-and-biosolids-consultant"]
+        self.assertEqual((pfas["close_date"], pfas["listing_type"]), ("2026-10-30", "Contract (RFP)"))
+        pump = got["rfp-for-pumping-station-2-force-main-condition-assessment"]
+        self.assertEqual((pump["post_date"], pump["close_date"]), ("2026-09-22", ""))
+        self.assertNotIn("appeared first", pump["summary"])
+        self.assertEqual(pump["funder"], "Madison Metropolitan Sewerage District")
 
 
 class VirginiaTest(unittest.TestCase):

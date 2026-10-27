@@ -36,6 +36,7 @@ water_agencies = [
   "Department Of Water Management",           # City of Chicago
   "Northeast Ohio Regional Sewer District",    # NEORSD, Cleveland area
   "Milwaukee Metropolitan Sewerage District",  # MMSD, Milwaukee area
+  "Madison Metropolitan Sewerage District",    # Madison, WI
   "Buffalo Sewer Authority",                   # Buffalo, NY
   "City of Cleveland Division of Water",       # also matches Division of Water Pollution Control
   "Metropolitan Council Environmental Services",  # Minneapolis-St. Paul wastewater
