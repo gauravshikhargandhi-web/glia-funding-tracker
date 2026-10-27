@@ -10,16 +10,17 @@ Every day a GitHub job pulls public funding sources, keeps the listings that are
 | --- | --- |
 | [`data/listings.csv`](data/listings.csv) | Every open listing from every source |
 | [`data/matches.csv`](data/matches.csv) | The listings that fit [`profile.toml`](profile.toml) |
-| [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, off-topic bid for supplies or building services, or a grant that rules out businesses), with the reason in the last column |
+| [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, or off-topic bid for supplies or building services), with the reason in the last column |
 | [`data/archive/`](data/archive) | Water listings that have closed, one file per year (starting 2026), kept for looking back at what funders offer and when |
 | [`data/summary.csv`](data/summary.csv) | Today's counts per source and per kind, stage and who can apply (feeds the sheet's About tab) |
 | [`profile.toml`](profile.toml) | Keywords and eligibility rules that decide what counts as a match |
 
-Each row has the same columns whatever the source. Six plain columns come right after the title and funder, so every listing reads the same way:
+Each row has the same columns whatever the source. Seven plain columns come right after the title and funder, so every listing reads the same way:
 
 | Column | Values |
 | --- | --- |
 | kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Equity (investment programs), Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
+| funding_type | How a startup would go after it: Grant (apply directly, including prizes, programs, equity and SBIR topics), RFP (pitch a proposal: RFPs, RFIs, sources sought, CSOs, BAAs), Contract (bid on a set specification), Construction (building and repair bids), Partnership (funding that goes to governments, nonprofits or universities, which a startup joins as a partner) |
 | stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
 | deadline | Closing date, or "Not set" for rolling and forecast listings |
 | amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
@@ -35,7 +36,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 - A listing matches when its title or full description has one of the `keywords`. The `summary` column only keeps the first 600 characters, but long federal notices often name the topic further down, so the whole text is searched.
 - Every listing from a `water_agencies` funder, a `research_funders` funder (Army Corps ERDC, SERDP, ESTCP) or a `hand_picked_sources` source counts, whatever its words.
 - The "who can bid" rules then set aside certification-only set-asides, construction and off-topic bids, and grants closed to companies, with the reason in `filtered_out.csv`.
-- Grants that go to universities, or (for sources in `partner_needed_sources`, such as Wisconsin DNR) to towns and nonprofits, are kept with who_can_apply = Partner needed.
+- Grants companies can't apply for directly (open only to governments, tribes, nonprofits or universities, or saying for-profits are not eligible) are kept with who_can_apply = Partner needed and funding_type = Partnership, because a startup can join as a partner or subrecipient. Contracts and grants for individuals only are still left out. Set `partner_when_not_eligible = false` to drop them instead.
 - Local and utility bids whose titles have no technology, pilot or information-request word (`tech_bid_words`) are kept with kind = Construction/maintenance, so they can be filtered out. Federal research and SBIR topics never get this label.
 
 ## Sources

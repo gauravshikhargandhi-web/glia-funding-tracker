@@ -151,6 +151,12 @@ partner_needed_patterns = [
   'limited to (accredited )?(institutions of higher education|universities|colleges)',
 ]
 partner_needed_eligibility = ["institutions of higher education"]
+# Grants that companies can't apply for directly (open only to governments,
+# tribes, nonprofits or universities, or that say for-profits are not eligible)
+# are kept as Partner needed instead of being dropped: a startup can join as a
+# partner or subrecipient. Contracts and grants for individuals only are still
+# dropped. Set to false to drop them.
+partner_when_not_eligible = true
 # Sources whose grants all go to governments or nonprofits that bring in
 # companies as partners (Wisconsin DNR's water grants go to towns, lake
 # districts and nonprofits).

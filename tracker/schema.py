@@ -8,6 +8,7 @@ FIELDS = [
     "funder_code",
     # Plain-language columns, the same for every source (see tracker/plain.py)
     "kind",            # Grant, Contract, Prize, Loan, Equity, Funding notice
+    "funding_type",    # Grant, RFP, Contract, Construction, Partnership: how a startup would go after it
     "stage",           # Open, Coming soon, Info request
     "deadline",        # close date, or "Not set"
     "amount",          # e.g. "Up to $500K"

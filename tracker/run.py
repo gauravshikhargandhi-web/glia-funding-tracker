@@ -200,6 +200,8 @@ def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()
         out.append(["source", label, level, pool_by[source], match_by[source], drop_by[source], note + covers])
     for name, n in collections.Counter(r["kind"] for r in matches).most_common():
         out.append(["kind", name, "", "", n, "", ""])
+    for name, n in collections.Counter(r["funding_type"] for r in matches).most_common():
+        out.append(["funding_type", name, "", "", n, "", ""])
     for name, n in collections.Counter(r["stage"] for r in matches).most_common():
         out.append(["stage", name, "", "", n, "", ""])
     for name, n in collections.Counter(r["who_can_apply"] for r in matches).most_common():

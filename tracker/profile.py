@@ -53,6 +53,8 @@ def apply(profile, rows, dropped=None, keep=()):
     partner_text = _regex(rules.get("partner_needed_patterns", []))
     partner_types = [e.lower() for e in rules.get("partner_needed_eligibility", [])]
     partner_sources = rules.get("partner_needed_sources", [])
+    partner_fallback = rules.get("partner_when_not_eligible", False)
+    picked = topic["picked"]
     tech_bid_words = _pattern(rules.get("tech_bid_words", []))
     label_skip = rules.get("maintenance_label_skip_sources", [])
 
@@ -61,13 +63,20 @@ def apply(profile, rows, dropped=None, keep=()):
         if not _on_topic(row, topic, keep):
             continue
         partner = row["source"] in partner_sources or _partner_needed(row, partner_text, partner_types, eligible)
+        if not partner and partner_fallback and row["source"] not in picked and _could_partner(row):
+            # A grant companies can't apply for directly is still one they can join as a partner.
+            text = f"{row.get('eligibility_notes', '')} {row.get('match_text') or row['summary']}"
+            partner = bool((not_eligible and not_eligible.search(text)) or
+                           (eligible and not any(e in row["eligibility"].lower() for e in eligible)))
         reason = _who_can_bid(row, set_asides, contractor_words, contractor_topics, tech_words,
                               None if partner else not_eligible, off_topic_words)
         if reason:
             if dropped is not None:
                 dropped.append((row, reason))
             continue
-        if not partner and eligible and not any(e in row["eligibility"].lower() for e in eligible):
+        # Hand-picked sources (the Calendar tab) were chosen by a person, so they skip this check.
+        if not partner and row["source"] not in picked and eligible and \
+                not any(e in row["eligibility"].lower() for e in eligible):
             continue
         if not _is_research(row, topic["research"]):
             if skip_funders and row["funder_code"].startswith(skip_funders):
@@ -82,6 +91,10 @@ def apply(profile, rows, dropped=None, keep=()):
             changes["who_can_apply"] = "Partner needed"
         if tech_bid_words and _maintenance_bid(row, tech_bid_words, label_skip):
             changes["kind"] = "Construction/maintenance"
+        if partner:
+            changes["funding_type"] = "Partnership"
+        elif changes.get("kind") == "Construction/maintenance":
+            changes["funding_type"] = "Construction"
         matches.append(dict(row, **changes) if changes else row)
     return matches
 
@@ -128,6 +141,19 @@ def _partner_needed(row, partner_text, partner_types, eligible):
         return True
     types = row["eligibility"].lower()
     return any(t in types for t in partner_types) and not any(e in types for e in eligible)
+
+
+_ORGANIZATIONS = re.compile(r"government|agenc|tribe|tribal|non-?profit|higher education|universit|college|"
+                            r"school|organization|district|public|entit|business|compan", re.IGNORECASE)
+
+
+def _could_partner(row):
+    """A grant (not a contract) whose applicants are organizations a startup could
+    team up with. Grants for individuals only, such as fellowships, are left out."""
+    if row["listing_type"].startswith("Contract"):
+        return False
+    eligibility = row["eligibility"]
+    return not (re.search(r"individual", eligibility, re.IGNORECASE) and not _ORGANIZATIONS.search(eligibility))
 
 
 def _maintenance_bid(row, tech_bid_words, skip_sources):

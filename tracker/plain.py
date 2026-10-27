@@ -19,6 +19,7 @@ def add(rows):
 def describe(row):
     return {
         "kind": kind(row),
+        "funding_type": funding_type(row),
         "stage": stage(row),
         "deadline": row["close_date"] or "Not set",
         "amount": amount(row),
@@ -48,6 +49,25 @@ def kind(row):
     if t == "notice":
         return "Funding notice"
     return "Other"
+
+
+# Contracts where the buyer asks for your proposal or ideas rather than a price
+# for a set specification.
+_PROPOSAL = re.compile(r"\b(rfp|rfi|rfq|rfei|request for (proposals?|information|qualifications|quotes?)|proposals?|"
+                       r"sources sought|broad agency|baa|commercial solutions opening|cso|"
+                       r"expressions? of interest|special notice)\b", re.IGNORECASE)
+
+
+def funding_type(row):
+    """How a startup would go after it: Grant (apply directly, including prizes,
+    programs, equity and SBIR topics), RFP (pitch a proposal), or Contract (bid
+    on a set specification). The profile filter adds Construction and Partnership."""
+    t = row["listing_type"]
+    if not t.lower().startswith("contract") or re.search(r"\b(SBIR|STTR)\b", t):
+        return "Grant"
+    if stage(row) == "Info request" or _PROPOSAL.search(f"{t} {row['title']}"):
+        return "RFP"
+    return "Contract"
 
 
 _INFO = ("sources sought", "request for information", "(rfi)", "special notice")
