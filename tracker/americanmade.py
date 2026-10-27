@@ -41,7 +41,11 @@ def parse(page):
     cards = [(path, _part(card, "title"), _part(card, "description"), _part(card, "stage"), _part(card, "award"))
              for path, card in _CARD.findall(page)]
     if not cards:
-        raise ValueError("HeroX page layout changed: no challenge cards found")
+        # Say what came back instead, so the log shows whether the layout
+        # changed or HeroX sent a different page (such as a bot check).
+        title = re.search(r"(?is)<title[^>]*>(.*?)</title>", page)
+        got = _text(title.group(1)) if title else _text(page)[:120]
+        raise ValueError(f"HeroX page has no challenge cards; got {len(page)} characters titled {got!r}")
     return cards
 
 
