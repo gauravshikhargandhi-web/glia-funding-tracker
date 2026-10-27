@@ -36,6 +36,7 @@ water_agencies = [
   "Department Of Water Management",           # City of Chicago
   "Northeast Ohio Regional Sewer District",    # NEORSD, Cleveland area
   "Milwaukee Metropolitan Sewerage District",  # MMSD, Milwaukee area
+  "Madison Metropolitan Sewerage District",    # Madison, WI
   "Buffalo Sewer Authority",                   # Buffalo, NY
   "City of Cleveland Division of Water",       # also matches Division of Water Pollution Control
   "Metropolitan Council Environmental Services",  # Minneapolis-St. Paul wastewater
@@ -150,6 +151,16 @@ partner_needed_patterns = [
   'limited to (accredited )?(institutions of higher education|universities|colleges)',
 ]
 partner_needed_eligibility = ["institutions of higher education"]
+# Grants that companies can't apply for directly (open only to governments,
+# tribes, nonprofits or universities, or that say for-profits are not eligible)
+# are kept as Partner needed instead of being dropped: a startup can join as a
+# partner or subrecipient. Contracts and grants for individuals only are still
+# dropped. Set to false to drop them.
+partner_when_not_eligible = true
+# Sources whose grants all go to governments or nonprofits that bring in
+# companies as partners (Wisconsin DNR's water grants go to towns, lake
+# districts and nonprofits).
+partner_needed_sources = ["wi-dnr"]
 
 # Local and utility bids for building, repair, supplies or services stay in
 # data/matches.csv but get kind = "Construction/maintenance", so they can be
@@ -192,6 +203,22 @@ allowed_codes = [
   "PSC 5845",  # underwater sound equipment
   "PSC 66",    # instruments and laboratory equipment
   "PSC 7",     # IT equipment and software
+]
+
+[wi_dnr]
+# Wisconsin DNR water grant programs to watch. Each is listed while a deadline
+# on its page is still ahead. Find more at https://dnr.wisconsin.gov/aid/Grants.html
+programs = [
+  "https://dnr.wisconsin.gov/Aid/SurfaceWater.html",
+  "https://dnr.wisconsin.gov/Aid/UrbanNonpoint.html",       # urban stormwater
+  "https://dnr.wisconsin.gov/Aid/TargetedRunoff.html",
+  "https://dnr.wisconsin.gov/Aid/MunFloodControl.html",
+  "https://dnr.wisconsin.gov/Aid/DamRemoval.html",
+  "https://dnr.wisconsin.gov/Aid/DamMunicipal.html",
+  "https://dnr.wisconsin.gov/aid/PFASsampling",
+  "https://dnr.wisconsin.gov/aid/EC-SDC.html",             # emerging contaminants in small water systems
+  "https://dnr.wisconsin.gov/Aid/CleanVessel.html",
+  "https://dnr.wisconsin.gov/node/95546",                  # underserved drinking water systems
 ]
 
 [calendar]

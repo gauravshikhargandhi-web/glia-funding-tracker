@@ -12,8 +12,8 @@ import csv
 import os
 
 from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana,
-                     leads, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile,
-                     programs, samgov, sbir, virginia, waterrf)
+                     leads, madsewer, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile,
+                     programs, samgov, sbir, virginia, waterrf, widnr)
 
 POOL_PATH = "data/listings.csv"
 MATCHES_PATH = "data/matches.csv"
@@ -44,6 +44,7 @@ ABOUT = {
     "bonfire": ("Great Lakes Water Authority", "Water agency", "Detroit-area regional water authority bids"),
     "opengov": ("OpenGov portals", "Water agency, cities", "Bids from NEORSD (Cleveland area sewer district) and the cities of Cleveland and Syracuse"),
     "mmsd": ("MMSD (Milwaukee)", "Water agency", "Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"),
+    "madsewer": ("Madison MSD", "Water agency", "Madison Metropolitan Sewerage District bids and RFPs"),
     "buffalo-sewer": ("Buffalo Sewer Authority", "Water agency", "Buffalo Sewer Authority bids and RFPs"),
     "cleveland": ("City of Cleveland", "City (Cleveland)", "City bids and RFPs, including the Division of Water"),
     "metcouncil": ("Met Council (Minneapolis)", "Water agency", "Metropolitan Council bids, RFPs and RFIs, including regional wastewater"),
@@ -58,6 +59,7 @@ ABOUT = {
     "h2ohio": ("H2Ohio", "State (OH)", "Ohio water quality grant programs that are open or rolling"),
     "ohio-tvsf": ("Ohio Third Frontier TVSF", "State (OH)", "Technology Validation and Start-up Fund round, while proposals are open"),
     "glc": ("Great Lakes Commission", "Regional", "Commission RFPs posted as news, while their deadlines are ahead"),
+    "wi-dnr": ("Wisconsin DNR water grants", "State (WI)", "DNR water grant programs (stormwater, PFAS, lakes, dams) while a deadline is ahead; for towns and nonprofits, so startups join as partners"),
     "glri": ("Great Lakes Restoration Initiative", "Federal", "Open opportunities listed on the GLRI funding page (Grants.gov links skipped)"),
     "prizes": ("Army xTech, Bureau of Reclamation", "Prizes", "Open prize competitions"),
     "calendar": ("Calendar (hand-kept)", "Programs", "Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"),
@@ -90,6 +92,7 @@ def main():
         ("bonfire", lambda: bonfire.collect(today)),
         ("opengov", lambda: opengov.collect(today)),
         ("mmsd", lambda: mmsd.collect(today)),
+        ("madsewer", lambda: madsewer.collect(today)),
         ("buffalo-sewer", lambda: buffalo.collect(today)),
         ("cleveland", lambda: cleveland.collect(today)),
         ("metcouncil", lambda: metcouncil.collect(today)),
@@ -110,6 +113,7 @@ def main():
         ("h2ohio", lambda: h2ohio.collect(today)),
         ("ohio-tvsf", lambda: ohiotvsf.collect(today)),
         ("glc", lambda: glc.collect(today)),
+        ("wi-dnr", lambda: widnr.collect(today, prof.get("wi_dnr", {}).get("programs", []))),
         ("glri", lambda: glri.collect(today)),
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),
@@ -196,6 +200,8 @@ def save_summary(path, today, rows, matches, dropped, failed, calendar_checks=()
         out.append(["source", label, level, pool_by[source], match_by[source], drop_by[source], note + covers])
     for name, n in collections.Counter(r["kind"] for r in matches).most_common():
         out.append(["kind", name, "", "", n, "", ""])
+    for name, n in collections.Counter(r["funding_type"] for r in matches).most_common():
+        out.append(["funding_type", name, "", "", n, "", ""])
     for name, n in collections.Counter(r["stage"] for r in matches).most_common():
         out.append(["stage", name, "", "", n, "", ""])
     for name, n in collections.Counter(r["who_can_apply"] for r in matches).most_common():

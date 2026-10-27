@@ -10,20 +10,21 @@ Every day a GitHub job pulls public funding sources, keeps the listings that are
 | --- | --- |
 | [`data/listings.csv`](data/listings.csv) | Every open listing from every source |
 | [`data/matches.csv`](data/matches.csv) | The listings that fit [`profile.toml`](profile.toml) |
-| [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, off-topic bid for supplies or building services, or a grant that rules out businesses), with the reason in the last column |
+| [`data/filtered_out.csv`](data/filtered_out.csv) | Listings that fit the keywords but were removed because a startup could not bid (certification-only set-aside, construction bid, or off-topic bid for supplies or building services), with the reason in the last column |
 | [`data/archive/`](data/archive) | Water listings that have closed, one file per year (starting 2026), kept for looking back at what funders offer and when |
 | [`data/summary.csv`](data/summary.csv) | Today's counts per source and per kind, stage and who can apply (feeds the sheet's About tab) |
 | [`profile.toml`](profile.toml) | Keywords and eligibility rules that decide what counts as a match |
 
-Each row has the same columns whatever the source. Six plain columns come right after the title and funder, so every listing reads the same way:
+Each row has the same columns whatever the source. Seven plain columns come right after the title and funder, so every listing reads the same way:
 
 | Column | Values |
 | --- | --- |
 | kind | Grant, Contract, Prize, Accelerator, Pitch competition, Pilot, Loan, Equity (investment programs), Funding notice; in `matches.csv`, Construction/maintenance marks a local or utility bid for building, repair, supplies or services rather than technology (see below) |
+| funding_type | How a startup would go after it: Grant (apply directly, including prizes, programs, equity and SBIR topics), RFP (pitch a proposal: RFPs, RFIs, sources sought, CSOs, BAAs), Contract (bid on a set specification), Construction (building and repair bids), Partnership (funding that goes to governments, nonprofits or universities, which a startup joins as a partner) |
 | stage | Open (apply now), Coming soon (announced, not open yet), Info request (the buyer is asking questions before a bid) |
 | deadline | Closing date, or "Not set" for rolling and forecast listings |
 | amount | "Up to $500K" from the award ceiling, or "$3.5M total" from total funding, when the source gives one |
-| who_can_apply | Any company, Companies eligible, Small businesses only, Check listing, Not companies; in `matches.csv`, Partner needed marks a grant open only to universities, which a startup can join as a partner or subrecipient |
+| who_can_apply | Any company, Companies eligible, Small businesses only, Check listing, Not companies; in `matches.csv`, Partner needed marks a grant that goes to universities, governments or nonprofits, which a startup can join as a partner or subrecipient |
 | short_summary | The first sentences of the summary |
 
 The source's own wording follows: listing type, status, post and close dates, award floor and ceiling, total funding, eligibility, eligibility notes, topics, location, link, the summary (first 600 characters), and the dates the tracker first and last saw the listing.
@@ -35,7 +36,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 - A listing matches when its title or full description has one of the `keywords`. The `summary` column only keeps the first 600 characters, but long federal notices often name the topic further down, so the whole text is searched.
 - Every listing from a `water_agencies` funder, a `research_funders` funder (Army Corps ERDC, SERDP, ESTCP) or a `hand_picked_sources` source counts, whatever its words.
 - The "who can bid" rules then set aside certification-only set-asides, construction and off-topic bids, and grants closed to companies, with the reason in `filtered_out.csv`.
-- Grants open only to universities are kept with who_can_apply = Partner needed.
+- Grants companies can't apply for directly (open only to governments, tribes, nonprofits or universities, or saying for-profits are not eligible) are kept with who_can_apply = Partner needed and funding_type = Partnership, because a startup can join as a partner or subrecipient. Contracts and grants for individuals only are still left out. Set `partner_when_not_eligible = false` to drop them instead.
 - Local and utility bids whose titles have no technology, pilot or information-request word (`tech_bid_words`) are kept with kind = Construction/maintenance, so they can be filtered out. Federal research and SBIR topics never get this label.
 
 ## Sources
@@ -52,6 +53,8 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [Great Lakes Water Authority](https://glwater.bonfirehub.com/portal/?tab=openOpportunities) (Detroit area) open bids on Bonfire | Live | No |
 | Open bids on OpenGov: [Northeast Ohio Regional Sewer District](https://procurement.opengov.com/portal/neorsd) (Cleveland area), [City of Cleveland](https://procurement.opengov.com/portal/clevelandoh) and [City of Syracuse](https://procurement.opengov.com/portal/syrgov) | Live | No |
 | [Milwaukee Metropolitan Sewerage District](https://mmsd.diversitycompliance.com/FrontEnd/proposalsearchpublic.asp?tn=mmsd&xid=8146) bids, RFPs and RFIs (construction bids on QuestCDN not covered) | Live | No |
+| [Wisconsin DNR](https://dnr.wisconsin.gov/aid/Grants.html) water grant programs (stormwater, PFAS, lakes, dams, drinking water), listed while a deadline is ahead; the programs are set in `profile.toml` under `[wi_dnr]`, and they are marked Partner needed because they go to towns, lake districts and nonprofits | Live | No |
+| [Madison Metropolitan Sewerage District](https://www.madsewer.org/contracting-center/) bids and RFPs (deadline read from the notice; notices without one are kept 45 days) | Live | No |
 | [Buffalo Sewer Authority](https://buffalosewer.org/category/vendor-opportunities/) bid and RFP posts (deadline read from the notice text) | Live | No |
 | Chicago bids posted only in the weekly PDF; City of Detroit (site blocks automated access) | Not covered | |
 | [Illinois GATA](https://omb.illinois.gov/public/gata/csfa/OpportunityList.aspx) state funding opportunities | Live | No |
@@ -77,7 +80,7 @@ The rules are in [`profile.toml`](profile.toml), each with a comment. In short:
 | [NSF SBIR/STTR](https://www.nsf.gov/funding/opportunities) deadlines in the next 30 days (NSF's other programs come through Grants.gov) | Live | No |
 | Calendar of yearly programs (accelerators, prizes, grants with no feed), kept by hand in the Google Sheet's **Calendar** tab; see below | Live | No |
 | Leads: news feeds of incubators, water clusters and funders (Evergreen Climate Innovations, The Water Council, Current, LACI, JumpStart, fundsforcompanies, GLOS, NAWI, ERDCWERX, mHUB, SeaAhead, Ocean Exchange, Climate Tech VC); see below | Live | No |
-| Michigan EGLE (site refuses automated requests); Minnesota Pollution Control Agency (site sends automated requests to a bot check); Minnesota state RFPs (robots.txt disallows automated access); Pennsylvania grants search (its CSV download only works inside a browser, through a third-party search service); Ohio Lake Erie Commission (program descriptions only, no open dates); NOAA Sea Grant (national notices also reach Grants.gov); CIGLR (feed refuses automated requests); Defense Innovation Unit (listings only render in a browser; many also reach SAM.gov); Greentown Labs (no feed; its challenges usually appear in the Climate Tech VC newsletter); SERDP/ESTCP site (unreliable; its calls also reach SAM.gov); other New York state grants (no open source found yet) | Not covered | |
+| Michigan EGLE (site refuses automated requests); Minnesota Pollution Control Agency (site sends automated requests to a bot check); Wisconsin VendorNet (state agencies, UW System and many cities; only works in a browser); City of Milwaukee and Port Milwaukee bids (sites refuse automated requests); NEW Water, Green Bay (no open projects to read yet); WEDC Entrepreneurship Partner Grants (yearly, for organizations that support startups; better in the Calendar tab); Minnesota state RFPs (robots.txt disallows automated access); Pennsylvania grants search (its CSV download only works inside a browser, through a third-party search service); Ohio Lake Erie Commission (program descriptions only, no open dates); NOAA Sea Grant (national notices also reach Grants.gov); CIGLR (feed refuses automated requests); Defense Innovation Unit (listings only render in a browser; many also reach SAM.gov); Greentown Labs (no feed; its challenges usually appear in the Climate Tech VC newsletter); SERDP/ESTCP site (unreliable; its calls also reach SAM.gov); other New York state grants (no open source found yet) | Not covered | |
 
 If one source fails on a given day, the others still update and that source keeps its previous listings, and the About tab says so. A one-day outage is common, so the run only shows as failed in the Actions tab (and GitHub emails you) once a source has failed 3 days in a row; `data/failures.csv` keeps the count.
 

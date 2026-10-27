@@ -7,8 +7,8 @@ import urllib.error
 from unittest import mock
 
 from tracker import run
-from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads,
-                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf)
+from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana, leads, madsewer,
+                     massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile, programs, samgov, sbir, text, virginia, waterrf, widnr)
 
 HERE = os.path.dirname(__file__)
 SAMPLE = os.path.join(HERE, "sample_extract.xml")
@@ -514,6 +514,48 @@ class GlcTest(unittest.TestCase):
         self.assertEqual(rows[1]["close_date"], "2026-04-27")  # year taken from the post date
 
 
+class MadSewerTest(unittest.TestCase):
+    def test_reads_deadlines_and_keeps_recent_notices_without_one(self):
+        rows = madsewer.collect(datetime.date(2026, 10, 28), feed=_read("sample_madsewer.xml"))
+        got = {r["source_id"]: r for r in rows}
+        # The forklift bid closed Oct 27; the August notice has no date and is past 45 days.
+        self.assertEqual(set(got), {"pfas-testing-of-wastewater-and-biosolids-consultant",
+                                    "rfp-for-pumping-station-2-force-main-condition-assessment"})
+        pfas = got["pfas-testing-of-wastewater-and-biosolids-consultant"]
+        self.assertEqual((pfas["close_date"], pfas["listing_type"]), ("2026-10-30", "Contract (RFP)"))
+        pump = got["rfp-for-pumping-station-2-force-main-condition-assessment"]
+        self.assertEqual((pump["post_date"], pump["close_date"]), ("2026-09-22", ""))
+        self.assertNotIn("appeared first", pump["summary"])
+        self.assertEqual(pump["funder"], "Madison Metropolitan Sewerage District")
+
+
+class WiDnrTest(unittest.TestCase):
+    PFAS = "https://dnr.wisconsin.gov/aid/PFASsampling"
+    SURFACE = "https://dnr.wisconsin.gov/Aid/SurfaceWater.html"
+
+    def collect(self, today):
+        pages = {self.PFAS: _read("sample_widnr_pfas.html"), self.SURFACE: _read("sample_widnr_closed.html")}
+        return widnr.collect(today, [self.PFAS, self.SURFACE], pages=pages)
+
+    def test_lists_programs_while_a_deadline_is_ahead(self):
+        rows = self.collect(datetime.date(2026, 10, 27))
+        self.assertEqual([(r["source_id"], r["title"], r["close_date"]) for r in rows],
+                         [("pfassampling", "PFAS Sampling", "2027-04-30")])
+        rows = self.collect(datetime.date(2026, 9, 1))
+        self.assertEqual({r["source_id"]: r["close_date"] for r in rows},
+                         {"pfassampling": "2027-04-30", "surfacewater": "2026-09-15"})
+
+    def test_programs_are_kept_as_partner_needed(self):
+        rows = pool.merge([], "wi-dnr", self.collect(datetime.date(2026, 10, 27)), TODAY)
+        plain.add(rows)
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertEqual([r["who_can_apply"] for r in profile.apply(prof, rows)], ["Partner needed"])
+
+    def test_profile_lists_program_pages(self):
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        self.assertIn(self.PFAS, prof["wi_dnr"]["programs"])
+
+
 class VirginiaTest(unittest.TestCase):
     def test_keeps_open_future_and_normalizes(self):
         rows = virginia.collect(TODAY, data=json.loads(_read("sample_virginia.json")))
@@ -696,13 +738,14 @@ class ProfileTest(unittest.TestCase):
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
         dropped = []
         ids = {r["source_id"] for r in profile.apply(prof, rows, dropped)}
-        self.assertEqual(ids, {"keep", "grant", "seelisting", "locating"})
+        # The grant that rules out for-profits is kept for a startup to join as a partner.
+        self.assertEqual(ids, {"keep", "grant", "seelisting", "locating", "noprofit"})
         reasons = {row["source_id"]: reason for row, reason in dropped}
         self.assertEqual(reasons["setaside"], "set-aside: 8(a)")
         self.assertEqual(reasons["build"], "construction bid: water main replacement")
         self.assertEqual(reasons["category"], "construction bid: Category: Construction")
         self.assertNotIn("locating", reasons)
-        self.assertTrue(reasons["noprofit"].startswith("not open to businesses"))
+        self.assertNotIn("noprofit", reasons)
 
     def test_off_topic_utility_bids_are_set_aside(self):
         base = {k: "" for k in pool.FIELDS}
@@ -773,10 +816,28 @@ class ProfileTest(unittest.TestCase):
         prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
         dropped = []
         got = {r["source_id"]: r for r in profile.apply(prof, rows, dropped)}
-        self.assertEqual(set(got), {"uni"})
-        self.assertEqual(got["uni"]["who_can_apply"], "Partner needed")
+        self.assertEqual(set(got), {"uni", "states"})
+        self.assertEqual({r["who_can_apply"] for r in got.values()}, {"Partner needed"})
+        self.assertEqual({r["funding_type"] for r in got.values()}, {"Partnership"})
         self.assertEqual(rows[0]["who_can_apply"], "")  # the pool row is left as it was
-        self.assertTrue(dropped[0][1].startswith("not open to businesses"))
+        self.assertEqual(dropped, [])
+
+    def test_grants_companies_cannot_apply_for_are_kept_as_partnerships(self):
+        base = dict(source="grants.ca.gov", title="Watershed restoration", listing_type="Grant")
+        rows = [
+            self.row(source_id="public", eligibility="Nonprofit; Public Agency; Tribal Government", **base),
+            self.row(source_id="fellow", eligibility="Individual", **base),
+            self.row(source_id="bid", source="nyc-city-record", title="Watershed sampling",
+                     listing_type="Contract (bid)", eligibility="Public agencies only"),
+            self.row(source_id="cal", source="calendar", title="Pre-seed program", listing_type="Accelerator",
+                     eligibility="Illinois pre-seed/seed startups"),
+        ]
+        prof = profile.load(os.path.join(HERE, "..", "profile.toml"))
+        got = {r["source_id"]: r for r in profile.apply(prof, rows)}
+        # Fellowships and contracts are still left out; the hand-picked calendar program is kept as is.
+        self.assertEqual(set(got), {"public", "cal"})
+        self.assertEqual(got["public"]["funding_type"], "Partnership")
+        self.assertNotEqual(got["cal"].get("who_can_apply"), "Partner needed")
 
     def test_utility_maintenance_bids_are_labelled_not_dropped(self):
         base = dict(source="cleveland", funder="City of Cleveland Division of Water", kind="Contract")
@@ -818,6 +879,20 @@ class PlainTest(unittest.TestCase):
         presol = self.row(listing_type="Contract (Presolicitation)", status="forecast", eligibility="Any vendor")
         self.assertEqual((presol["stage"], presol["deadline"], presol["who_can_apply"]),
                          ("Coming soon", "Not set", "Any company"))
+
+    def test_funding_type(self):
+        cases = {
+            ("Grant", "Coastal research"): "Grant",
+            ("Prize", "Water prize"): "Grant",
+            ("Contract (SBIR topic)", "Hull inspection"): "Grant",
+            ("Contract (Sources Sought)", "Water sensors"): "RFP",
+            ("Contract (Solicitation)", "Commercial Solutions Opening - ERDC"): "RFP",
+            ("Contract (bid)", "RFP Stormwater Annual Engineering Services"): "RFP",
+            ("Contract (bid)", "Pipe Repair Clamps"): "Contract",
+        }
+        for (listing_type, title), expected in cases.items():
+            got = self.row(listing_type=listing_type, title=title, status="posted")
+            self.assertEqual(got["funding_type"], expected, title)
 
     def test_total_funding_and_long_summary(self):
         got = self.row(listing_type="Grant", total_funding="3500000", eligibility="Business; Nonprofit",
