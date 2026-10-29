@@ -477,6 +477,12 @@ class WaterRfTest(unittest.TestCase):
         self.assertEqual(row["link"], "https://portal.waterrf.org/outbound-grant-details/3337")
         self.assertIn("managed aquifer recharge", row["summary"])
 
+    def test_no_open_rfps_is_not_a_failure(self):
+        page = '<div id="tab1-body"><span class="nodata-title"> No Data Available </span></div> Available Grants (0 Results)'
+        self.assertEqual(waterrf.collect(TODAY, page=page), [])
+        with self.assertRaises(ValueError):
+            waterrf.collect(TODAY, page="<html>new design</html>")
+
 
 class H2OhioTest(unittest.TestCase):
     def test_reads_table_data_and_skips_awarded_programs(self):
