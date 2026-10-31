@@ -1,31 +1,31 @@
 section,name,level,open,matches,set_aside,detail
-run,Last refresh,,,,,2026-10-30
-total,All sources,,13357,635,177,35 sources
-source,Grants.gov,Federal,1420,80,0,"All federal grants and cooperative agreements, including forecasts"
-source,SAM.gov,Federal,9142,230,110,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
-source,Federal Register,Federal,11,2,0,Funding and prize notices published by agencies
-source,California Grants Portal,State (CA),162,65,0,California state grants and loans
-source,Illinois GATA,State (IL),122,31,0,Illinois state funding opportunities
-source,Massachusetts COMMBUYS,State (MA),864,46,5,"Massachusetts state and local bids, plus some grants"
-source,Indiana state bids,State (IN),66,10,0,Indiana state agency bids and RFPs (IDOA)
-source,Illinois BidBuy,State (IL),162,8,1,Illinois state agency and university bids
-source,Pennsylvania eMarketplace,State (PA),209,16,0,"Pennsylvania state agency, university and authority solicitations"
-source,Virginia eVA,State (VA),511,33,39,Virginia state and local solicitations
-source,NYC City Record,City (New York),199,12,13,New York City solicitations
+run,Last refresh,,,,,2026-10-31
+total,All sources,,12825,632,170,35 sources
+source,Grants.gov,Federal,1418,89,0,"All federal grants and cooperative agreements, including forecasts"
+source,SAM.gov,Federal,8664,222,103,"Federal contract opportunities in R&D, environmental, sensors, data, inspection, engineering and drones"
+source,Federal Register,Federal,12,2,0,Funding and prize notices published by agencies
+source,California Grants Portal,State (CA),161,64,0,California state grants and loans
+source,Illinois GATA,State (IL),120,31,0,Illinois state funding opportunities
+source,Massachusetts COMMBUYS,State (MA),845,47,5,"Massachusetts state and local bids, plus some grants"
+source,Indiana state bids,State (IN),64,10,0,Indiana state agency bids and RFPs (IDOA)
+source,Illinois BidBuy,State (IL),165,8,1,Illinois state agency and university bids
+source,Pennsylvania eMarketplace,State (PA),208,17,0,"Pennsylvania state agency, university and authority solicitations"
+source,Virginia eVA,State (VA),498,32,40,Virginia state and local solicitations
+source,NYC City Record,City (New York),193,12,13,New York City solicitations
 source,Chicago eProcurement,City (Chicago),5,0,1,City of Chicago bids
-source,MWRD (Chicago),Water agency,10,8,2,Metropolitan Water Reclamation District bids
-source,Great Lakes Water Authority,Water agency,6,5,1,Detroit-area regional water authority bids
-source,OpenGov portals,"Water agency, cities",25,8,1,Bids from NEORSD (Cleveland area sewer district) and the cities of Cleveland and Syracuse
+source,MWRD (Chicago),Water agency,9,7,2,Metropolitan Water Reclamation District bids
+source,Great Lakes Water Authority,Water agency,4,4,0,Detroit-area regional water authority bids
+source,OpenGov portals,"Water agency, cities",22,8,1,Bids from NEORSD (Cleveland area sewer district) and the cities of Cleveland and Syracuse
 source,MMSD (Milwaukee),Water agency,11,7,4,"Milwaukee Metropolitan Sewerage District bids, RFPs and RFIs"
-source,Madison MSD,Water agency,9,9,0,Madison Metropolitan Sewerage District bids and RFPs
+source,Madison MSD,Water agency,7,7,0,Madison Metropolitan Sewerage District bids and RFPs
 source,Buffalo Sewer Authority,Water agency,0,0,0,Buffalo Sewer Authority bids and RFPs
-source,City of Cleveland,City (Cleveland),39,5,0,"City bids and RFPs, including the Division of Water"
+source,City of Cleveland,City (Cleveland),35,5,0,"City bids and RFPs, including the Division of Water"
 source,Met Council (Minneapolis),Water agency,14,4,0,"Metropolitan Council bids, RFPs and RFIs, including regional wastewater"
 source,SBIR.gov topics,Federal,306,16,0,"Open and upcoming SBIR/STTR research topics from every agency, including Defense"
 source,NSF SBIR/STTR,Federal,2,2,0,NSF small-business research deadlines in the next 30 days
 source,MassCEC,State (MA),16,16,0,"Massachusetts Clean Energy Center open grants, investments and programs"
-source,NYSERDA,State (NY),5,0,0,New York energy research authority's current innovation calls (PONs and RFIs)
-source,DOE American-Made prizes,Federal,5,0,0,"Failed 7 days in a row; showing the last listings it gave. Department of Energy prize competitions open for entries, listed on HeroX"
+source,NYSERDA,State (NY),5,0,0,Failed today; showing yesterday's listings. New York energy research authority's current innovation calls (PONs and RFIs)
+source,DOE American-Made prizes,Federal,5,0,0,"Failed 8 days in a row; showing the last listings it gave. Department of Energy prize competitions open for entries, listed on HeroX"
 source,Federal prize challenges,Federal,13,1,0,Active federal challenges and prize competitions listed on USA.gov (Challenge.gov's successor)
 source,DOE Water Power Office,Federal,2,2,0,Open funding and technical support from DOE's Water Power Technologies Office
 source,Water Research Foundation,Research,5,4,0,"Open WRF research RFPs (teams of consultants, universities, utilities and companies)"
@@ -36,33 +36,33 @@ source,Wisconsin DNR water grants,State (WI),1,1,0,"DNR water grant programs (st
 source,Great Lakes Restoration Initiative,Federal,2,2,0,Open opportunities listed on the GLRI funding page (Grants.gov links skipped)
 source,"Army xTech, Bureau of Reclamation",Prizes,1,0,0,Open prize competitions
 source,Calendar (hand-kept),Programs,8,8,0,"Yearly accelerators, prizes and grants kept in the sheet's Calendar tab"
-kind,Contract,,,257,,
-kind,Grant,,,212,,
-kind,Construction/maintenance,,,151,,
+kind,Contract,,,248,,
+kind,Grant,,,220,,
+kind,Construction/maintenance,,,149,,
 kind,Other,,,8,,
 kind,Funding notice,,,2,,
 kind,Accelerator,,,2,,
 kind,Loan,,,1,,
 kind,Equity,,,1,,
 kind,Prize,,,1,,
-funding_type,Grant,,,161,,
-funding_type,Construction,,,151,,
-funding_type,RFP,,,142,,
-funding_type,Contract,,,106,,
-funding_type,Partnership,,,75,,
-stage,Open,,,460,,
-stage,Info request,,,120,,
+funding_type,Grant,,,171,,
+funding_type,Construction,,,149,,
+funding_type,RFP,,,138,,
+funding_type,Contract,,,101,,
+funding_type,Partnership,,,73,,
+stage,Open,,,459,,
+stage,Info request,,,118,,
 stage,Coming soon,,,55,,
-who,Any company,,,383,,
-who,Check listing,,,108,,
-who,Partner needed,,,75,,
+who,Any company,,,372,,
+who,Check listing,,,118,,
+who,Partner needed,,,73,,
 who,Companies eligible,,,36,,
 who,Small businesses only,,,31,,
 who,Not companies,,,2,,
-set_aside,Construction bids,,,,84,
-set_aside,Certification-only set-asides,,,,65,
-set_aside,"Off-topic bids (supplies, grounds, building services)",,,,28,
-new,New matches today,,,34,,
+set_aside,Construction bids,,,,83,
+set_aside,Certification-only set-asides,,,,60,
+set_aside,"Off-topic bids (supplies, grounds, building services)",,,,27,
+new,New matches today,,,33,,
 calendar_check,Water Council Tech Challenge,,,,,Add this round's dates
 calendar_check,Techstars Founder Catalyst WaterTech,,,,,Add this round's dates
 calendar_check,Cleantech Open,,,,,Add this round's dates
