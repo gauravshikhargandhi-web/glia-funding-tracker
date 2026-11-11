@@ -11,7 +11,7 @@ import collections
 import csv
 import os
 
-from tracker import (americanmade, bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana,
+from tracker import (bidbuy, bonfire, buffalo, california, challenges, chicago, cleveland, doewater, federalregister, glc, glri, grantsgov, h2ohio, illinois, indiana,
                      leads, madsewer, massachusetts, masscec, metcouncil, mmsd, mwrd, nsf, nyc, nyserda, ohiotvsf, opengov, pennsylvania, plain, pool, prizes, profile,
                      programs, samgov, sbir, virginia, waterrf, widnr)
 
@@ -52,7 +52,6 @@ ABOUT = {
     "nsf-sbir": ("NSF SBIR/STTR", "Federal", "NSF small-business research deadlines in the next 30 days"),
     "masscec": ("MassCEC", "State (MA)", "Massachusetts Clean Energy Center open grants, investments and programs"),
     "nyserda": ("NYSERDA", "State (NY)", "New York energy research authority's current innovation calls (PONs and RFIs)"),
-    "american-made": ("DOE American-Made prizes", "Federal", "Department of Energy prize competitions open for entries, listed on HeroX"),
     "usa.gov-challenges": ("Federal prize challenges", "Federal", "Active federal challenges and prize competitions listed on USA.gov (Challenge.gov's successor)"),
     "doe-water": ("DOE Water Power Office", "Federal", "Open funding and technical support from DOE's Water Power Technologies Office"),
     "waterrf": ("Water Research Foundation", "Research", "Open WRF research RFPs (teams of consultants, universities, utilities and companies)"),
@@ -106,7 +105,6 @@ def main():
         ("pa-emarketplace", lambda: pennsylvania.collect(today)),
         ("masscec", lambda: masscec.collect(today)),
         ("nyserda", lambda: nyserda.collect(today)),
-        ("american-made", lambda: americanmade.collect(today)),
         ("usa.gov-challenges", lambda: challenges.collect(today)),
         ("doe-water", lambda: doewater.collect(today)),
         ("waterrf", lambda: waterrf.collect(today)),
@@ -118,6 +116,9 @@ def main():
         ("prizes", lambda: prizes.collect(today)),
         ("calendar", lambda: programs.collect(today, url=calendar_url)),
     ]
+    # Listings from a source that is no longer read (taken out of the list above)
+    # would otherwise stay in the pool for good.
+    rows = [r for r in rows if r["source"] in {name for name, _ in sources}]
     failed = []
     closed = []
     for name, collect in sources:

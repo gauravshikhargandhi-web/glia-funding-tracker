@@ -43,7 +43,8 @@ def parse(page):
             "due": due.group(1) if due else "",
             "amount": amount.group(1).replace(",", "") if amount else "",
         })
-    if not cards:
+    # Between funding rounds the page says "Available Grants (0 Results)" and "No Data Available".
+    if not cards and not re.search(r"Available Grants \(0 Results\)|No Data Available", page):
         raise ValueError("WRF page layout changed: no grant cards found")
     return cards
 
